@@ -1,7 +1,7 @@
 const gulp         = require('gulp');
 const autoprefixer = require('gulp-autoprefixer');
 const babel        = require('gulp-babel');
-// const cleanCSS     = require('gulp-clean-css');
+const cleanCSS     = require('gulp-clean-css');
 const concat       = require('gulp-concat');
 const rename       = require('gulp-rename');
 // const sass         = require('gulp-sass');
