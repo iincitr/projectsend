@@ -78,34 +78,71 @@
 
 <div class="options_divide"></div>
 
-<h3><?php _e('reCAPTCHA','cftp_admin'); ?></h3>
+<h3><?php _e('CAPTCHA','cftp_admin'); ?></h3>
 <p><?php _e('Helps prevent SPAM on your login, registration and password forgotten forms.','cftp_admin'); ?></p>
 
+<div class="form-group row">
+    <label for="captcha_method" class="col-sm-4 control-label"><?php _e('Captcha method','cftp_admin'); ?></label>
+    <div class="col-sm-8">
+        <select class="form-select" name="captcha_method" id="captcha_method" required>
+            <option value="" <?php echo (get_option('captcha_method') == null) ? 'selected="selected"' : ''; ?>><?php _e('Do not use captcha','cftp_admin'); ?></option>
+            <?php
+                $methods = captcha_get_methods();
+                foreach ($methods as $method => $method_class) {
+                    $object = new $method_class;
+            ?>
+                    <option value="<?php echo $method; ?>" <?php echo (get_option('captcha_method') == $method) ? 'selected="selected"' : ''; ?>><?php echo $object->getMethodName(); ?></option>
+            <?php
+                }
+            ?>
+        </select>
+    </div>
+</div>
+
+<?php /*
 <div class="form-group row">
     <div class="col-sm-8 offset-sm-4">
         <label for="recaptcha_enabled">
             <input type="checkbox" value="1" name="recaptcha_enabled" id="recaptcha_enabled" class="checkbox_options" <?php echo (get_option('recaptcha_enabled') == 1) ? 'checked="checked"' : ''; ?> /> <?php _e('Use reCAPTCHA','cftp_admin'); ?> <?php _e('(v2 currently supported)','cftp_admin'); ?>
         </label>
     </div>
-</div>
+</div> */ ?>
 
-<div class="form-group row">
-    <label for="recaptcha_site_key" class="col-sm-4 control-label"><?php _e('Site key','cftp_admin'); ?></label>
-    <div class="col-sm-8">
-        <input type="text" name="recaptcha_site_key" id="recaptcha_site_key" class="form-control" value="<?php echo html_output(get_option('recaptcha_site_key')); ?>" />
+<div id="captcha_recaptchav2" class="d-none captcha_options_block">
+    <div class="form-group row">
+        <label for="recaptcha_site_key" class="col-sm-4 control-label"><?php _e('Site key','cftp_admin'); ?></label>
+        <div class="col-sm-8">
+            <input type="text" name="recaptcha_site_key" id="recaptcha_site_key" class="form-control" value="<?php echo html_output(get_option('recaptcha_site_key')); ?>" />
+        </div>
+    </div>
+    
+    <div class="form-group row">
+        <label for="recaptcha_secret_key" class="col-sm-4 control-label"><?php _e('Secret key','cftp_admin'); ?></label>
+        <div class="col-sm-8">
+            <input type="text" name="recaptcha_secret_key" id="recaptcha_secret_key" class="form-control" value="<?php echo html_output(get_option('recaptcha_secret_key')); ?>" />
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-sm-8 offset-sm-4">
+            <a href="<?php echo LINK_DOC_RECAPTCHA; ?>" class="external_link" target="_blank"><?php _e('How do I obtain this credentials?','cftp_admin'); ?></a>
+        </div>
     </div>
 </div>
 
-<div class="form-group row">
-    <label for="recaptcha_secret_key" class="col-sm-4 control-label"><?php _e('Secret key','cftp_admin'); ?></label>
-    <div class="col-sm-8">
-        <input type="text" name="recaptcha_secret_key" id="recaptcha_secret_key" class="form-control" value="<?php echo html_output(get_option('recaptcha_secret_key')); ?>" />
+<div id="captcha_cloudflare_turnstile" class="d-none captcha_options_block">
+    <div class="form-group row">
+        <label for="cloudflare_turnstile_site_key" class="col-sm-4 control-label"><?php _e('Site key','cftp_admin'); ?></label>
+        <div class="col-sm-8">
+            <input type="text" name="cloudflare_turnstile_site_key" id="cloudflare_turnstile_site_key" class="form-control" value="<?php echo html_output(get_option('cloudflare_turnstile_site_key')); ?>" />
+        </div>
     </div>
-</div>
-
-<div class="form-group row">
-    <div class="col-sm-8 offset-sm-4">
-        <a href="<?php echo LINK_DOC_RECAPTCHA; ?>" class="external_link" target="_blank"><?php _e('How do I obtain this credentials?','cftp_admin'); ?></a>
+    
+    <div class="form-group row">
+        <label for="cloudflare_turnstile_secret_key" class="col-sm-4 control-label"><?php _e('Secret key','cftp_admin'); ?></label>
+        <div class="col-sm-8">
+            <input type="text" name="cloudflare_turnstile_secret_key" id="cloudflare_turnstile_secret_key" class="form-control" value="<?php echo html_output(get_option('cloudflare_turnstile_secret_key')); ?>" />
+        </div>
     </div>
 </div>
 
