@@ -25,5 +25,22 @@
 
             $('#download_method').trigger('change');
         });
+
+        const captchaMethodSelect = document.getElementById('captcha_method');
+        const captchaOptionsBlocks = document.querySelectorAll('.captcha_options_block');
+        if (elementExists(captchaMethodSelect)) {
+            captchaMethodSelect.addEventListener('change', function(e) {
+                const showOptionsBlock = document.getElementById('captcha_' + e.target.value)
+                console.log(showOptionsBlock);
+                for (let i = 0; i < captchaOptionsBlocks.length; i++) {
+                    const captchaOptionsBlock = captchaOptionsBlocks[i];
+                    captchaOptionsBlock.classList.add('d-none');
+                }
+
+                if (elementExists(showOptionsBlock)) {
+                    showOptionsBlock.classList.remove('d-none');
+                }
+            });
+        }
     };
 })();

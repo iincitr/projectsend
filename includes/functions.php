@@ -4,6 +4,8 @@
  */
 
 use enshrined\svgSanitize\Sanitizer;
+use ProjectSend\Classes\Captcha\CloudflareTurnstile;
+use ProjectSend\Classes\Captcha\RecaptchaV2;
 
 function try_queries($queries = [])
 {
@@ -2086,6 +2088,22 @@ function sanitize_filename_for_download($file_name)
     );
 
     return $file_name;
+}
+
+function captcha_get_methods()
+{
+    return [
+        'recaptchav2' => RecaptchaV2::class,
+        'cloudflare_turnstile' => CloudflareTurnstile::class,
+    ];
+}
+
+function captcha_maybe_get_request()
+{
+    $method = get_option('captcha_method');
+    if (!in_array($method, array_keys(captcha_get_methods()))) {
+        return null;
+    }
 }
 
 function recaptcha2_is_enabled()
