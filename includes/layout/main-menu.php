@@ -3,6 +3,9 @@
  * This file generates the main menu for the header on the back-end
  * and also for the default template.
  */
+
+use ProjectSend\Classes\Files;
+
 $items = [];
 
 /**
@@ -298,15 +301,17 @@ else {
         );
     }
 
-    $items['manage_files'] = array(
-        'nav' => 'manage',
-        'level' => array(9, 8, 7, 0),
-        'main' => array(
-            'label' => __('Manage files', 'cftp_admin'),
-            'link' => 'manage-files.php',
-            'icon' => 'file',
-        ),
-    );
+    if (count_user_uploads(CURRENT_USER_ID) > 0 || get_option('clients_can_upload') == 1) {
+        $items['manage_files'] = array(
+            'nav' => 'manage',
+            'level' => array(9, 8, 7, 0),
+            'main' => array(
+                'label' => __('Manage files', 'cftp_admin'),
+                'link' => 'manage-files.php',
+                'icon' => 'file',
+            ),
+        );
+    }
 
     $items['view_files'] = array(
         'nav' => 'template',

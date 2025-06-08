@@ -2282,3 +2282,13 @@ function make_return_to_url($from = null, $encode = false)
 
     return $return_to;
 }
+
+function count_user_uploads($user_id)
+{
+    global $dbh;
+    $files_query = "SELECT * FROM " . TABLE_FILES . " WHERE user_id=:user_id";
+    $files_sql = $dbh->prepare($files_query);
+    $files_sql->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $files_sql->execute();
+    return $files_sql->rowCount();
+}

@@ -16,6 +16,12 @@ $page_id = 'manage_files';
 
 $current_url = get_form_action_with_existing_parameters(basename(__FILE__), array('modify_id', 'modify_type'));
 
+if (CURRENT_USER_LEVEL == 0) {
+    if (count_user_uploads(CURRENT_USER_ID) == 0 && get_option('clients_can_upload') != 1) {
+        exit_with_error_code(403);
+    }
+}
+
 /**
  * Used to distinguish the current page results.
  * Global means all files.
