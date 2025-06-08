@@ -43,6 +43,10 @@ class Files
     public $embeddable;
     public $embeddable_type;
     public $custom_downloads = [];
+    private $dbh;
+    private $logger;
+    private $date_folder_year;
+    private $date_folder_month;
 
     private $use_date_folder;
     private $is_filetype_allowed;
@@ -121,8 +125,8 @@ class Files
         $this->disk_folder_month = (isset($this->date_folder_month)) ? (int)$this->date_folder_month : null;
 
         // Assignations
-		$this->assignations_groups = !empty( $arguments['assignations_groups'] ) ? to_array_if_not($arguments['assignations_groups']) : null;
-		$this->assignations_clients = !empty( $arguments['assignations_clients'] ) ? to_array_if_not($arguments['assignations_clients']) : null;
+		$this->assignments_groups = !empty( $arguments['assignations_groups'] ) ? to_array_if_not($arguments['assignations_groups']) : null;
+		$this->assignments_clients = !empty( $arguments['assignations_clients'] ) ? to_array_if_not($arguments['assignations_clients']) : null;
 
         $this->categories = !empty( $arguments['categories'] ) ? to_array_if_not($arguments['categories']) : null;
 
