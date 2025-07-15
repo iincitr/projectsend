@@ -127,6 +127,16 @@
 <p><?php _e('You need to include your username (usually your e-mail address) and password if you have selected either SMTP or Gmail as your mailer.','cftp_admin'); ?></p>
 
 <div class="form-group row">
+    <label for="mail_smtp_auth" class="col-sm-4 control-label"><?php _e('Authentication','cftp_admin'); ?></label>
+    <div class="col-sm-8">
+        <select class="form-select" name="mail_smtp_auth" id="mail_smtp_auth" required>
+            <option value="none" <?php echo (get_option('mail_smtp_auth') == 'none') ? 'selected="selected"' : ''; ?>><?php _e('No Authentication','cftp_admin'); ?></option>
+            <option value="use" <?php echo (get_option('mail_smtp_auth') == 'use') ? 'selected="selected"' : ''; ?>><?php _e('Username/Password', 'cftp_admin') ?></option>
+        </select>
+    </div>
+</div>
+
+<div class="form-group row">
     <label for="mail_smtp_user" class="col-sm-4 control-label"><?php _e('Username','cftp_admin'); ?></label>
     <div class="col-sm-8">
         <input type="text" name="mail_smtp_user" id="mail_smtp_user" class="mail_data form-control" value="<?php echo html_output(get_option('mail_smtp_user')); ?>" />
@@ -160,12 +170,12 @@
 </div>
 
 <div class="form-group row">
-    <label for="mail_smtp_auth" class="col-sm-4 control-label"><?php _e('Authentication','cftp_admin'); ?></label>
+    <label for="mail_smtp_secure" class="col-sm-4 control-label"><?php _e('Connection security','cftp_admin'); ?></label>
     <div class="col-sm-8">
-        <select class="form-select" name="mail_smtp_auth" id="mail_smtp_auth" required>
-            <option value="none" <?php echo (get_option('mail_smtp_auth') == 'none') ? 'selected="selected"' : ''; ?>><?php _e('None','cftp_admin'); ?></option>
-            <option value="ssl" <?php echo (get_option('mail_smtp_auth') == 'ssl') ? 'selected="selected"' : ''; ?>>SSL</option>
-            <option value="tls" <?php echo (get_option('mail_smtp_auth') == 'tls') ? 'selected="selected"' : ''; ?>>TLS</option>
+        <select class="form-select" name="mail_smtp_secure" id="mail_smtp_secure" required>
+            <option value="none" <?php echo (get_option('mail_smtp_secure') == 'none') ? 'selected="selected"' : ''; ?>><?php _e('None','cftp_admin'); ?></option>
+            <option value="ssl" <?php echo (get_option('mail_smtp_secure') == 'ssl') ? 'selected="selected"' : ''; ?>>SMTPS</option>
+            <option value="tls" <?php echo (get_option('mail_smtp_secure') == 'tls') ? 'selected="selected"' : ''; ?>>STARTTLS</option>
         </select>
     </div>
 </div>
