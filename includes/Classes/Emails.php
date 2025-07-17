@@ -14,6 +14,25 @@ class Emails
     private $header;
     private $footer;
     private $email_successful;
+    private $email_body;
+    private $groups_list;
+    private $username;
+    private$password;
+    private $name;
+    private $token;
+    private $memberships;
+    private $add_bcc_to;
+    private $mail_info;
+    private $try_bcc;
+    private $add_bcc;
+    private $files_list;
+    private $get_groups;
+    private $type;
+    private $preview;
+    private $method;
+    private $addresses;
+    private $set_bcc;
+    private $debug_result;
 
     function __construct()
     {
@@ -1084,9 +1103,11 @@ class Emails
 
                     if (get_option('mail_smtp_auth') != 'none') {
                         $email->SMTPAuth = true;
-                        $email->SMTPSecure = get_option('mail_smtp_auth');
                     } else {
                         $email->SMTPAuth = false;
+                    }
+                    if (get_option('mail_smtp_secure') != 'none') {
+                        $email->SMTPSecure = get_option('mail_smtp_secure');
                     }
                     break;
                 case 'gmail':
