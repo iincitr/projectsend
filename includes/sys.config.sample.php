@@ -37,6 +37,9 @@ define('DB_NAME', 'database');
 /** Database host (in most cases it's localhost) */
 define('DB_HOST', 'localhost');
 
+/** Database port (for mysql: 3306, for mssql 1443) */
+define('DB_PORT', '3306');
+
 /** Database username (must be assigned to the database) */
 define('DB_USER', 'username');
 
