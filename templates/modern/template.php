@@ -446,7 +446,7 @@ $bulk_actions_items = [
                 <!-- Pagination -->
                 <div class="modern-pagination-wrapper">
                     <?php
-                    if (!empty($table)) {
+                    if (isset($count_for_pagination) && $count_for_pagination > 0) {
                         $pagination = new \ProjectSend\Classes\Layout\Pagination;
                         echo $pagination->make([
                             'link' => 'my_files/index.php',
