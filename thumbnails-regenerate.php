@@ -140,51 +140,6 @@ if ($_POST) {
     </div>
 </div>
 
-<!-- Statistics Section -->
-<div class="row mt-3">
-    <div class="col-12">
-        <div class="white-box">
-            <div class="white-box-interior">
-                <h5><?php _e('Image Statistics', 'cftp_admin'); ?></h5>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-sm-6">
-                                        <h6><?php _e('Total Convertible Images', 'cftp_admin'); ?></h6>
-                                        <h1 class="text-primary display-4"><?php echo number_format($all_images_stats['total']); ?></h1>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <h6><?php _e('Supported Formats', 'cftp_admin'); ?></h6>
-                                        <small class="text-muted">PNG, JPG, JPEG, GIF</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <h6><?php _e('Files by Format', 'cftp_admin'); ?></h6>
-                                <?php foreach ($image_formats as $format): ?>
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="text-uppercase font-weight-bold"><?php echo strtoupper($format); ?>:</span>
-                                        <span class="badge bg-secondary text-white fs-6">
-                                            <?php echo number_format($format_stats[$format]); ?>
-                                        </span>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Regeneration Options Section -->
 <div class="row mt-3">
     <div class="col-12">
@@ -244,6 +199,9 @@ if ($_POST) {
                                 
                                 <div class="col-md-6">
                                     <h6><?php _e('Format Selection', 'cftp_admin'); ?></h6>
+                                    <div class="fw-bold fs-5 mb-3" style="color: var(--main_color);">
+                                        <?php echo number_format($all_images_stats['total']); ?> <?php _e('total images', 'cftp_admin'); ?>
+                                    </div>
                                     <div class="form-group">
                                         <div class="d-flex flex-wrap gap-2">
                                             <?php foreach ($image_formats as $format):
