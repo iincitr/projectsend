@@ -9,29 +9,74 @@
         var failedFiles = 0;
 
         $(document).ready(function(){
-            // Form validation and submission
-            $('#thumbnails-form').on('submit', function(e) {
+            // Button click handler for regeneration
+            $('#regenerate-btn').on('click', function(e) {
                 e.preventDefault();
-                
+
                 var selectedFormats = $('input[name="formats[]"]:checked').length;
                 if (selectedFormats === 0) {
-                    alert(json_strings.thumbnails_regenerate.select_format);
+                    Swal.fire({
+                        title: json_strings.thumbnails_regenerate.no_formats_selected,
+                        text: json_strings.thumbnails_regenerate.select_one_format,
+                        icon: 'warning',
+                        showConfirmButton: true,
+                        confirmButtonText: json_strings.translations.ok,
+                        buttonsStyling: false,
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        }
+                    });
                     return false;
                 }
-                
+
                 var width = parseInt($('#thumbnail_width').val());
                 var height = parseInt($('#thumbnail_height').val());
-                
+
                 if (width < 50 || width > 1000 || height < 50 || height > 1000) {
-                    alert(json_strings.thumbnails_regenerate.invalid_dimensions);
+                    Swal.fire({
+                        title: json_strings.thumbnails_regenerate.invalid_dimensions_title,
+                        text: json_strings.thumbnails_regenerate.invalid_dimensions,
+                        icon: 'error',
+                        showConfirmButton: true,
+                        confirmButtonText: json_strings.translations.ok,
+                        buttonsStyling: false,
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        }
+                    });
                     return false;
                 }
-                
-                // Show confirmation and start processing
-                if (confirm(json_strings.thumbnails_regenerate.confirm_regeneration)) {
-                    startThumbnailRegeneration();
-                }
-                
+
+                // Show SweetAlert2 confirmation and start processing
+                Swal.fire({
+                    title: json_strings.thumbnails_regenerate.start_regeneration_title,
+                    html: '<div class="text-start">' +
+                          '<p class="mb-3">' + json_strings.thumbnails_regenerate.process_will_message + '</p>' +
+                          '<ul class="">' +
+                          '<li>' + json_strings.thumbnails_regenerate.replace_thumbnails + '</li>' +
+                          '<li>' + json_strings.thumbnails_regenerate.take_minutes + '</li>' +
+                          '<li>' + json_strings.thumbnails_regenerate.run_background + '</li>' +
+                          '<li>' + json_strings.thumbnails_regenerate.keep_page_open + '</li>' +
+                          '</ul>' +
+                          '</div>',
+                    icon: 'warning',
+                    showCloseButton: false,
+                    showCancelButton: true,
+                    showConfirmButton: true,
+                    focusCancel: true,
+                    cancelButtonText: json_strings.translations.cancel,
+                    confirmButtonText: json_strings.thumbnails_regenerate.start_regeneration,
+                    buttonsStyling: false,
+                    customClass: {
+                        confirmButton: 'btn btn-primary me-2',
+                        cancelButton: 'btn btn-secondary'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        startThumbnailRegeneration();
+                    }
+                });
+
                 return false;
             });
             
@@ -41,7 +86,17 @@
                 var endDate = $('#filter_end_date').val();
                 
                 if (startDate && endDate && startDate > endDate) {
-                    alert(json_strings.thumbnails_regenerate.invalid_date_range);
+                    Swal.fire({
+                        title: json_strings.thumbnails_regenerate.invalid_date_range_title,
+                        text: json_strings.thumbnails_regenerate.invalid_date_range,
+                        icon: 'error',
+                        showConfirmButton: true,
+                        confirmButtonText: json_strings.translations.ok,
+                        buttonsStyling: false,
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        }
+                    });
                     $(this).val('');
                 }
             });
@@ -289,12 +344,32 @@
 
             // Show completion message
             if (failedFiles > 0) {
-                alert(json_strings.thumbnails_regenerate.completed_with_errors
-                    .replace('{processed}', processedFiles)
-                    .replace('{failed}', failedFiles));
+                Swal.fire({
+                    title: json_strings.thumbnails_regenerate.process_complete_errors_title,
+                    text: json_strings.thumbnails_regenerate.completed_with_errors
+                        .replace('{processed}', processedFiles)
+                        .replace('{failed}', failedFiles),
+                    icon: 'warning',
+                    showConfirmButton: true,
+                    confirmButtonText: json_strings.translations.ok,
+                    buttonsStyling: false,
+                    customClass: {
+                        confirmButton: 'btn btn-primary'
+                    }
+                });
             } else {
-                alert(json_strings.thumbnails_regenerate.completed_successfully
-                    .replace('{processed}', processedFiles));
+                Swal.fire({
+                    title: json_strings.thumbnails_regenerate.process_complete_title,
+                    text: json_strings.thumbnails_regenerate.completed_successfully
+                        .replace('{processed}', processedFiles),
+                    icon: 'success',
+                    showConfirmButton: true,
+                    confirmButtonText: json_strings.translations.ok,
+                    buttonsStyling: false,
+                    customClass: {
+                        confirmButton: 'btn btn-primary'
+                    }
+                });
             }
         }
     };

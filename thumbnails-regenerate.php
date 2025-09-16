@@ -245,42 +245,38 @@ if ($_POST) {
                                 <div class="col-md-6">
                                     <h6><?php _e('Format Selection', 'cftp_admin'); ?></h6>
                                     <div class="form-group">
-                                        <?php foreach ($image_formats as $format): ?>
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" 
-                                                       type="checkbox" 
-                                                       name="formats[]" 
-                                                       id="format_<?php echo $format; ?>" 
-                                                       value="<?php echo $format; ?>" 
-                                                       checked>
-                                                <label class="form-check-label" for="format_<?php echo $format; ?>">
-                                                    <?php echo strtoupper($format); ?> 
-                                                    <span class="badge bg-info text-white"><?php echo number_format($format_stats[$format]); ?></span>
-                                                </label>
-                                            </div>
-                                        <?php endforeach; ?>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <?php foreach ($image_formats as $format):
+                                                $has_files = $format_stats[$format] > 0;
+                                                $disabled = !$has_files ? 'disabled' : '';
+                                                $checked = $has_files ? 'checked' : '';
+                                            ?>
+                                                <div class="format-selector <?php echo !$has_files ? 'format-disabled' : ''; ?>">
+                                                    <input class="format-checkbox"
+                                                           type="checkbox"
+                                                           name="formats[]"
+                                                           id="format_<?php echo $format; ?>"
+                                                           value="<?php echo $format; ?>"
+                                                           <?php echo $checked; ?>
+                                                           <?php echo $disabled; ?>>
+                                                    <label class="format-label" for="format_<?php echo $format; ?>">
+                                                        <div class="format-name"><?php echo strtoupper($format); ?></div>
+                                                        <div class="format-count"><?php echo number_format($format_stats[$format]); ?></div>
+                                                    </label>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
                                     </div>
                                     <small class="form-text text-muted"><?php _e('Select which image formats to process', 'cftp_admin'); ?></small>
                                 </div>
                             </div>
 
                             </div>
-                            
-                            <div class="alert alert-warning mt-4">
-                                <i class="fa fa-exclamation-triangle"></i>
-                                <strong><?php _e('Important Notes:', 'cftp_admin'); ?></strong>
-                                <ul class="mb-0 mt-2">
-                                    <li><?php _e('This process will replace all existing thumbnails for the selected images', 'cftp_admin'); ?></li>
-                                    <li><?php _e('Large batch operations may take several minutes to complete', 'cftp_admin'); ?></li>
-                                    <li><?php _e('The process will run in the background using AJAX', 'cftp_admin'); ?></li>
-                                    <li><?php _e('Do not close this page while the process is running', 'cftp_admin'); ?></li>
-                                </ul>
-                            </div>
                     </div>
 
                     <div class="after_form_buttons">
-                        <button type="submit" 
-                                name="submit" 
+                        <button type="button"
+                                name="submit"
                                 class="btn btn-wide btn-primary mb-5"
                                 id="regenerate-btn"
                                 <?php echo ($all_images_stats['total'] == 0) ? 'disabled' : ''; ?>>
