@@ -118,16 +118,20 @@ if ($_POST) {
                                     <small class="form-text text-muted"><?php _e('Leave empty for all files until now', 'cftp_admin'); ?></small>
                                 </div>
                                 <div class="col-md-4">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fa fa-filter"></i>
-                                        <?php _e('Filter', 'cftp_admin'); ?>
-                                    </button>
-                                    <?php if ($filter_start_date || $filter_end_date): ?>
-                                        <a href="thumbnails-regenerate.php" class="btn btn-secondary">
-                                            <i class="fa fa-times"></i>
-                                            <?php _e('Clear', 'cftp_admin'); ?>
-                                        </a>
-                                    <?php endif; ?>
+                                    <label>&nbsp;</label>
+                                    <div>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fa fa-filter"></i>
+                                            <?php _e('Filter', 'cftp_admin'); ?>
+                                        </button>
+                                        <?php if ($filter_start_date || $filter_end_date): ?>
+                                            <a href="thumbnails-regenerate.php" class="btn btn-secondary ms-2">
+                                                <i class="fa fa-times"></i>
+                                                <?php _e('Clear', 'cftp_admin'); ?>
+                                            </a>
+                                        <?php endif; ?>
+                                    </div>
+                                    <small class="form-text text-muted">&nbsp;</small>
                                 </div>
                             </div>
                         </form>
@@ -149,7 +153,7 @@ if ($_POST) {
                                 <div class="row">
                                     <div class="col-sm-6">
                                         <h6><?php _e('Total Convertible Images', 'cftp_admin'); ?></h6>
-                                        <h3 class="text-primary"><?php echo number_format($all_images_stats['total']); ?></h3>
+                                        <h1 class="text-primary display-4"><?php echo number_format($all_images_stats['total']); ?></h1>
                                     </div>
                                     <div class="col-sm-6">
                                         <h6><?php _e('Supported Formats', 'cftp_admin'); ?></h6>
@@ -167,7 +171,7 @@ if ($_POST) {
                                 <?php foreach ($image_formats as $format): ?>
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <span class="text-uppercase font-weight-bold"><?php echo strtoupper($format); ?>:</span>
-                                        <span class="badge bg-secondary text-white">
+                                        <span class="badge bg-secondary text-white fs-6">
                                             <?php echo number_format($format_stats[$format]); ?>
                                         </span>
                                     </div>
@@ -203,33 +207,38 @@ if ($_POST) {
                             <div class="row">
                                 <div class="col-md-6">
                                     <h6><?php _e('Thumbnail Dimensions', 'cftp_admin'); ?></h6>
-                                    
-                                    <div class="form-group">
-                                        <label for="thumbnail_width"><?php _e('Width (pixels)', 'cftp_admin'); ?></label>
-                                        <input type="number" 
-                                               name="thumbnail_width" 
-                                               id="thumbnail_width" 
-                                               class="form-control" 
-                                               value="<?php echo get_option('thumbnails_width', false, 200); ?>"
-                                               placeholder="200"
-                                               min="50" 
-                                               max="1000" 
-                                               required>
-                                        <small class="form-text text-muted"><?php _e('Recommended: 150-300px', 'cftp_admin'); ?></small>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label for="thumbnail_height"><?php _e('Height (pixels)', 'cftp_admin'); ?></label>
-                                        <input type="number" 
-                                               name="thumbnail_height" 
-                                               id="thumbnail_height" 
-                                               class="form-control" 
-                                               value="<?php echo get_option('thumbnails_height', false, 200); ?>"
-                                               placeholder="200"
-                                               min="50" 
-                                               max="1000" 
-                                               required>
-                                        <small class="form-text text-muted"><?php _e('Recommended: 150-300px', 'cftp_admin'); ?></small>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="thumbnail_width"><?php _e('Width (pixels)', 'cftp_admin'); ?></label>
+                                                <input type="number"
+                                                       name="thumbnail_width"
+                                                       id="thumbnail_width"
+                                                       class="form-control"
+                                                       value="<?php echo get_option('thumbnails_width', false, 200); ?>"
+                                                       placeholder="200"
+                                                       min="50"
+                                                       max="1000"
+                                                       required>
+                                                <small class="form-text text-muted"><?php _e('Recommended: 150-300px', 'cftp_admin'); ?></small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="thumbnail_height"><?php _e('Height (pixels)', 'cftp_admin'); ?></label>
+                                                <input type="number"
+                                                       name="thumbnail_height"
+                                                       id="thumbnail_height"
+                                                       class="form-control"
+                                                       value="<?php echo get_option('thumbnails_height', false, 200); ?>"
+                                                       placeholder="200"
+                                                       min="50"
+                                                       max="1000"
+                                                       required>
+                                                <small class="form-text text-muted"><?php _e('Recommended: 150-300px', 'cftp_admin'); ?></small>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -269,10 +278,10 @@ if ($_POST) {
                             </div>
                     </div>
 
-                    <div class="after_form_buttons" style="margin: 20px auto 30px;">
+                    <div class="after_form_buttons">
                         <button type="submit" 
                                 name="submit" 
-                                class="btn btn-wide btn-primary"
+                                class="btn btn-wide btn-primary mb-5"
                                 id="regenerate-btn"
                                 <?php echo ($all_images_stats['total'] == 0) ? 'disabled' : ''; ?>>
                             <i class="fa fa-refresh"></i>
