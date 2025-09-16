@@ -283,6 +283,10 @@ if (current_role_in(array(9, 8, 7))) {
                 'label' => __('Custom HTML/CSS/JS', 'cftp_admin'),
                 'link' => 'custom-assets.php',
             ),
+            array(
+                'label' => __('Regenerate thumbnails', 'cftp_admin'),
+                'link' => 'thumbnails-regenerate.php',
+            ),
         ),
     );
 }

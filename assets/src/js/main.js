@@ -87,6 +87,9 @@
             case 'public_download':
                 admin.parts.filePreviewModal();
                 break;
+            case 'thumbnails_regenerate':
+                admin.pages.thumbnailsRegenerate();
+                break;
             default:
                 // do nothing
                 break;

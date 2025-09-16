@@ -2281,3 +2281,240 @@ function count_user_uploads($user_id)
     $files_sql->execute();
     return $files_sql->rowCount();
 }
+
+/**
+ * Count uploaded files with optional format filtering and date range
+ * @param array $formats Optional array of file extensions to filter by
+ * @param string $start_date Optional start date (YYYY-MM-DD format)
+ * @param string $end_date Optional end date (YYYY-MM-DD format)
+ * @return array Array with total count and per-format breakdown
+ */
+function count_uploaded_files($formats = null, $start_date = null, $end_date = null)
+{
+    global $dbh;
+    
+    $result = [
+        'total' => 0,
+        'by_format' => []
+    ];
+    
+    // Base query
+    $query = "SELECT url FROM " . TABLE_FILES . " WHERE 1=1";
+    $params = [];
+    
+    // Add date range filtering if provided
+    if (!empty($start_date)) {
+        $query .= " AND timestamp >= :start_date";
+        $params[':start_date'] = $start_date . ' 00:00:00';
+    }
+    
+    if (!empty($end_date)) {
+        $query .= " AND timestamp <= :end_date";
+        $params[':end_date'] = $end_date . ' 23:59:59';
+    }
+    
+    $files_sql = $dbh->prepare($query);
+    $files_sql->execute($params);
+    
+    $total_count = 0;
+    $format_counts = [];
+    
+    while ($row = $files_sql->fetch(PDO::FETCH_ASSOC)) {
+        $filename = $row['url'];
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        
+        // If formats filter is provided, only count matching extensions
+        if ($formats === null || in_array($extension, array_map('strtolower', $formats))) {
+            $total_count++;
+            
+            if (!isset($format_counts[$extension])) {
+                $format_counts[$extension] = 0;
+            }
+            $format_counts[$extension]++;
+        }
+    }
+    
+    $result['total'] = $total_count;
+    $result['by_format'] = $format_counts;
+    
+    return $result;
+}
+
+function get_files_for_thumbnail_regeneration($formats = null, $start_date = null, $end_date = null, $limit = 10, $offset = 0) {
+    global $dbh;
+    
+    $result = [
+        'files' => [],
+        'total' => 0,
+        'has_more' => false
+    ];
+    
+    // Build WHERE conditions for format filtering
+    $where_conditions = ['1=1'];
+    $params = [];
+    
+    // Add date range filtering if provided
+    if (!empty($start_date)) {
+        $where_conditions[] = "timestamp >= :start_date";
+        $params[':start_date'] = $start_date . ' 00:00:00';
+    }
+    
+    if (!empty($end_date)) {
+        $where_conditions[] = "timestamp <= :end_date";
+        $params[':end_date'] = $end_date . ' 23:59:59';
+    }
+    
+    // Add format filtering if provided
+    if ($formats !== null && !empty($formats)) {
+        $format_conditions = [];
+        foreach ($formats as $index => $format) {
+            $param_name = ':format_' . $index;
+            $format_conditions[] = "LOWER(SUBSTRING_INDEX(url, '.', -1)) = " . $param_name;
+            $params[$param_name] = strtolower($format);
+        }
+        $where_conditions[] = '(' . implode(' OR ', $format_conditions) . ')';
+    }
+    
+    $where_clause = implode(' AND ', $where_conditions);
+    
+    // Get total count of matching files
+    $count_query = "SELECT COUNT(*) as total FROM " . TABLE_FILES . " WHERE " . $where_clause;
+    $count_sql = $dbh->prepare($count_query);
+    $count_sql->execute($params);
+    $total_matching_files = $count_sql->fetch(PDO::FETCH_ASSOC)['total'];
+    
+    // Get files for this batch
+    $query = "SELECT id, url, original_url FROM " . TABLE_FILES . " WHERE " . $where_clause . " ORDER BY id ASC LIMIT :limit OFFSET :offset";
+    $params[':limit'] = $limit;
+    $params[':offset'] = $offset;
+    
+    $files_sql = $dbh->prepare($query);
+    
+    // Bind parameters with correct types
+    foreach ($params as $key => $value) {
+        if ($key === ':limit' || $key === ':offset') {
+            $files_sql->bindValue($key, $value, PDO::PARAM_INT);
+        } else {
+            $files_sql->bindValue($key, $value, PDO::PARAM_STR);
+        }
+    }
+    
+    $files_sql->execute();
+    
+    $files = [];
+    
+    while ($row = $files_sql->fetch(PDO::FETCH_ASSOC)) {
+        $filename = $row['url'];
+        $original_filename = !empty($row['original_url']) ? $row['original_url'] : $row['url'];
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        
+        $files[] = [
+            'id' => $row['id'],
+            'filename' => $filename,
+            'original_filename' => $original_filename,
+            'extension' => $extension
+        ];
+    }
+    
+    $result['files'] = $files;
+    $result['total'] = $total_matching_files;
+    $result['has_more'] = ($offset + $limit) < $total_matching_files;
+    
+    return $result;
+}
+
+function regenerate_single_thumbnail($file_id, $width, $height) {
+    global $dbh;
+    
+    // Get file info
+    $file_sql = $dbh->prepare("SELECT url, original_url FROM " . TABLE_FILES . " WHERE id = :id");
+    $file_sql->execute([':id' => $file_id]);
+    $file_data = $file_sql->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$file_data) {
+        return [
+            'success' => false, 
+            'error' => 'File not found',
+            'file_id' => $file_id,
+            'filename' => 'Unknown file'
+        ];
+    }
+    
+    $filename = $file_data['url'];
+    $original_filename = !empty($file_data['original_url']) ? $file_data['original_url'] : $file_data['url'];
+    $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+    
+    // Check if it's a supported image format
+    $supported_formats = ['png', 'jpg', 'jpeg', 'gif'];
+    if (!in_array($extension, $supported_formats)) {
+        return [
+            'success' => false, 
+            'error' => 'Unsupported format',
+            'file_id' => $file_id,
+            'filename' => $original_filename
+        ];
+    }
+    
+    // Define file paths
+    $original_file = UPLOADED_FILES_DIR . DS . $filename;
+    $thumbnail_file = THUMBNAILS_FILES_DIR . DS . $filename;
+    
+    // Check if original file exists
+    if (!file_exists($original_file)) {
+        return [
+            'success' => false, 
+            'error' => 'Original file not found',
+            'file_id' => $file_id,
+            'filename' => $original_filename
+        ];
+    }
+    
+    try {
+        // Use existing make_thumbnail function with correct parameters
+        $result = make_thumbnail($original_file, 'thumbnail', $width, $height);
+        
+        // Check if thumbnail was created successfully
+        if (isset($result['thumbnail']['location'])) {
+            $thumbnail_path = $result['thumbnail']['location'];
+            
+            // Verify thumbnail file exists and has content
+            if (file_exists($thumbnail_path)) {
+                $file_size = filesize($thumbnail_path);
+                if ($file_size > 0) {
+                    return [
+                        'success' => true, 
+                        'file_id' => $file_id,
+                        'filename' => $original_filename,
+                        'thumbnail_path' => $thumbnail_path,
+                        'thumbnail_size' => $file_size
+                    ];
+                } else {
+                    $error_message = 'Thumbnail file was created but is empty (0 bytes)';
+                }
+            } else {
+                $error_message = 'Thumbnail file was not created at expected location: ' . $thumbnail_path;
+            }
+        } else {
+            $error_message = 'No thumbnail location returned from make_thumbnail function';
+        }
+        
+        // Add any additional error from make_thumbnail
+        if (isset($result['error'])) {
+            $error_message = (isset($error_message) ? $error_message . ' | ' : '') . 'make_thumbnail error: ' . $result['error'];
+        }
+        
+        return [
+            'success' => false, 
+            'error' => $error_message,
+            'file_id' => $file_id,
+            'filename' => $original_filename
+        ];
+    } catch (Exception $e) {
+        return [
+            'success' => false, 
+            'error' => 'Exception: ' . $e->getMessage(),
+            'file_id' => $file_id,
+            'filename' => $original_filename
+        ];
+    }
+}
