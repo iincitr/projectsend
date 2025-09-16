@@ -150,15 +150,77 @@
             this.showLoadingModal();
             
             // Fetch preview content
-            fetch(url)
-                .then(response => response.text())
-                .then(html => {
-                    this.showPreviewModal(html);
-                })
-                .catch(error => {
+            $.ajax({
+                method: "GET",
+                url: url,
+                cache: false,
+            }).done((response) => {
+                try {
+                    const obj = JSON.parse(response);
+                    const content = this.createPreviewContent(obj);
+                    this.showPreviewModal(content, obj.name);
+                } catch (error) {
                     console.error('Preview failed:', error);
                     this.showErrorModal('Failed to load preview');
-                });
+                }
+            }).fail((response) => {
+                console.error('Preview request failed:', response);
+                this.showErrorModal('Failed to load preview');
+            });
+        },
+
+        // Create preview content based on file type
+        createPreviewContent: function(obj) {
+            let content = '';
+            
+            switch (obj.type) {
+                case 'video':
+                    content = `
+                        <div class="video-preview">
+                            <video controls style="width: 100%; max-height: 70vh;">
+                                <source src="${obj.file_url}" type="${obj.mime_type}">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>`;
+                    break;
+                case 'audio':
+                    content = `
+                        <div class="audio-preview">
+                            <audio controls style="width: 100%;">
+                                <source src="${obj.file_url}" type="${obj.mime_type}">
+                                Your browser does not support the audio tag.
+                            </audio>
+                        </div>`;
+                    break;
+                case 'pdf':
+                    content = `
+                        <div class="pdf-preview">
+                            <iframe src="${obj.file_url}" 
+                                    style="width: 100%; height: 70vh; border: none;"
+                                    title="PDF Preview">
+                            </iframe>
+                        </div>`;
+                    break;
+                case 'image':
+                    content = `
+                        <div class="image-preview">
+                            <img src="${obj.file_url}" 
+                                 style="max-width: 100%; max-height: 70vh; display: block; margin: 0 auto;"
+                                 alt="${obj.name}">
+                        </div>`;
+                    break;
+                default:
+                    content = `
+                        <div class="preview-not-available">
+                            <p>Preview not available for this file type.</p>
+                            <a href="${obj.file_url}" target="_blank" class="btn btn-modern btn-primary">
+                                <i class="fa fa-external-link"></i>
+                                Open File
+                            </a>
+                        </div>`;
+            }
+            
+            return content;
         },
 
         // Show loading modal
@@ -174,8 +236,15 @@
         },
 
         // Show preview modal with content
-        showPreviewModal: function(content) {
+        showPreviewModal: function(content, title) {
             $('#previewContent').html(content);
+            if (title) {
+                // Add title if modal has a title element
+                const $modalTitle = $('#previewModal').find('.modal-title');
+                if ($modalTitle.length) {
+                    $modalTitle.text(title);
+                }
+            }
             $('#previewModal').fadeIn(this.config.animationDuration);
             
             // Initialize any embedded content
