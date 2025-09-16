@@ -39,8 +39,12 @@ Class AssetsLoader
                 ] 
             ];
 
-            if (recaptcha2_is_enabled()) {
-                $this->js_assets['footer']['recaptcha2'] = ['url' => 'https://www.google.com/recaptcha/api.js'];
+            // Dynamic captcha script loading
+            if (captcha_is_enabled()) {
+                $captcha_script_url = captcha_get_script_url();
+                if ($captcha_script_url) {
+                    $this->js_assets['footer']['captcha'] = ['url' => $captcha_script_url];
+                }
             }
     }
 
