@@ -250,29 +250,96 @@ tr:hover td[bgcolor="#808080"] {
 .pagination {
     text-align: center;
     font-family: Arial, sans-serif;
-    font-size: 12px;
+    font-size: 14px;
+    margin: 20px 0;
+    display: block;
+    clear: both;
 }
 
-.pagination a {
+.pagination ul {
     display: inline-block;
-    padding: 2px 6px;
-    margin: 1px;
-    border: 1px outset #c0c0c0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.pagination li {
+    display: inline-block;
+    margin: 2px;
+}
+
+.pagination a,
+.pagination span {
+    display: inline-block;
+    padding: 6px 12px;
+    margin: 0;
+    border: 2px outset #c0c0c0;
     background-color: #c0c0c0;
     color: #000000;
     text-decoration: none;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    min-width: 20px;
+    text-align: center;
+    line-height: 1.2;
 }
 
 .pagination a:hover {
     background-color: #e0e0e0;
     color: #000000;
+    text-decoration: none;
+    border: 2px outset #e0e0e0;
 }
 
-.pagination a.current,
-.pagination .page-item.active a {
-    border: 1px inset #c0c0c0;
+.pagination a:active {
+    border: 2px inset #c0c0c0;
+    background-color: #a0a0a0;
+}
+
+.pagination .current,
+.pagination .page-item.active a,
+.pagination .page-item.active span {
+    border: 2px inset #c0c0c0;
     background-color: #808080;
     color: #ffffff;
+    font-weight: bold;
+}
+
+.pagination .disabled span {
+    border: 2px outset #f0f0f0;
+    background-color: #f0f0f0;
+    color: #999999;
+}
+
+/* Alternative pagination styles for different structures */
+nav[aria-label="pagination"] ul {
+    display: inline-block;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+nav[aria-label="pagination"] li {
+    display: inline-block;
+    margin: 2px;
+}
+
+nav[aria-label="pagination"] a,
+nav[aria-label="pagination"] span {
+    display: inline-block;
+    padding: 6px 12px;
+    margin: 0;
+    border: 2px outset #c0c0c0;
+    background-color: #c0c0c0;
+    color: #000000;
+    text-decoration: none;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    min-width: 20px;
+    text-align: center;
+    line-height: 1.2;
 }
 
 /* Modal 90s styling */

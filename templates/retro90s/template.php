@@ -10,7 +10,7 @@ Description: A nostalgic throwback to the golden era of the web - complete with 
 
 $ld = 'retro90s_template'; // specify the language domain for this template
 
-define('TEMPLATE_RESULTS_PER_PAGE', 5);
+define('TEMPLATE_RESULTS_PER_PAGE', get_option('pagination_results_per_page'));
 define('TEMPLATE_THUMBNAILS_WIDTH', '80');
 define('TEMPLATE_THUMBNAILS_HEIGHT', '60');
 
@@ -498,7 +498,7 @@ $bulk_actions_items = [
 
                                 <!-- Pagination -->
                                 <?php
-                                if (!empty($table)) {
+                                if (isset($count) && $count > 0) {
                                     $pagination = new \ProjectSend\Classes\Layout\Pagination;
                                     echo '<br><center>';
                                     echo $pagination->make([
@@ -537,6 +537,24 @@ $bulk_actions_items = [
                     </tr>
                 </table>
             </form>
+
+            <!-- Retro Separator -->
+            <div style="margin-top: 50px; margin-bottom: 50px;">
+                <center>
+                    <table width="90%" cellpadding="2" cellspacing="0" border="0">
+                        <tr>
+                            <td bgcolor="#808080" height="3" style="border-top: 1px solid #ffffff; border-left: 1px solid #ffffff;"></td>
+                        </tr>
+                        <tr>
+                            <td bgcolor="#c0c0c0" height="2" style="border-bottom: 1px solid #000000; border-right: 1px solid #000000;"></td>
+                        </tr>
+                    </table>
+                    <br>
+                    <font face="Arial, sans-serif" color="#666666" size="1">
+                        <blink>★ ★ ★</blink> ENTERTAINMENT ZONE <blink>★ ★ ★</blink>
+                    </font>
+                </center>
+            </div>
 
             <!-- MUST WATCH MOVIES Section (Very 90s!) -->
             <table width="100%" cellpadding="4" cellspacing="2" border="0" bgcolor="#008080">
