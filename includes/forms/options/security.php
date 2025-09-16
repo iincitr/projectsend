@@ -108,7 +108,7 @@
     </div>
 </div> */ ?>
 
-<div id="captcha_recaptchav2" class="d-none captcha_options_block">
+<div id="captcha_recaptchav2" class="captcha_options_block <?php if (get_option('captcha_method') != 'recaptchav2') { ?>d-none<?php } ?>">
     <div class="form-group row">
         <label for="recaptcha_site_key" class="col-sm-4 control-label"><?php _e('Site key','cftp_admin'); ?></label>
         <div class="col-sm-8">
@@ -130,7 +130,7 @@
     </div>
 </div>
 
-<div id="captcha_cloudflare_turnstile" class="d-none captcha_options_block">
+<div id="captcha_cloudflare_turnstile" class="captcha_options_block <?php if (get_option('captcha_method') != 'cloudflare_turnstile') { ?>d-none<?php } ?>">
     <div class="form-group row">
         <label for="cloudflare_turnstile_site_key" class="col-sm-4 control-label"><?php _e('Site key','cftp_admin'); ?></label>
         <div class="col-sm-8">
@@ -142,6 +142,12 @@
         <label for="cloudflare_turnstile_secret_key" class="col-sm-4 control-label"><?php _e('Secret key','cftp_admin'); ?></label>
         <div class="col-sm-8">
             <input type="text" name="cloudflare_turnstile_secret_key" id="cloudflare_turnstile_secret_key" class="form-control" value="<?php echo html_output(get_option('cloudflare_turnstile_secret_key')); ?>" />
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-sm-8 offset-sm-4">
+            <a href="<?php echo LINK_DOC_TURNSTILE; ?>" class="external_link" target="_blank"><?php _e('How do I obtain this credentials?','cftp_admin'); ?></a>
         </div>
     </div>
 </div>

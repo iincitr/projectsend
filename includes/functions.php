@@ -6,6 +6,7 @@
 use enshrined\svgSanitize\Sanitizer;
 use ProjectSend\Classes\Captcha\CloudflareTurnstile;
 use ProjectSend\Classes\Captcha\RecaptchaV2;
+use ProjectSend\Classes\CaptchaManager;
 
 function try_queries($queries = [])
 {
@@ -2092,83 +2093,70 @@ function sanitize_filename_for_download($file_name)
 
 function captcha_get_methods()
 {
-    return [
-        'recaptchav2' => RecaptchaV2::class,
-        'cloudflare_turnstile' => CloudflareTurnstile::class,
-    ];
+    $manager = CaptchaManager::getInstance();
+    return $manager->getAvailableMethods();
 }
 
 function captcha_maybe_get_request()
 {
-    $method = get_option('captcha_method');
-    if (!in_array($method, array_keys(captcha_get_methods()))) {
-        return null;
-    }
+    $manager = CaptchaManager::getInstance();
+    return $manager->getRequest();
 }
 
 function recaptcha2_is_enabled()
 {
-    if (
-        get_option('recaptcha_enabled') == 1 &&
-        !empty(get_option('recaptcha_site_key')) &&
-        !empty(get_option('recaptcha_secret_key'))
-    ) {
-        return true;
-    }
-
-    return false;
+    // Legacy function - now uses new captcha system
+    // Checks if reCAPTCHA v2 is specifically selected and enabled
+    $manager = CaptchaManager::getInstance();
+    return (get_option('captcha_method') == 'recaptchav2' && $manager->isEnabled());
 }
 
 function recaptcha2_render_widget()
 {
-    if (recaptcha2_is_enabled()) {
-    ?>
-        <div class="form-group row">
-            <!-- <label><?php _e('Verification', 'cftp_admin'); ?></label> -->
-            <div class="g-recaptcha" data-sitekey="<?php echo get_option('recaptcha_site_key'); ?>"></div>
-        </div>
-<?php
-    }
+    // Legacy function - now uses new captcha system
+    $manager = CaptchaManager::getInstance();
+    echo $manager->renderWidget();
 }
 
 function recaptcha2_get_request()
 {
-    $recaptcha_request = null;
-
-    if (recaptcha2_is_enabled()) {
-        $recaptcha_user_ip        = $_SERVER["REMOTE_ADDR"];
-        $recaptcha_response        = $_POST['g-recaptcha-response'];
-        $recaptcha_secret_key    = get_option('recaptcha_secret_key');
-        $recaptcha_request        = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret={$recaptcha_secret_key}&response={$recaptcha_response}&remoteip={$recaptcha_user_ip}");
-    }
-
-    return $recaptcha_request;
+    // Legacy function - now uses new captcha system
+    $manager = CaptchaManager::getInstance();
+    return $manager->getRequest();
 }
 
 function recaptcha2_validate_request($redirect = true)
 {
-    $validation_passed = false;
+    // Legacy function - now uses new captcha system
+    $manager = CaptchaManager::getInstance();
+    return $manager->validateRequest($redirect);
+}
 
-    if (recaptcha2_is_enabled()) {
-        $validation = new \ProjectSend\Classes\Validation;
-        $validation->validate_items([
-            recaptcha2_get_request() => [
-                'recaptcha2' => [],
-            ],
-        ]);
+/**
+ * New captcha functions - use these instead of recaptcha2_* functions
+ */
+function captcha_is_enabled()
+{
+    $manager = CaptchaManager::getInstance();
+    return $manager->isEnabled();
+}
 
-        if ($validation->passed()) {
-            $validation_passed = true;
-        }
-    } else {
-        $validation_passed = true;
-    }
+function captcha_render_widget()
+{
+    $manager = CaptchaManager::getInstance();
+    echo $manager->renderWidget();
+}
 
-    if ($redirect && !$validation_passed) {
-        exit_with_error_code(403);
-    }
+function captcha_validate_request($redirect = true)
+{
+    $manager = CaptchaManager::getInstance();
+    return $manager->validateRequest($redirect);
+}
 
-    return $validation_passed;
+function captcha_get_script_url()
+{
+    $manager = CaptchaManager::getInstance();
+    return $manager->getScriptUrl();
 }
 
 function ps_redirect($location, $status = 303)
