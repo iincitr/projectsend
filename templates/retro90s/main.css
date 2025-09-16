@@ -11,7 +11,7 @@
 
 body {
     margin: 0;
-    padding: 8px;
+    padding: 60px;
     font-family: Arial, sans-serif;
     font-size: 14px;
     background-color: #c0c0c0;
@@ -179,6 +179,14 @@ font[size="4"] { font-size: 20px; }
 font[size="5"] { font-size: 28px; }
 font[size="6"] { font-size: 36px; }
 font[size="7"] { font-size: 52px; }
+
+/* Header background with pattern */
+table[bgcolor="#008080"]:first-of-type {
+    background-image: url('images/pattern.jpeg');
+    background-repeat: repeat;
+    background-position: center;
+    background-size: auto;
+}
 
 /* Classic color combinations */
 font[color="#ffffff"] { color: #ffffff; }
@@ -378,7 +386,7 @@ nav[aria-label="pagination"] span {
 /* Responsive adjustments (but keep the 90s feel) */
 @media screen and (max-width: 640px) {
     body {
-        padding: 4px;
+        padding: 8px;
         font-size: 13px;
     }
     

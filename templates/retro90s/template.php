@@ -113,7 +113,7 @@ $bulk_actions_items = [
     <?php render_custom_assets('head'); ?>
 </head>
 
-<body background="<?php echo $this_template_url; ?>images/bg-pattern.gif">
+<body style="background:url('<?php echo $this_template_url; ?>images/pattern.jpeg')">
     <?php render_custom_assets('body_top'); ?>
 
 <!-- Main Container Table -->
