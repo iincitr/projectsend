@@ -317,7 +317,11 @@ class Auth
     {
         global $logger;
         
+        // Debug logging
+        error_log("LDAP Login Debug - Starting authentication for: " . $email);
+        
         if ( !$email || !$password ) {
+            error_log("LDAP Login Debug - Empty email or password");
             $return = [
                 'status' => 'error',
                 'message' => __("Email and password cannot be empty.",'cftp_admin')
@@ -329,14 +333,21 @@ class Auth
 		$selected_form_lang = (!empty( $language ) ) ? $language : SITE_LANG;
 
         // Bind to server
-        $ldap_server = get_option('ldap_server');
+        $ldap_server = get_option('ldap_hosts');
         $ldap_bind_dn = get_option('ldap_bind_dn');
         $ldap_admin_user = get_option('ldap_admin_user');
         $ldap_admin_password = get_option('ldap_admin_password');
+        
+        // Debug logging
+        error_log("LDAP Login Debug - Server: " . $ldap_server);
+        error_log("LDAP Login Debug - Bind DN: " . $ldap_bind_dn);
+        error_log("LDAP Login Debug - Admin User: " . $ldap_admin_user);
 
         try {
             $ldap = ldap_connect($ldap_server);
+            error_log("LDAP Login Debug - Connected to server successfully");
         } catch (\Exception $e) {
+            error_log("LDAP Login Debug - Connection failed: " . $e->getMessage());
             $return = [
                 'status' => 'error',
                 'message' => sprintf(__("LDAP connection error: %s", 'cftp_admin'), $e->getMessage())
@@ -345,34 +356,145 @@ class Auth
             return json_encode($return);
         }
 
-        ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, get_option('ldap_protocol_version'));
+        ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, get_option('ldap_protocol_version', null, '3'));
         ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
 
         try {
+            error_log("LDAP Login Debug - Attempting admin bind");
             $bind = ldap_bind($ldap, $ldap_admin_user, $ldap_admin_password);
             if ($bind) {
+                error_log("LDAP Login Debug - Admin bind successful");
                 $ldap_search_base = get_option('ldap_search_base');
+                error_log("LDAP Login Debug - Search base: " . $ldap_search_base);
                 
                 $arr = array('dn', 1);
-                $result = ldap_search($ldap, $ldap_bind_dn, "(mail=$email)", $arr);
-                $entries = ldap_get_entries($ldap, $result);
+                error_log("LDAP Login Debug - Searching for user: " . $email);
+                $result = @ldap_search($ldap, $ldap_search_base, "(mail=$email)", $arr);
+                $entries = @ldap_get_entries($ldap, $result);
+                
+                error_log("LDAP Login Debug - Search result count: " . ($entries ? $entries['count'] : 'false'));
 
                 if ($entries['count'] > 0) {
-                    // Bind with user
+                    // Bind with user to verify password
                     if (ldap_bind($ldap, $entries[0]['dn'], $password)) {
-                        /*
-                            @todo
-                            Check if user exists on database
-                                Create if not
-                                Login if exists
-                                Log action
-                                Redirect
-                        */
-                        $return = [
-                            'status' => 'success',
-                        ];
-            
-                        return json_encode($return);
+                        // Get full LDAP attributes for user creation/sync
+                        $ldap_user_dn = $entries[0]['dn'];
+                        $attributes = ['mail', 'displayName', 'cn', 'name', 'telephoneNumber', 'mobile', 'postalAddress', 'streetAddress', 'department', 'title', 'company', 'manager'];
+                        $user_result = @ldap_search($ldap, $ldap_user_dn, "(objectClass=*)", $attributes);
+                        $user_data = @ldap_get_entries($ldap, $user_result);
+                        
+                        if ($user_data['count'] > 0) {
+                            $ldap_attributes = $user_data[0];
+                            $ldap_attributes['dn'] = $ldap_user_dn; // Store DN for metadata
+                        } else {
+                            $ldap_attributes = ['dn' => $ldap_user_dn];
+                        }
+
+                        // Check if user exists in local database
+                        $statement = $this->dbh->prepare("SELECT * FROM " . TABLE_USERS . " WHERE email = :email");
+                        $statement->execute([':email' => $email]);
+                        
+                        if ($statement->rowCount() > 0) {
+                            // User exists - login and sync data
+                            $row = $statement->fetch(PDO::FETCH_ASSOC);
+                            $user = new \ProjectSend\Classes\Users($row['id']);
+                            $this->user = $user;
+                            
+                            // Sync user data from LDAP if this is an LDAP user
+                            if ($user->isLdapUser()) {
+                                $user->syncFromLdap($ldap_attributes);
+                            }
+                            
+                            if ($user->isActive()) {
+                                // Check for 2FA requirement
+                                $new2fa = new \ProjectSend\Classes\AuthenticationCode();
+                                if ($new2fa->requires2fa()) {
+                                    $request2fa = json_decode($new2fa->requestNewCode($user->id));
+                                    if ($request2fa->status == 'success') {
+                                        $results = [
+                                            'status' => 'success',
+                                            'user_id' => $user->id,
+                                            'location' => BASE_URI."index.php?form=2fa_verify&token=".$request2fa->token,
+                                        ];
+                                    } else {
+                                        $this->setError($request2fa->message);
+                                        $results = [
+                                            'status' => 'error',
+                                            'message' => $request2fa->message,
+                                            'location' => BASE_URI,
+                                        ];
+                                    }
+                                    
+                                    return json_encode($results);
+                                }
+                                
+                                // Login the user
+                                $this->login($user);
+                                
+                                // Log the LDAP login
+                                $this->logger->addEntry([
+                                    'action' => 45, // New action for LDAP login
+                                    'owner_id' => $user->id,
+                                    'owner_user' => $user->username,
+                                    'affected_account_name' => $user->name,
+                                    'details' => 'LDAP authentication successful'
+                                ]);
+                                
+                                $return = [
+                                    'status' => 'success',
+                                    'user_id' => $user->id,
+                                    'location' => $user->isClient() ? CLIENT_VIEW_FILE_LIST_URL : BASE_URI."dashboard.php",
+                                ];
+                    
+                                return json_encode($return);
+                            } else {
+                                $return = [
+                                    'status' => 'error',
+                                    'message' => $this->getAccountInactiveError()
+                                ];
+                    
+                                return json_encode($return);
+                            }
+                        } else {
+                            // User doesn't exist - create new user if LDAP user creation is enabled
+                            if (get_option('ldap_auto_create_users', null, 'true') == 'true') {
+                                error_log("LDAP Login Debug - Auto-create users is enabled");
+                                $new_user = new \ProjectSend\Classes\Users();
+                                $create_result = $new_user->createFromLdap($ldap_attributes, $email);
+                                error_log("LDAP Login Debug - Create result: " . json_encode($create_result));
+                                
+                                if (!empty($create_result['id'])) {
+                                    error_log("LDAP Login Debug - User created successfully with ID: " . $create_result['id']);
+                                    // Get the created user and login
+                                    $user = new \ProjectSend\Classes\Users($create_result['id']);
+                                    $this->user = $user;
+                                    $this->login($user);
+                                    
+                                    $return = [
+                                        'status' => 'success',
+                                        'user_id' => $user->id,
+                                        'location' => $user->isClient() ? CLIENT_VIEW_FILE_LIST_URL : BASE_URI."dashboard.php",
+                                    ];
+                        
+                                    return json_encode($return);
+                                } else {
+                                    $return = [
+                                        'status' => 'error',
+                                        'message' => __("Error creating user account from LDAP.", 'cftp_admin')
+                                    ];
+                        
+                                    return json_encode($return);
+                                }
+                            } else {
+                                // User creation disabled
+                                $return = [
+                                    'status' => 'error',
+                                    'message' => __("Your LDAP account is not authorized. Please contact an administrator.", 'cftp_admin')
+                                ];
+                    
+                                return json_encode($return);
+                            }
+                        }
                     }
                     else {
                         $return = [
@@ -385,6 +507,8 @@ class Auth
                 }
                 else {
                     // Email not found
+                    error_log("LDAP Login Debug - User not found in LDAP");
+                    $this->setError(__("The supplied email or password does not match an existing record.", 'cftp_admin'));
                     $return = [
                         'status' => 'error',
                         'message' => __("The supplied email or password does not match an existing record.", 'cftp_admin')
@@ -394,6 +518,8 @@ class Auth
                 }
             }
             else {
+                error_log("LDAP Login Debug - Admin bind failed");
+                $this->setError(__("Error binding to LDAP server.",'cftp_admin'));
                 $return = [
                     'status' => 'error',
                     'message' => __("Error binding to LDAP server.",'cftp_admin')
@@ -402,12 +528,120 @@ class Auth
                 return json_encode($return);    
             }
         } catch (\Exception $e) {
+            error_log("LDAP Login Debug - Exception caught: " . $e->getMessage());
+            error_log("LDAP Login Debug - Exception trace: " . $e->getTraceAsString());
+            $this->setError($e->getMessage());
             $return = [
                 'status' => 'error',
                 'message' => $e->getMessage()
             ];
 
             return json_encode($return);
+        }
+    }
+
+    /**
+     * Test LDAP connection with current settings
+     */
+    public function testLdapConnection()
+    {
+        $errors = [];
+        $success_messages = [];
+
+        // Check if LDAP extension is loaded
+        if (!extension_loaded('ldap')) {
+            return [
+                'status' => 'error',
+                'message' => __('LDAP extension is not loaded in PHP.', 'cftp_admin')
+            ];
+        }
+
+        // Get LDAP settings
+        $ldap_server = get_option('ldap_hosts');
+        $ldap_bind_dn = get_option('ldap_bind_dn');
+        $ldap_admin_user = get_option('ldap_admin_user');
+        $ldap_admin_password = get_option('ldap_admin_password');
+        $ldap_protocol_version = get_option('ldap_protocol_version', null, '3');
+
+        // Validate required settings
+        if (empty($ldap_server)) {
+            $errors[] = __('LDAP server is not configured.', 'cftp_admin');
+        }
+        if (empty($ldap_admin_user)) {
+            $errors[] = __('LDAP admin user is not configured.', 'cftp_admin');
+        }
+        if (empty($ldap_admin_password)) {
+            $errors[] = __('LDAP admin password is not configured.', 'cftp_admin');
+        }
+
+        if (!empty($errors)) {
+            return [
+                'status' => 'error',
+                'message' => implode(' ', $errors)
+            ];
+        }
+
+        try {
+            // Step 1: Connect to LDAP server
+            $ldap = ldap_connect($ldap_server);
+            if (!$ldap) {
+                return [
+                    'status' => 'error',
+                    'message' => __('Could not connect to LDAP server.', 'cftp_admin')
+                ];
+            }
+            $success_messages[] = __('Successfully connected to LDAP server.', 'cftp_admin');
+
+            // Step 2: Set LDAP options
+            ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, (int)$ldap_protocol_version);
+            ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
+            $success_messages[] = sprintf(__('LDAP protocol version set to %s.', 'cftp_admin'), $ldap_protocol_version);
+
+            // Step 3: Bind with admin credentials
+            $bind = ldap_bind($ldap, $ldap_admin_user, $ldap_admin_password);
+            if (!$bind) {
+                ldap_close($ldap);
+                return [
+                    'status' => 'error',
+                    'message' => __('Could not bind to LDAP server with admin credentials. Please check username and password.', 'cftp_admin')
+                ];
+            }
+            $success_messages[] = __('Successfully authenticated with admin credentials.', 'cftp_admin');
+
+            // Step 4: Test search base if configured
+            $ldap_search_base = get_option('ldap_search_base');
+            if (!empty($ldap_search_base)) {
+                // Suppress size limit warnings - we only need to test accessibility
+                $search_result = @ldap_search($ldap, $ldap_search_base, "(objectClass=*)", [], 0, 1);
+                if ($search_result) {
+                    $entries = @ldap_get_entries($ldap, $search_result);
+                    $success_messages[] = sprintf(__('Search base "%s" is accessible (%d entries found).', 'cftp_admin'), $ldap_search_base, $entries['count']);
+                } else {
+                    $ldap_error = ldap_error($ldap);
+                    $errors[] = sprintf(__('Could not search in base "%s": %s', 'cftp_admin'), $ldap_search_base, $ldap_error);
+                }
+            }
+
+            // Close connection
+            ldap_close($ldap);
+
+            if (!empty($errors)) {
+                return [
+                    'status' => 'warning',
+                    'message' => implode(' ', $success_messages) . ' ' . __('However, there were some issues: ', 'cftp_admin') . implode(' ', $errors)
+                ];
+            }
+
+            return [
+                'status' => 'success',
+                'message' => implode(' ', $success_messages) . ' ' . __('LDAP connection test completed successfully.', 'cftp_admin')
+            ];
+
+        } catch (Exception $e) {
+            return [
+                'status' => 'error',
+                'message' => sprintf(__('LDAP connection test failed: %s', 'cftp_admin'), $e->getMessage())
+            ];
         }
     }
 

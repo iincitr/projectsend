@@ -188,8 +188,12 @@ if (current_role_in(array(9, 8, 7))) {
                 'link' => 'options.php?section=branding',
             ),
             array(
-                'label' => __('External Login', 'cftp_admin'),
-                'link' => 'options.php?section=external_login',
+                'label' => __('Social Networks Login', 'cftp_admin'),
+                'link' => 'options.php?section=social_login',
+            ),
+            array(
+                'label' => __('LDAP Authentication', 'cftp_admin'),
+                'link' => 'options.php?section=ldap',
             ),
             array(
                 'label' => __('Scheduled tasks (cron)', 'cftp_admin'),

@@ -941,4 +941,205 @@ class Users
 
         return false;
     }
+
+    /**
+     * Create a new user from LDAP authentication
+     */
+    public function createFromLdap($ldap_attributes, $email, $password = null)
+    {
+        // Extract user information from LDAP attributes
+        $name = $this->extractLdapAttribute($ldap_attributes, ['displayName', 'cn', 'name'], $email);
+        $username = $this->generateUsernameFromEmail($email);
+        
+        // Generate a random password since LDAP users authenticate via LDAP
+        if (empty($password)) {
+            $password = generate_random_password();
+        }
+
+        // Get default role for LDAP users
+        $default_role = get_option('ldap_default_role', null, '0'); // Default to client role
+        error_log("LDAP Create User Debug - Default role: " . $default_role);
+        error_log("LDAP Create User Debug - Default role type: " . gettype($default_role));
+        error_log("LDAP Create User Debug - Name: " . $name);
+        error_log("LDAP Create User Debug - Username: " . $username);
+        error_log("LDAP Create User Debug - Email: " . $email);
+
+        // Set user properties
+        $this->setType('new_client'); // This can be overridden by role
+        error_log("LDAP Create User Debug - About to set level to: " . $default_role);
+        $this->set([
+            'username' => $username, // This sets $this->username for validation
+            'password' => $password,
+            'name' => $name,
+            'email' => $email,
+            'role' => $default_role, // Set role property (maps to level column in DB)
+            'address' => $this->extractLdapAttribute($ldap_attributes, ['postalAddress', 'streetAddress']),
+            'phone' => $this->extractLdapAttribute($ldap_attributes, ['telephoneNumber', 'mobile']),
+            'contact' => null,
+            'max_file_size' => get_option('ldap_default_max_file_size', null, '0'),
+            'notify' => 1, // Use 'notify' column instead of 'notify_upload'
+            'active' => 1, // LDAP users are auto-approved
+            'can_upload_public' => get_option('ldap_default_can_upload_public', null, '0'),
+            'account_requested' => 0,
+            'account_denied' => 0, // Add this required field
+            'type' => ($default_role == 0) ? 'new_client' : 'new_user',
+        ]);
+
+        // Create the user
+        error_log("LDAP Create User Debug - About to call create()");
+        
+        // Check if the user data is valid before creating
+        error_log("LDAP Create User Debug - User data prepared for creation");
+        
+        $result = $this->create();
+        error_log("LDAP Create User Debug - Create result: " . json_encode($result));
+        
+        // Check for validation errors
+        if (empty($result) || empty($result['id'])) {
+            error_log("LDAP Create User Debug - User creation failed, checking validation errors");
+            $validation_errors = $this->getValidationErrors();
+            error_log("LDAP Create User Debug - Validation errors: " . json_encode($validation_errors));
+        }
+        
+        if (!empty($result['id'])) {
+            error_log("LDAP Create User Debug - User created successfully with ID: " . $result['id']);
+            // Store LDAP metadata
+            $this->storeLdapMetadata($result['id'], $ldap_attributes);
+            
+            // Log the LDAP user creation
+            $this->logger->addEntry([
+                'action' => 44, // New action for LDAP user creation
+                'owner_id' => $result['id'],
+                'owner_user' => $username,
+                'affected_account_name' => $name,
+                'details' => 'User created via LDAP authentication'
+            ]);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Extract attribute value from LDAP attributes array
+     */
+    private function extractLdapAttribute($attributes, $possible_names, $default = null)
+    {
+        foreach ($possible_names as $name) {
+            if (isset($attributes[$name])) {
+                $value = $attributes[$name];
+                // LDAP attributes are often arrays
+                if (is_array($value) && isset($value[0])) {
+                    return $value[0];
+                } elseif (is_string($value)) {
+                    return $value;
+                }
+            }
+        }
+        return $default;
+    }
+
+    /**
+     * Generate username from email address
+     */
+    private function generateUsernameFromEmail($email)
+    {
+        $email_parts = explode('@', $email);
+        $base_username = $email_parts[0];
+        
+        // Clean the username
+        $username = preg_replace('/[^a-zA-Z0-9._]/', '', $base_username);
+        
+        // Ensure username meets minimum length requirement (5 characters)
+        if (strlen($username) < 5) {
+            $username = $username . str_repeat('_', 5 - strlen($username));
+        }
+        
+        // Check if username exists and generate unique one if needed
+        if (username_exists($username)) {
+            $counter = 1;
+            while (username_exists($username . $counter)) {
+                $counter++;
+            }
+            $username = $username . $counter;
+        }
+        
+        return $username;
+    }
+
+    /**
+     * Store LDAP metadata for user identification
+     */
+    private function storeLdapMetadata($user_id, $ldap_attributes)
+    {
+        // Store that this user was created via LDAP
+        save_user_meta($user_id, 'auth_method', 'ldap');
+        save_user_meta($user_id, 'ldap_dn', $ldap_attributes['dn'] ?? '');
+        save_user_meta($user_id, 'ldap_created_date', date('Y-m-d H:i:s'));
+        
+        // Store additional LDAP attributes that might be useful
+        $attributes_to_store = ['department', 'title', 'company', 'manager'];
+        foreach ($attributes_to_store as $attr) {
+            $value = $this->extractLdapAttribute($ldap_attributes, [$attr]);
+            if (!empty($value)) {
+                save_user_meta($user_id, 'ldap_' . $attr, $value);
+            }
+        }
+    }
+
+    /**
+     * Check if user was created via LDAP
+     */
+    public function isLdapUser()
+    {
+        if (empty($this->id)) {
+            return false;
+        }
+        
+        $auth_method = get_user_meta($this->id, 'auth_method');
+        return ($auth_method === 'ldap');
+    }
+
+    /**
+     * Sync user data from LDAP on login
+     */
+    public function syncFromLdap($ldap_attributes)
+    {
+        if (empty($this->id) || !$this->isLdapUser()) {
+            return false;
+        }
+
+        // Update user information from LDAP
+        $name = $this->extractLdapAttribute($ldap_attributes, ['displayName', 'cn', 'name'], $this->name);
+        $address = $this->extractLdapAttribute($ldap_attributes, ['postalAddress', 'streetAddress'], $this->address);
+        $phone = $this->extractLdapAttribute($ldap_attributes, ['telephoneNumber', 'mobile'], $this->phone);
+
+        // Update database if values have changed
+        $updates = [];
+        if ($name !== $this->name) $updates['name'] = $name;
+        if ($address !== $this->address) $updates['address'] = $address;
+        if ($phone !== $this->phone) $updates['phone'] = $phone;
+
+        if (!empty($updates)) {
+            $set_parts = [];
+            $params = [':id' => $this->id];
+            
+            foreach ($updates as $field => $value) {
+                $set_parts[] = $field . " = :" . $field;
+                $params[':' . $field] = $value;
+            }
+            
+            $sql = "UPDATE " . TABLE_USERS . " SET " . implode(', ', $set_parts) . " WHERE id = :id";
+            $statement = $this->dbh->prepare($sql);
+            $statement->execute($params);
+
+            // Update object properties
+            foreach ($updates as $field => $value) {
+                $this->$field = $value;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
 }

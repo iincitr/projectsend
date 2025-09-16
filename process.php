@@ -27,13 +27,40 @@ switch ($_GET['do']) {
         $login = $auth->socialLogin($_GET['provider']);
         break;
     case 'login_ldap':
-        /*
-        $login = $auth->loginLdap($_POST['ldap_email'], $_POST['ldap_password']);
-        $auth->setLanguage($_POST['language']);
+        // Validate required fields
+        if (empty($_POST['ldap_email']) || empty($_POST['ldap_password'])) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => __("Email and password are required.", 'cftp_admin')
+            ]);
+            exit;
+        }
+
+        // Check if LDAP is enabled
+        if (get_option('ldap_signin_enabled') != 'true') {
+            echo json_encode([
+                'status' => 'error',
+                'message' => __("LDAP authentication is not enabled.", 'cftp_admin')
+            ]);
+            exit;
+        }
+
+        // Set language if provided
+        if (!empty($_POST['language'])) {
+            $auth->setLanguage($_POST['language']);
+        }
+
+        // Perform LDAP authentication
+        $login = $auth->loginLdap($_POST['ldap_email'], $_POST['ldap_password'], $_POST['language'] ?? null);
         echo $login;
         break;
-        */
-        exit;
+    case 'test_ldap_connection':
+        // Require admin level for testing LDAP connection
+        redirect_if_role_not_allowed([9]);
+        
+        $test_result = $auth->testLdapConnection();
+        echo json_encode($test_result);
+        break;
     case 'logout':
         force_logout();
         break;

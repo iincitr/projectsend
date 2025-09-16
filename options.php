@@ -85,6 +85,14 @@ switch ($section) {
         $section_title = __('External Login', 'cftp_admin');
         $checkboxes = array();
         break;
+    case 'ldap':
+        $section_title = __('LDAP Authentication', 'cftp_admin');
+        $checkboxes = array();
+        break;
+    case 'social_login':
+        $section_title = __('Social Networks Login', 'cftp_admin');
+        $checkboxes = array();
+        break;
     case 'cron':
         $section_title = __('Scheduled tasks (cron)', 'cftp_admin');
         $checkboxes = array(
@@ -159,6 +167,16 @@ if ($_POST) {
         'ldap_admin_user',
         'ldap_admin_password',
         'ldap_search_base',
+        'ldap_username_attribute',
+        'ldap_search_filter',
+        'ldap_email_attribute',
+        'ldap_name_attribute',
+        'ldap_account_suffix',
+        'ldap_use_tls',
+        'ldap_default_role',
+        'ldap_auto_create_users',
+        'social_login_auto_enable',
+        'social_login_default_role',
         'ip_whitelist',
         'ip_blacklist',
         'cron_email_summary_address_to',

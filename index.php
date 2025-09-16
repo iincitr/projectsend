@@ -67,6 +67,18 @@ if ($_POST) {
             }
             // $auth->setLanguage($_POST['language']);
             break;
+        case 'login_ldap':
+            recaptcha2_validate_request();
+
+            $login = json_decode($auth->loginLdap($_POST['ldap_email'], $_POST['ldap_password'], $_POST['language'] ?? null));
+            if ($login->status == 'success') {
+                $user = new \ProjectSend\Classes\Users($login->user_id);
+                ps_redirect($login->location);
+            } else {
+                $flash->error($auth->getError());
+                ps_redirect(BASE_URI);
+            }
+            break;
         case '2fa_verify':
             recaptcha2_validate_request();
             $code = $_POST['n1'] . $_POST['n2'] . $_POST['n3'] . $_POST['n4'] . $_POST['n5'] . $_POST['n6'];
@@ -131,25 +143,36 @@ include_once ADMIN_VIEWS_DIR . DS . 'header-unlogged.php';
                 <div class="ajax_response">
                 </div>
 
-                <?php /*
-                <ul class="nav nav-tabs" role="tablist">
-                    <li role="presentation" class="active"><a href="#local" aria-controls="local" role="tab" data-toggle="tab">Local account</a></li>
-                    <?php if ($login_types['ldap'] == 'true') { ?>
-                        <li role="presentation"><a href="#ldap" aria-controls="ldap" role="tab" data-toggle="tab">LDAP</a></li>
-                    <?php } ?>
-                </ul> */ ?>
-                <div class="tab-content">
-                    <div role="tabpanel" class="tab-pane fade in active show" id="local">
+                <?php if ($login_types['ldap'] == 'true') { ?>
+                <!-- Tab Navigation -->
+                <div class="login-tabs-container mb-4">
+                    <ul class="nav nav-pills nav-fill login-pills" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="local-tab" data-bs-toggle="tab" data-bs-target="#local" type="button" role="tab" aria-controls="local" aria-selected="true">
+                                <i class="fa fa-user me-2"></i><?php _e('Local Account', 'cftp_admin'); ?>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="ldap-tab" data-bs-toggle="tab" data-bs-target="#ldap" type="button" role="tab" aria-controls="ldap" aria-selected="false">
+                                <i class="fa fa-server me-2"></i><?php _e('LDAP/Active Directory', 'cftp_admin'); ?>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <?php } ?>
+
+                <div class="tab-content<?php if ($login_types['ldap'] != true) { echo ' mt-0'; } ?>">
+                    <div role="tabpanel" class="tab-pane fade active show" id="local">
                         <?php
                         include_once FORMS_DIR . DS . $form . '.php';
                         ?>
                     </div>
 
-                    <?php /* if ($login_types['ldap'] == 'true') { ?>
+                    <?php if ($login_types['ldap'] == 'true') { ?>
                         <div role="tabpanel" class="tab-pane fade" id="ldap">
                             <?php include_once FORMS_DIR . DS . 'login-ldap.php'; ?>
                         </div>
-                    <?php } */ ?>
+                    <?php } ?>
                 </div>
             </div>
         </div>

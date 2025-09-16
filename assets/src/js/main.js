@@ -23,6 +23,7 @@
                 admin.pages.loginForm();
                 admin.pages.loginLdapForm();
                 admin.parts.login2faInputs();
+                admin.parts.loginTabs();
                 break;
             case 'dashboard':
                 admin.pages.dashboard();
