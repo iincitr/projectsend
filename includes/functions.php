@@ -6,6 +6,7 @@
 use enshrined\svgSanitize\Sanitizer;
 use ProjectSend\Classes\Captcha\CloudflareTurnstile;
 use ProjectSend\Classes\Captcha\RecaptchaV2;
+use ProjectSend\Classes\Captcha\RecaptchaV3;
 use ProjectSend\Classes\CaptchaManager;
 
 function try_queries($queries = [])

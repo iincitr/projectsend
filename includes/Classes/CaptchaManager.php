@@ -2,6 +2,7 @@
 namespace ProjectSend\Classes;
 
 use ProjectSend\Classes\Captcha\RecaptchaV2;
+use ProjectSend\Classes\Captcha\RecaptchaV3;
 use ProjectSend\Classes\Captcha\CloudflareTurnstile;
 
 class CaptchaManager
@@ -47,6 +48,7 @@ class CaptchaManager
     {
         return [
             'recaptchav2' => RecaptchaV2::class,
+            'recaptchav3' => RecaptchaV3::class,
             'cloudflare_turnstile' => CloudflareTurnstile::class,
         ];
     }
