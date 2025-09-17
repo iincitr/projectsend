@@ -65,6 +65,13 @@ function extract_template_info($template_directory)
         $template_info['cover']	= $cover_url;
     }
 
+    // Check for template features
+    $template_info['features'] = [
+        'client_files' => file_exists($template_directory . DS . 'template.php'),
+        'public_files' => file_exists($template_directory . DS . 'public.php'),
+        'download_page' => file_exists($template_directory . DS . 'download.php'),
+    ];
+
     return $template_info;
 }
 
@@ -260,6 +267,18 @@ function get_default_template_path()
 {
     $path = ROOT_DIR.DS.'templates'.DS.'default'.DS;
     return $path;
+}
+
+function get_public_template_file_location()
+{
+    // Check for complete template override first (public.php)
+    $template_public_file = get_selected_template_path() . 'public.php';
+    if (file_exists($template_public_file)) {
+        return $template_public_file;
+    }
+    
+    // Fallback to content-only template (public-list.php)
+    return get_template_file_location('public-list.php');
 }
 
 /**

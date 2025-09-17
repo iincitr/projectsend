@@ -468,11 +468,13 @@ function openFileInfoPanel(fileId) {
     }, 10);
     
     // Load file information via AJAX
+    var endpoint = window.isPublicContext ? 'get_public_file_info' : 'get_file_info';
+    
     $.ajax({
         url: window.base_url + 'process.php',
         method: 'GET',
         data: {
-            do: 'get_file_info',
+            do: endpoint,
             file_id: fileId
         },
         dataType: 'json'

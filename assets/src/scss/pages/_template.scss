@@ -22,6 +22,56 @@
                 margin:20px 0 10px;
                 font-size:1.2em;
             }
+
+            // Template features badges
+            .template-features {
+                margin: 15px 0;
+                padding-top: 10px;
+                border-top: 1px solid #e0e0e0;
+
+                h5 {
+                    font-size: 13px;
+                    font-weight: 600;
+                    color: #666;
+                    margin-bottom: 10px;
+                }
+
+                .feature-badges {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 6px;
+
+                    .feature-badge {
+                        padding: 4px 10px;
+                        border-radius: 3px;
+                        font-size: 11px;
+                        font-weight: 500;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 4px;
+                        transition: opacity 0.2s;
+
+                        .icon {
+                            font-size: 13px;
+                        }
+
+                        &.active {
+                            background-color: #28a745 !important;
+                            color: white !important;
+                        }
+
+                        &.inactive {
+                            background-color: #dee2e6 !important;
+                            color: #6c757d !important;
+                            opacity: 0.7;
+                        }
+
+                        &:hover {
+                            opacity: 1;
+                        }
+                    }
+                }
+            }
         }
 
         .images {

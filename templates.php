@@ -73,6 +73,32 @@ if (isset($_GET['activate_template'])) {
                                         <?php echo $template['description']; ?>
                                     </div>
 
+                                    <!-- Features badges -->
+                                    <?php if (isset($template['features'])): ?>
+                                    <div class="template-features">
+                                        <h5><?php _e('Features', 'cftp_admin'); ?></h5>
+                                        <div class="feature-badges">
+                                            <span class="feature-badge <?php echo $template['features']['client_files'] ? 'active' : 'inactive'; ?>" 
+                                                  title="<?php echo $template['features']['client_files'] ? __('Client files view is available', 'cftp_admin') : __('Client files view is not implemented', 'cftp_admin'); ?>">
+                                                <span class="icon"><?php echo $template['features']['client_files'] ? '✓' : '○'; ?></span>
+                                                <?php _e('Client Files', 'cftp_admin'); ?>
+                                            </span>
+                                            
+                                            <span class="feature-badge <?php echo $template['features']['public_files'] ? 'active' : 'inactive'; ?>"
+                                                  title="<?php echo $template['features']['public_files'] ? __('Public files view is available', 'cftp_admin') : __('Public files view is not implemented', 'cftp_admin'); ?>">
+                                                <span class="icon"><?php echo $template['features']['public_files'] ? '✓' : '○'; ?></span>
+                                                <?php _e('Public Files', 'cftp_admin'); ?>
+                                            </span>
+                                            
+                                            <span class="feature-badge <?php echo $template['features']['download_page'] ? 'active' : 'inactive'; ?>"
+                                                  title="<?php echo $template['features']['download_page'] ? __('Custom download page is available', 'cftp_admin') : __('Custom download page is not implemented', 'cftp_admin'); ?>">
+                                                <span class="icon"><?php echo $template['features']['download_page'] ? '✓' : '○'; ?></span>
+                                                <?php _e('Download Page', 'cftp_admin'); ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <?php endif; ?>
+
                                     <h5><?php _e('Author', 'cftp_admin'); ?></h5>
                                     <p>
                                         <a href="<?php echo $template['authoruri']; ?>" target="_blank">

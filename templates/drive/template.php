@@ -114,26 +114,47 @@ include_once 'lang/' . LOADED_LANG . '.mo.php';
     <script>
         window.base_url = '<?php echo BASE_URI; ?>';
         
-        // Theme management
+        // Theme management with fallback for localStorage issues
         function initTheme() {
-            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark')
-            } else {
-                document.documentElement.classList.remove('dark')
+            try {
+                var storedTheme = localStorage.getItem('theme');
+                
+                if (storedTheme === 'dark' || (storedTheme === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            } catch (e) {
+                // Fallback to system preference if localStorage fails
+                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
             }
         }
         
         function toggleTheme() {
-            if (document.documentElement.classList.contains('dark')) {
-                document.documentElement.classList.remove('dark')
-                localStorage.theme = 'light'
+            var isDark = document.documentElement.classList.contains('dark');
+            
+            if (isDark) {
+                document.documentElement.classList.remove('dark');
+                try {
+                    localStorage.setItem('theme', 'light');
+                } catch (e) {
+                    // localStorage might not be available (e.g., private browsing)
+                }
             } else {
-                document.documentElement.classList.add('dark')
-                localStorage.theme = 'dark'
+                document.documentElement.classList.add('dark');
+                try {
+                    localStorage.setItem('theme', 'dark');
+                } catch (e) {
+                    // localStorage might not be available (e.g., private browsing)
+                }
             }
         }
         
-        // Initialize theme
+        // Initialize theme immediately
         initTheme();
     </script>
 

@@ -61,4 +61,4 @@ if (!empty($_GET['group'])) {
 
 $files = get_public_files($args);
 
-require get_template_file_location('public-list.php');
+require get_public_template_file_location();

@@ -6,7 +6,11 @@ use ProjectSend\Classes\ActionsLog;
 /** Process an action */
 $allowed_levels = array(9, 8, 7, 0);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+
+// Allow get_public_file_info without login requirement
+if (!isset($_GET['do']) || $_GET['do'] !== 'get_public_file_info') {
+    log_in_required($allowed_levels);
+}
 
 global $auth;
 global $logger;
@@ -140,6 +144,45 @@ switch ($_GET['do']) {
         $file_data = $file->getPublicData();
         
         echo json_encode(['success' => true, 'file' => $file_data]);
+    break;
+
+    case 'get_public_file_info':
+        header('Content-Type: application/json');
+        
+        if (!isset($_GET['file_id']) || empty($_GET['file_id'])) {
+            echo json_encode(['success' => false, 'error' => 'File ID is required']);
+            break;
+        }
+        
+        $file_id = (int)$_GET['file_id'];
+        
+        try {
+            // Get file information
+            $file = new \ProjectSend\Classes\Files($file_id);
+            
+            if (!$file->id) {
+                echo json_encode(['success' => false, 'error' => 'File not found', 'debug' => 'File object has no ID']);
+                break;
+            }
+            
+            // Check if file is public
+            if (!$file->isPublic()) {
+                echo json_encode(['success' => false, 'error' => 'File is not public', 'debug' => 'File exists but isPublic() returned false']);
+                break;
+            }
+            
+            // Get file data using the getPublicData method
+            $file_data = $file->getPublicData();
+            
+            if (empty($file_data)) {
+                echo json_encode(['success' => false, 'error' => 'Failed to get file data', 'debug' => 'getPublicData() returned empty']);
+                break;
+            }
+            
+            echo json_encode(['success' => true, 'file' => $file_data]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'error' => 'Exception occurred: ' . $e->getMessage(), 'debug' => 'Exception in get_public_file_info']);
+        }
     break;
 }
 
