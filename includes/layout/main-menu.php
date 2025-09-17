@@ -211,6 +211,13 @@ if (current_role_in(array(9, 8, 7))) {
         ),
         'sub' => array(
             array(
+                'label' => __('Template Selection', 'cftp_admin'),
+                'link' => 'email-templates.php?section=template_selection',
+            ),
+            array(
+                'divider' => true,
+            ),
+            array(
                 'label' => __('Header / footer', 'cftp_admin'),
                 'link' => 'email-templates.php?section=header_footer',
             ),

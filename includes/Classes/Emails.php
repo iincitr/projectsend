@@ -44,6 +44,7 @@ class Emails
     {
         return [
             'header_footer',
+            'template_selection',
             'new_files_by_user',
             'new_files_by_client',
             'new_client',
@@ -74,6 +75,14 @@ class Emails
                     'checkboxes' => [
                         'email_header_footer_customize',
                     ],
+                    'items' => [],
+                ];
+                break;
+            case 'template_selection':
+                $strings = [];
+                $options = [
+                    'title' => __('Template Selection', 'cftp_admin'),
+                    'checkboxes' => [],
                     'items' => [],
                 ];
                 break;
@@ -1174,5 +1183,97 @@ class Emails
             $this->email_successful = $send;
             return $send;
         }
+    }
+
+    /**
+     * Get available email templates
+     */
+    public function getAvailableTemplates()
+    {
+        $template_file = EMAIL_TEMPLATES_DIR . DS . 'templates' . DS . 'template_metadata.php';
+        if (file_exists($template_file)) {
+            return include $template_file;
+        }
+        return [];
+    }
+
+    /**
+     * Get template data by ID
+     */
+    public function getTemplateData($template_id)
+    {
+        $templates = $this->getAvailableTemplates();
+        return isset($templates[$template_id]) ? $templates[$template_id] : null;
+    }
+
+    /**
+     * Get template content (header or footer)
+     */
+    public function getTemplateContent($template_id, $type = 'header')
+    {
+        $template_data = $this->getTemplateData($template_id);
+        if (!$template_data) {
+            return false;
+        }
+
+        $file_key = $type . '_file';
+        if (!isset($template_data[$file_key])) {
+            return false;
+        }
+
+        $template_file = EMAIL_TEMPLATES_DIR . DS . 'templates' . DS . $template_data[$file_key];
+        if (file_exists($template_file)) {
+            return file_get_contents($template_file);
+        }
+
+        return false;
+    }
+
+    /**
+     * Preview template with sample content
+     */
+    public function previewTemplate($template_id, $sample_content = null)
+    {
+        $header = $this->getTemplateContent($template_id, 'header');
+        $footer = $this->getTemplateContent($template_id, 'footer');
+
+        if (!$header || !$footer) {
+            return false;
+        }
+
+        // Default sample content if none provided
+        if (!$sample_content) {
+            $sample_content = '
+                <h2>Sample Email Content</h2>
+                <p>This is a preview of how your email template will look with content. This sample demonstrates the typography, spacing, and overall design of the template.</p>
+                <p>You can customize the header and footer sections, and all emails sent by the system will use this template structure.</p>
+                <a href="#" class="button">Sample Button</a>
+                <p>Additional paragraph text to show the layout and spacing between elements.</p>
+            ';
+        }
+
+        // Replace template variables with sample data
+        $replacements = [
+            '{{SYSTEM_NAME}}' => get_option('this_install_title'),
+            '{{SYSTEM_URI}}' => BASE_URI,
+            '{{EMAIL_TITLE}}' => 'Sample Email - ' . get_option('this_install_title'),
+            '{{CURRENT_YEAR}}' => date('Y'),
+        ];
+
+        $full_content = $header . $sample_content . $footer;
+
+        foreach ($replacements as $placeholder => $value) {
+            $full_content = str_replace($placeholder, $value, $full_content);
+        }
+
+        return $full_content;
+    }
+
+    /**
+     * Check if templates section should be shown
+     */
+    public function templatesEnabled()
+    {
+        return true; // For now, always enabled
     }
 }

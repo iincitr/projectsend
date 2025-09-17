@@ -81,6 +81,11 @@
                 position:relative;
                 border-radius: 8px;
 
+                &.divider {
+                    margin: 10px 0;
+                    border-bottom: 1px solid #ccc;
+                }
+
                 a {
                     display: flex;
                     padding: .7rem 0 .7rem 3.5rem;

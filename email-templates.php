@@ -54,7 +54,7 @@ if ($_POST) {
 }
 ?>
 <div class="row">
-    <div class="col-12 col-sm-12 col-lg-6">
+    <div class="col-12 col-sm-12 <?php echo ($section == 'template_selection') ? '' : 'col-lg-8'; ?>">
         <div class="white-box">
             <div class="white-box-interior">
                 <form action="email-templates.php" id="form_email_template" name="templatesform" method="post" enctype="multipart/form-data" class="form-horizontal">
@@ -62,6 +62,55 @@ if ($_POST) {
                     <input type="hidden" name="section" value="<?php echo $section; ?>">
 
                     <?php
+                    /** Template selection options */
+                    if ($section == 'template_selection') {
+                    ?>
+                        <p><?php _e('Choose from professionally designed email templates. These templates provide different styles and layouts for your email communications.', 'cftp_admin'); ?></p>
+                        <p><?php _e('Preview each template to see how your emails will look.', 'cftp_admin'); ?></p>
+                        <p class="text-warning"><?php _e('Templates can be applied directly from this page and will affect the general look and header/footer styling, but not the individual email content.', 'cftp_admin'); ?></p>
+
+                        <div class="options_divide"></div>
+
+                        <!-- Template Gallery -->
+                        <div id="template-gallery" class="template-gallery">
+                            <?php
+                            $available_templates = $emails->getAvailableTemplates();
+                            foreach ($available_templates as $template_id => $template_data) {
+                            ?>
+                                <div class="template-card" data-template-id="<?php echo $template_id; ?>">
+                                    <div class="template-preview">
+                                        <div class="template-preview-placeholder">
+                                            <i class="fa fa-envelope-o"></i>
+                                            <span><?php echo $template_data['name']; ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="template-info">
+                                        <h4 class="template-name"><?php echo $template_data['name']; ?></h4>
+                                        <p class="template-description"><?php echo $template_data['description']; ?></p>
+                                        <div class="template-features">
+                                            <?php foreach ($template_data['features'] as $feature): ?>
+                                                <span class="feature-badge"><?php echo $feature; ?></span>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        <div class="template-actions">
+                                            <button type="button" class="btn btn-primary btn-template-preview" data-template-id="<?php echo $template_id; ?>">
+                                                <i class="fa fa-eye"></i>
+                                                <?php _e('Preview', 'cftp_admin'); ?>
+                                            </button>
+                                            <button type="button" class="btn btn-success btn-template-apply" data-template-id="<?php echo $template_id; ?>" data-template-name="<?php echo htmlspecialchars($template_data['name']); ?>">
+                                                <i class="fa fa-download"></i>
+                                                <?php _e('Apply', 'cftp_admin'); ?>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php
+                            }
+                            ?>
+                        </div>
+                    <?php
+                    }
+
                     /** Header and footer options */
                     if ($section == 'header_footer') {
                     ?>
@@ -86,10 +135,10 @@ if ($_POST) {
                             </div>
                         </div>
 
-                        <div class="preview_button">
+<?php /*                         <div class="preview_button">
                             <button type="button" class="btn btn-pslight load_default" data-textarea="email_header_text" data-file="<?php echo EMAIL_TEMPLATE_HEADER; ?>"><?php _e('Replace with default', 'cftp_admin'); ?></button>
                         </div>
-
+ */ ?>
                         <hr />
 
                         <div class="form-group row">
@@ -100,10 +149,10 @@ if ($_POST) {
                             </div>
                         </div>
 
-                        <div class="preview_button">
+<?php /*                         <div class="preview_button">
                             <button type="button" class="btn btn-pslight load_default" data-textarea="email_footer_text" data-file="<?php echo EMAIL_TEMPLATE_FOOTER; ?>"><?php _e('Replace with default', 'cftp_admin'); ?></button>
                         </div>
-                    <?php
+ */ ?>                    <?php
                     }
 
                     // All other templates
@@ -177,13 +226,34 @@ if ($_POST) {
                     }
                     ?>
 
+                    <?php if ($section !== 'template_selection') { ?>
                     <div class="after_form_buttons">
                         <button type="submit" name="submit" class="btn btn-wide btn-primary empty"><?php _e('Save options', 'cftp_admin'); ?></button>
                     </div>
+                    <?php } ?>
                 </form>
             </div>
         </div>
     </div>
+
+    <?php if ($section == 'header_footer') { ?>
+    <div class="col-12 col-sm-12 col-lg-4">
+        <div class="white-box">
+            <div class="white-box-interior template-suggestion-box">
+                <h3><i class="fa fa-lightbulb-o text-warning"></i> <?php _e('Email Templates', 'cftp_admin'); ?></h3>
+                <p><?php _e('Looking for a quick start? Choose from our professionally designed email templates that include pre-styled headers and footers.', 'cftp_admin'); ?></p>
+                <p><?php _e('Templates provide consistent branding and professional layouts that you can apply instantly.', 'cftp_admin'); ?></p>
+
+                <div class="text-center mt-4">
+                    <a href="<?php echo BASE_URI; ?>email-templates.php?section=template_selection" class="btn btn-primary btn-wide">
+                        <i class="fa fa-th-large"></i>
+                        <?php _e('Browse Templates', 'cftp_admin'); ?>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php } ?>
 </div>
 <?php
 include_once ADMIN_VIEWS_DIR . DS . 'footer.php';
