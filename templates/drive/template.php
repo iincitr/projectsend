@@ -2,10 +2,10 @@
 /*
 Template name: Google Drive
 URI: https://www.projectsend.org/templates/drive
-Author: Claude (Anthropic)
-Author URI: https://www.anthropic.com/
-Author e-mail: claude@anthropic.com
-Description: A clean, modern template inspired by Google Drive's interface design. Features a minimalist layout with Google's Material Design principles.
+Author: ProjectSend
+Author URI: https://www.projectsend.org/
+Author e-mail: contact@projectsend.org
+Description: A clean, modern template inspired by Google Drive's interface design. Features a minimalist layout with Google's Material Design principles. Developed with assistance from Claude AI.
 */
 $ld = 'drive_template'; // specify the language domain for this template
 
