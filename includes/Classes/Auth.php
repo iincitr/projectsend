@@ -94,7 +94,7 @@ class Auth
         ]);
     }
 
-    public function authenticate($username, $password)
+    public function authenticate($username, $password, $remember_me = false)
     {
         if ( !$username || !$password )
             return false;
@@ -138,6 +138,15 @@ class Auth
 
                     // When 2FA is not required, login
                     $this->login($user);
+
+                    // Handle remember me functionality
+                    if ($remember_me && get_option('remember_me_enabled', null, '1')) {
+                        $rememberMe = new \ProjectSend\Classes\RememberMe();
+                        $token = $rememberMe->generateToken();
+                        if ($rememberMe->storeToken($user->id, $token)) {
+                            $rememberMe->setCookie($token);
+                        }
+                    }
 
 					$results = [
                         'status' => 'success',
@@ -313,7 +322,7 @@ class Auth
         }
     }
 
-    public function loginLdap($email, $password, $language)
+    public function loginLdap($email, $password, $language, $remember_me = false)
     {
         global $logger;
         
@@ -431,6 +440,15 @@ class Auth
                                 // Login the user
                                 $this->login($user);
                                 
+                                // Handle remember me functionality for LDAP
+                                if ($remember_me && get_option('remember_me_enabled', null, '1')) {
+                                    $rememberMe = new \ProjectSend\Classes\RememberMe();
+                                    $token = $rememberMe->generateToken();
+                                    if ($rememberMe->storeToken($user->id, $token)) {
+                                        $rememberMe->setCookie($token);
+                                    }
+                                }
+                                
                                 // Log the LDAP login
                                 $this->logger->addEntry([
                                     'action' => 45, // New action for LDAP login
@@ -469,6 +487,15 @@ class Auth
                                     $user = new \ProjectSend\Classes\Users($create_result['id']);
                                     $this->user = $user;
                                     $this->login($user);
+                                    
+                                    // Handle remember me functionality for new LDAP user
+                                    if ($remember_me && get_option('remember_me_enabled', null, '1')) {
+                                        $rememberMe = new \ProjectSend\Classes\RememberMe();
+                                        $token = $rememberMe->generateToken();
+                                        if ($rememberMe->storeToken($user->id, $token)) {
+                                            $rememberMe->setCookie($token);
+                                        }
+                                    }
                                     
                                     $return = [
                                         'status' => 'success',
@@ -659,8 +686,23 @@ class Auth
         return $this->error_message;
     }
 
-    public function logout()
+    public function logout($clear_remember_me = true)
     {
+        // Clear remember me token if enabled
+        if ($clear_remember_me && get_option('remember_me_enabled', null, '1')) {
+            $rememberMe = new \ProjectSend\Classes\RememberMe();
+            
+            // Get current token from cookie before clearing session
+            $current_token = $rememberMe->getTokenFromCookie();
+            
+            if ($current_token) {
+                // Only revoke current token, not all user tokens
+                $rememberMe->revokeToken($current_token);
+            }
+            
+            $rememberMe->clearCookie();
+        }
+
         header("Cache-control: private");
 		$_SESSION = [];
         session_destroy();
@@ -694,5 +736,58 @@ class Auth
 		// if ( isset( $_GET['timeout'] ) ) {
         //     $error_code = 'timeout';
         // }
+    }
+
+    /**
+     * Attempt automatic login using remember me token
+     * @return bool Success
+     */
+    public function loginWithRememberMe()
+    {
+        if (!get_option('remember_me_enabled', null, '1')) {
+            return false;
+        }
+
+        $rememberMe = new \ProjectSend\Classes\RememberMe();
+        $token = $rememberMe->getTokenFromCookie();
+        
+        if (!$token) {
+            return false;
+        }
+
+        $user_data = $rememberMe->validateToken($token);
+        
+        if (!$user_data) {
+            // Clear invalid cookie
+            $rememberMe->clearCookie();
+            return false;
+        }
+
+        // Create user object and login
+        $user = new \ProjectSend\Classes\Users($user_data['user_id']);
+        if ($user->userExists() && $user->isActive()) {
+            $this->login($user);
+            return true;
+        } else {
+            // User no longer exists or is inactive, revoke token
+            $rememberMe->revokeToken($token);
+            $rememberMe->clearCookie();
+            return false;
+        }
+    }
+
+
+    /**
+     * Logout from all devices (revoke all remember me tokens)
+     */
+    public function logoutFromAllDevices()
+    {
+        if (isset($_SESSION['user_id'])) {
+            $rememberMe = new \ProjectSend\Classes\RememberMe();
+            $rememberMe->revokeUserTokens($_SESSION['user_id']);
+            $rememberMe->clearCookie();
+        }
+
+        $this->logout(false); // Don't double-clear remember me tokens
     }
 }

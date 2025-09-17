@@ -196,6 +196,36 @@
 
 <div class="options_divide"></div>
 
+<h3><?php _e('Remember Me','cftp_admin'); ?></h3>
+<p><?php _e('Allow users to stay logged in across browser sessions using secure tokens.','cftp_admin'); ?></p>
+
+<div class="form-group row">
+    <div class="col-sm-8 offset-sm-4">
+        <label for="remember_me_enabled">
+            <input type="checkbox" value="1" name="remember_me_enabled" id="remember_me_enabled" class="checkbox_options" <?php echo (get_option('remember_me_enabled') == 1) ? 'checked="checked"' : ''; ?> /> <?php _e('Enable "Remember Me" functionality','cftp_admin'); ?>
+            <p class="field_note form-text"><?php _e('Users will be able to stay logged in for extended periods using secure, rotating tokens.','cftp_admin'); ?></p>
+        </label>
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="remember_me_duration_days" class="col-sm-4 control-label"><?php _e('Token duration (days)','cftp_admin'); ?></label>
+    <div class="col-sm-8">
+        <input type="number" name="remember_me_duration_days" id="remember_me_duration_days" class="form-control" value="<?php echo html_output(get_option('remember_me_duration_days')); ?>" min="1" max="365" />
+        <p class="field_note form-text"><?php _e('How many days a remember me token remains valid. Default: 30 days.','cftp_admin'); ?></p>
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="remember_me_max_tokens_per_user" class="col-sm-4 control-label"><?php _e('Max tokens per user','cftp_admin'); ?></label>
+    <div class="col-sm-8">
+        <input type="number" name="remember_me_max_tokens_per_user" id="remember_me_max_tokens_per_user" class="form-control" value="<?php echo html_output(get_option('remember_me_max_tokens_per_user')); ?>" min="1" max="20" />
+        <p class="field_note form-text"><?php _e('Maximum number of devices/browsers a user can stay logged in to simultaneously. Default: 5.','cftp_admin'); ?></p>
+    </div>
+</div>
+
+<div class="options_divide"></div>
+
 <h3><?php _e('Log in throttle','cftp_admin'); ?></h3>
 <p><?php _e('Multiple failed log in attempts will increase timeouts for the originating IP address. Helps prevent brute force attacks.','cftp_admin'); ?></p>
 

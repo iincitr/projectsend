@@ -75,6 +75,7 @@ switch ($section) {
             'pass_require_special',
             'recaptcha_enabled',
             'authentication_require_email_code',
+            'remember_me_enabled',
         );
         break;
     case 'branding':

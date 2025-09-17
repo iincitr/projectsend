@@ -156,6 +156,7 @@ define('TABLE_CUSTOM_ASSETS', TABLES_PREFIX . 'custom_assets');
 define('TABLE_CUSTOM_DOWNLOADS', TABLES_PREFIX . 'custom_downloads');
 define('TABLE_USER_LIMIT_UPLOAD_TO', TABLES_PREFIX . 'user_limit_upload_to');
 define('TABLE_AUTHENTICATION_CODES', TABLES_PREFIX . 'authentication_codes');
+define('TABLE_REMEMBER_TOKENS', TABLES_PREFIX . 'remember_tokens');
 
 $original_basic_tables = array(
     TABLE_FILES,

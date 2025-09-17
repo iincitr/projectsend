@@ -18,6 +18,9 @@ if ( session_expired() && user_is_logged_in()) {
 
 extend_session(); // update last activity time stamp
 
+// Clean up expired remember me tokens periodically
+cleanup_expired_remember_tokens();
+
 /**
  * Global information on the current account to use across the system.
  */

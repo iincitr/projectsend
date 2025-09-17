@@ -64,7 +64,37 @@ function user_is_logged_in()
         }
     }
 
+    // Check for remember me token if no valid session
+    if (get_option('remember_me_enabled', null, '1')) {
+        global $auth;
+        if (!$auth) {
+            $auth = new \ProjectSend\Classes\Auth();
+        }
+        
+        if ($auth->loginWithRememberMe()) {
+            return true;
+        }
+    }
+
     return false;
+}
+
+/**
+ * Clean up expired remember me tokens
+ * Should be called periodically (e.g., on cron jobs or random login attempts)
+ */
+function cleanup_expired_remember_tokens()
+{
+    if (get_option('remember_me_enabled', null, '1')) {
+        // Run cleanup randomly on 1% of requests to avoid performance impact
+        if (mt_rand(1, 100) <= 1) {
+            $rememberMe = new \ProjectSend\Classes\RememberMe();
+            $cleaned = $rememberMe->cleanExpiredTokens();
+            if ($cleaned > 0) {
+                error_log("ProjectSend: Cleaned up $cleaned expired remember me tokens");
+            }
+        }
+    }
 }
 
 /**
