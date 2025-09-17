@@ -191,11 +191,27 @@ include_once 'lang/' . LOADED_LANG . '.mo.php';
 
             <!-- Right Side: Actions and User -->
             <div class="flex items-center space-x-2">
-                <!-- Settings -->
+                <!-- Navigation Icons -->
+                <a href="<?php echo BASE_URI; ?>manage-files.php" 
+                   class="p-3 rounded-full hover:bg-google-gray-100 dark:hover:bg-google-gray-700 transition-colors"
+                   title="<?php _e('Manage Files', 'drive_template'); ?>">
+                    <span class="material-icons text-google-gray-600 dark:text-google-gray-400">dashboard</span>
+                </a>
+                
+                <?php if (get_option('clients_can_upload') == 1): ?>
+                <a href="<?php echo BASE_URI; ?>upload.php" 
+                   class="p-3 rounded-full hover:bg-google-gray-100 dark:hover:bg-google-gray-700 transition-colors"
+                   title="<?php _e('Upload Files', 'drive_template'); ?>">
+                    <span class="material-icons text-google-gray-600 dark:text-google-gray-400">cloud_upload</span>
+                </a>
+                <?php endif; ?>
+
+                <!-- Theme Toggle -->
                 <button onclick="toggleTheme()" 
                         class="p-3 rounded-full hover:bg-google-gray-100 dark:hover:bg-google-gray-700 transition-colors"
                         title="Toggle theme">
-                    <span class="material-icons text-google-gray-600 dark:text-google-gray-400">settings</span>
+                    <span class="material-icons text-google-gray-600 dark:text-google-gray-400 dark:hidden">light_mode</span>
+                    <span class="material-icons text-google-gray-600 dark:text-google-gray-400 hidden dark:inline">dark_mode</span>
                 </button>
 
                 <!-- User Avatar -->

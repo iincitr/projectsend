@@ -158,6 +158,21 @@ include_once 'lang/' . LOADED_LANG . '.mo.php';
                         <?php echo sprintf(__('%d documents available', 'business_template'), $count_for_pagination); ?>
                     </div>
 
+                    <!-- Navigation Icons -->
+                    <a href="<?php echo BASE_URI; ?>manage-files.php" 
+                       class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+                       title="<?php _e('Manage Files', 'business_template'); ?>">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </a>
+                    
+                    <?php if (get_option('clients_can_upload') == 1): ?>
+                    <a href="<?php echo BASE_URI; ?>upload.php" 
+                       class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+                       title="<?php _e('Upload Files', 'business_template'); ?>">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </a>
+                    <?php endif; ?>
+
                     <!-- Dark Mode Toggle -->
                     <button onclick="toggleTheme()" 
                             class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
