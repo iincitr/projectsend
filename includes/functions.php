@@ -2518,3 +2518,15 @@ function regenerate_single_thumbnail($file_id, $width, $height) {
         ];
     }
 }
+
+/**
+ * Get the appropriate profile edit link for current user
+ * Based on user level (client vs admin/user)
+ *
+ * @return string
+ */
+function client_get_profile_link()
+{
+    $my_account_link = (CURRENT_USER_LEVEL == 0) ? 'clients-edit.php' : 'users-edit.php';
+    return BASE_URI . $my_account_link . '?id=' . CURRENT_USER_ID;
+}

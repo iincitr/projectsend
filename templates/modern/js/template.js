@@ -533,27 +533,23 @@
 
         // Submit bulk action
         submitBulkAction: function(action, fileIds) {
-            const form = $('<form>', {
-                method: 'POST',
-                action: window.base_url + 'process.php'
-            });
-            
-            form.append($('<input>', {
-                type: 'hidden',
-                name: 'do',
-                value: action
-            }));
-            
-            fileIds.forEach(id => {
-                form.append($('<input>', {
-                    type: 'hidden',
-                    name: 'files[]',
-                    value: id
-                }));
-            });
-            
-            $('body').append(form);
-            form.submit();
+            if (action === 'zip') {
+                // Handle ZIP download via GET request
+                const url = window.base_url + 'process.php?do=download_zip&files=' + fileIds.join(',');
+                
+                // Create invisible iframe for download
+                const iframe = $('<iframe>', {
+                    style: 'display: none;',
+                    src: url
+                });
+                
+                $('body').append(iframe);
+                
+                // Remove iframe after delay
+                setTimeout(() => {
+                    iframe.remove();
+                }, 5000);
+            }
         },
 
         // Store view preference

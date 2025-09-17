@@ -156,7 +156,7 @@ if (!empty($cat_ids)) {
  * With the categories generated, keep only the files
  * that are assigned to the selected one.
  */
-if (isset($filter_by_category) && $filter_by_category != '0') {
+if (isset($filter_by_category) && $filter_by_category != '0' && $filter_by_category !== '' && $filter_by_category !== null) {
     $filtered_file_ids = [];
     foreach ($files_keep as $keep_file_id => $keep_cat_ids) {
         if (in_array($filter_by_category, $keep_cat_ids)) {
@@ -200,12 +200,14 @@ if (!empty($found_all_files_array)) {
         $params[':description'] = '%' . $_GET['search'] . '%';
     }
 
-    // Filter by folders
-    if (!empty($current_folder)) {
-        $files_query .= " AND folder_id = :folder_id";
-        $params[':folder_id'] = (int)$current_folder;
-    } else {
-        $files_query .= " AND folder_id is null";
+    // Filter by folders (skip if doing global search)
+    if (!isset($_GET['global_search'])) {
+        if (!empty($current_folder)) {
+            $files_query .= " AND folder_id = :folder_id";
+            $params[':folder_id'] = (int)$current_folder;
+        } else {
+            $files_query .= " AND folder_id is null";
+        }
     }
     
     /**

@@ -293,6 +293,7 @@ $bulk_actions_items = [
 
     <!-- Files Content -->
     <form action="" name="files_list" method="get" class="form-inline batch_actions">
+        <?php addCsrf(); ?>
         <div class="modern-content">
             <?php
             if (isset($count) && $count > 0) {

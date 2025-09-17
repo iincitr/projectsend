@@ -50,8 +50,7 @@
             </li>
             <?php if ( user_is_logged_in() ) { ?>
                 <li>
-                    <?php $my_account_link = (CURRENT_USER_LEVEL == 0) ? 'clients-edit.php' : 'users-edit.php'; ?>
-                    <a href="<?php echo BASE_URI.$my_account_link; ?>?id=<?php echo CURRENT_USER_ID; ?>" class="my_account"><i class="fa fa-user-circle" aria-hidden="true"></i> <span><?php _e('My Account', 'cftp_admin'); ?></span></a>
+                    <a href="<?php echo client_get_profile_link(); ?>" class="my_account"><i class="fa fa-user-circle" aria-hidden="true"></i> <span><?php _e('My Account', 'cftp_admin'); ?></span></a>
                 </li>
                 <li>
                     <a href="<?php echo BASE_URI; ?>process.php?do=logout" ><i class="fa fa-sign-out" aria-hidden="true"></i> <span><?php _e('Logout', 'cftp_admin'); ?></span></a>
