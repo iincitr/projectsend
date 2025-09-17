@@ -94,16 +94,17 @@
                 top:0;
                 height:100%;
                 transition:.3s all linear;
+                display: none;
             }
         }
 
-        &:hover {
-            .images {
-                .cover {
-                    @include opacity(1);
-                }
-            }
-        }
+        // &:hover {
+        //     .images {
+        //         .cover {
+        //             @include opacity(1);
+        //         }
+        //     }
+        // }
 
         .buttons {
             text-align:right;
