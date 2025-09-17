@@ -94,6 +94,25 @@ function cleanup_expired_remember_tokens()
                 error_log("ProjectSend: Cleaned up $cleaned expired remember me tokens");
             }
         }
+        
+        // Also check if current browser has an invalid remember me cookie
+        // and clean it up (regardless of session status)
+        $rememberMe = new \ProjectSend\Classes\RememberMe();
+        $current_token = $rememberMe->getTokenFromCookie();
+        
+        if ($current_token) {
+            // Validate token against database
+            $token_hash = hash('sha256', $current_token);
+            global $dbh;
+            $stmt = $dbh->prepare("SELECT id FROM " . TABLE_REMEMBER_TOKENS . " WHERE token_hash = ? AND expires_at > NOW()");
+            $stmt->execute([$token_hash]);
+            
+            if (!$stmt->fetch()) {
+                // Token is invalid or expired, clear the cookie
+                $rememberMe->clearCookie();
+                error_log("ProjectSend: Cleared invalid remember me cookie");
+            }
+        }
     }
 }
 
