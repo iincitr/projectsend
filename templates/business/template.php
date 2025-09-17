@@ -30,6 +30,8 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 
 include_once ROOT_DIR . '/templates/common.php'; // include the required functions for every template
 
+// Logo info is already available from common.php as $logo_file_info
+
 $window_title = __('Document Center', 'business_template');
 
 $page_id = 'business_template';
@@ -144,9 +146,13 @@ include_once 'lang/' . LOADED_LANG . '.mo.php';
                 <!-- Logo/Title -->
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <h1 class="text-xl font-bold text-gray-900 dark:text-white">
-                            <?php echo html_output(get_option('this_install_title')); ?>
-                        </h1>
+                        <?php if ($logo_file_info && $logo_file_info['exists']): ?>
+                            <img src="<?php echo $logo_file_info['url']; ?>" alt="<?php echo get_option('this_install_title'); ?>" class="h-10 w-auto">
+                        <?php else: ?>
+                            <h1 class="text-xl font-bold text-gray-900 dark:text-white">
+                                <?php echo html_output(get_option('this_install_title')); ?>
+                            </h1>
+                        <?php endif; ?>
                     </div>
                 </div>
 
