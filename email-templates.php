@@ -18,6 +18,7 @@ $section_options = $emails->getDataForOptions($section);
 $page_title = $section_options['title'];
 
 $page_id = 'email_templates';
+add_codemirror_assets();
 
 $active_nav = 'emails';
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';

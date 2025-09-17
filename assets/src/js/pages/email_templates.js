@@ -35,7 +35,19 @@
 
         $('.insert_tag').on('click', function(e) {
             var target = jQuery(this).data('target');
-            insertAtCaret(target, $(this).data('tag'));
+            var tag = $(this).data('tag');
+
+            // Check if we have a CodeMirror editor for this textarea
+            if (editors[target]) {
+                var editor = editors[target];
+                var doc = editor.getDoc();
+                var cursor = doc.getCursor();
+                doc.replaceRange(tag, cursor);
+                editor.focus();
+            } else {
+                // Fallback to original function for regular textareas
+                insertAtCaret(target, tag);
+            }
         });
 
         // Template Gallery functionality
@@ -222,6 +234,33 @@
                 }
             });
         }
+
+        // Initialize HTML editors for email template textareas
+        var htmlTextareas = document.querySelectorAll('#form_email_template textarea.textarea_high');
+        var editors = {};
+
+        htmlTextareas.forEach(function(textarea) {
+            if (typeof CodeMirror !== 'undefined') {
+                editors[textarea.id] = CodeMirror.fromTextArea(textarea, {
+                    mode: 'htmlmixed',
+                    lineNumbers: true,
+                    lineWrapping: true,
+                    autoCloseTags: true,
+                    autoCloseBrackets: true,
+                    matchBrackets: true,
+                    theme: 'default',
+                    extraKeys: {
+                        "Ctrl-Space": "autocomplete",
+                        "F11": function(cm) {
+                            cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+                        },
+                        "Esc": function(cm) {
+                            if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+                        }
+                    }
+                });
+            }
+        });
 
         // Check if each tag is used or not
         var tags_dt = document.querySelectorAll('#email_available_tags dt button');

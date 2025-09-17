@@ -121,10 +121,14 @@ function render_custom_assets($position = null)
 
 function add_codemirror_assets()
 {
-    //add_asset('css', 'cm_theme_neo', BASE_URI.'node_modules/codemirror-minified/theme/neo.css');
+    add_asset('css', 'cm_main', BASE_URI.'node_modules/codemirror-minified/lib/codemirror.css');
+    add_asset('js', 'cm_main', BASE_URI.'node_modules/codemirror-minified/lib/codemirror.js');
     add_asset('js', 'cm_mode_js', BASE_URI.'node_modules/codemirror-minified/mode/javascript/javascript.js');
     add_asset('js', 'cm_mode_css', BASE_URI.'node_modules/codemirror-minified/mode/css/css.js');
     add_asset('js', 'cm_mode_xml', BASE_URI.'node_modules/codemirror-minified/mode/xml/xml.js');
     add_asset('js', 'cm_mode_multiplex', BASE_URI.'node_modules/codemirror-minified/addon/mode/multiplex.js');
     add_asset('js', 'cm_mode_htmlmixed', BASE_URI.'node_modules/codemirror-minified/mode/htmlmixed/htmlmixed.js');
+    add_asset('js', 'cm_addon_autoclose_tags', BASE_URI.'node_modules/codemirror-minified/addon/edit/closetag.js');
+    add_asset('js', 'cm_addon_autoclose_brackets', BASE_URI.'node_modules/codemirror-minified/addon/edit/closebrackets.js');
+    add_asset('js', 'cm_addon_match_brackets', BASE_URI.'node_modules/codemirror-minified/addon/edit/matchbrackets.js');
 }
