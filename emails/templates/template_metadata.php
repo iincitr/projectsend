@@ -80,4 +80,49 @@ return [
             __('Modern interface', 'cftp_admin'),
         ]
     ],
+    'retro90s' => [
+        'id' => 'retro90s',
+        'name' => __('Retro 90s Geocities', 'cftp_admin'),
+        'description' => __('Nostalgic throwback to the golden era of the web with animated backgrounds, rainbow gradients, and classic 90s styling', 'cftp_admin'),
+        'preview_image' => 'retro90s/preview.png',
+        'header_file' => 'retro90s/header.html',
+        'footer_file' => 'retro90s/footer.html',
+        'style' => 'retro90s',
+        'color_scheme' => 'rainbow',
+        'features' => [
+            __('Animated elements', 'cftp_admin'),
+            __('90s web aesthetics', 'cftp_admin'),
+            __('Nostalgic design', 'cftp_admin'),
+        ]
+    ],
+    'professional' => [
+        'id' => 'professional',
+        'name' => __('Professional Business', 'cftp_admin'),
+        'description' => __('Clean and sophisticated business template with modern typography and professional color scheme', 'cftp_admin'),
+        'preview_image' => 'professional/preview.png',
+        'header_file' => 'professional/header.html',
+        'footer_file' => 'professional/footer.html',
+        'style' => 'professional',
+        'color_scheme' => 'business-blue',
+        'features' => [
+            __('Business-focused design', 'cftp_admin'),
+            __('Professional typography', 'cftp_admin'),
+            __('Corporate styling', 'cftp_admin'),
+        ]
+    ],
+    'creative' => [
+        'id' => 'creative',
+        'name' => __('Creative Artistic', 'cftp_admin'),
+        'description' => __('Vibrant and artistic template with gradient backgrounds, creative typography, and inspiring design elements', 'cftp_admin'),
+        'preview_image' => 'creative/preview.png',
+        'header_file' => 'creative/header.html',
+        'footer_file' => 'creative/footer.html',
+        'style' => 'creative',
+        'color_scheme' => 'gradient-purple',
+        'features' => [
+            __('Artistic gradients', 'cftp_admin'),
+            __('Creative typography', 'cftp_admin'),
+            __('Inspiring design', 'cftp_admin'),
+        ]
+    ],
 ];
