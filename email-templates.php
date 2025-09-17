@@ -66,9 +66,9 @@ if ($_POST) {
                     /** Template selection options */
                     if ($section == 'template_selection') {
                     ?>
-                        <p><?php _e('Choose from professionally designed email templates. These templates provide different styles and layouts for your email communications.', 'cftp_admin'); ?></p>
-                        <p><?php _e('Preview each template to see how your emails will look.', 'cftp_admin'); ?></p>
-                        <p class="text-warning"><?php _e('Templates can be applied directly from this page and will affect the general look and header/footer styling, but not the individual email content.', 'cftp_admin'); ?></p>
+                        <p><?php _e('Choose from professionally designed email templates. These themes provide different styles and layouts for your email communications.', 'cftp_admin'); ?></p>
+                        <p><?php _e('Preview each themes to see how your emails will look.', 'cftp_admin'); ?></p>
+                        <p class="text-warning"><?php _e('Themes can be applied directly from this page and will affect the general look and header/footer styling, but not the individual email content.', 'cftp_admin'); ?></p>
 
                         <div class="options_divide"></div>
 
@@ -80,10 +80,18 @@ if ($_POST) {
                             ?>
                                 <div class="template-card" data-template-id="<?php echo $template_id; ?>">
                                     <div class="template-preview">
-                                        <div class="template-preview-placeholder">
-                                            <i class="fa fa-envelope-o"></i>
-                                            <span><?php echo $template_data['name']; ?></span>
-                                        </div>
+                                        <?php
+                                        $screenshot_path = ROOT_DIR . '/emails/templates/' . $template_id . '/screenshot.png';
+                                        $screenshot_url = BASE_URI . 'emails/templates/' . $template_id . '/screenshot.png';
+
+                                        if (file_exists($screenshot_path)) { ?>
+                                            <img src="<?php echo $screenshot_url; ?>" alt="<?php echo htmlspecialchars($template_data['name']); ?> Preview" style="width: 100%; height: 100%; object-fit: cover; object-position: top;">
+                                        <?php } else { ?>
+                                            <div class="template-preview-placeholder">
+                                                <i class="fa fa-envelope-o"></i>
+                                                <span><?php echo $template_data['name']; ?></span>
+                                            </div>
+                                        <?php } ?>
                                     </div>
                                     <div class="template-info">
                                         <h4 class="template-name"><?php echo $template_data['name']; ?></h4>
@@ -242,13 +250,13 @@ if ($_POST) {
         <div class="white-box">
             <div class="white-box-interior template-suggestion-box">
                 <h3><i class="fa fa-lightbulb-o text-warning"></i> <?php _e('Email Templates', 'cftp_admin'); ?></h3>
-                <p><?php _e('Looking for a quick start? Choose from our professionally designed email templates that include pre-styled headers and footers.', 'cftp_admin'); ?></p>
-                <p><?php _e('Templates provide consistent branding and professional layouts that you can apply instantly.', 'cftp_admin'); ?></p>
+                <p><?php _e('Looking for a quick start? Choose from our professionally designed email themes that include pre-styled headers and footers.', 'cftp_admin'); ?></p>
+                <p><?php _e('Themes provide consistent branding and professional layouts that you can apply instantly.', 'cftp_admin'); ?></p>
 
                 <div class="text-center mt-4">
                     <a href="<?php echo BASE_URI; ?>email-templates.php?section=template_selection" class="btn btn-primary btn-wide">
                         <i class="fa fa-th-large"></i>
-                        <?php _e('Browse Templates', 'cftp_admin'); ?>
+                        <?php _e('Browse Themes', 'cftp_admin'); ?>
                     </a>
                 </div>
             </div>

@@ -81,7 +81,7 @@ class Emails
             case 'template_selection':
                 $strings = [];
                 $options = [
-                    'title' => __('Template Selection', 'cftp_admin'),
+                    'title' => __('E-mail Themes', 'cftp_admin'),
                     'checkboxes' => [],
                     'items' => [],
                 ];

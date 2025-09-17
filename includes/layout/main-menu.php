@@ -155,63 +155,16 @@ if (current_role_in(array(9, 8, 7))) {
         ),
     );
 
-    $items['options'] = array(
-        'nav' => 'options',
-        'level' => array(9),
-        'main' => array(
-            'label' => __('Options', 'cftp_admin'),
-            'icon' => 'cog',
-        ),
-        'sub' => array(
-            array(
-                'label' => __('General options', 'cftp_admin'),
-                'link' => 'options.php?section=general',
-            ),
-            array(
-                'label' => __('Clients', 'cftp_admin'),
-                'link' => 'options.php?section=clients',
-            ),
-            array(
-                'label' => __('Privacy', 'cftp_admin'),
-                'link' => 'options.php?section=privacy',
-            ),
-            array(
-                'label' => __('E-mail notifications', 'cftp_admin'),
-                'link' => 'options.php?section=email',
-            ),
-            array(
-                'label' => __('Security', 'cftp_admin'),
-                'link' => 'options.php?section=security',
-            ),
-            array(
-                'label' => __('Branding', 'cftp_admin'),
-                'link' => 'options.php?section=branding',
-            ),
-            array(
-                'label' => __('Social Networks Login', 'cftp_admin'),
-                'link' => 'options.php?section=social_login',
-            ),
-            array(
-                'label' => __('LDAP Authentication', 'cftp_admin'),
-                'link' => 'options.php?section=ldap',
-            ),
-            array(
-                'label' => __('Scheduled tasks (cron)', 'cftp_admin'),
-                'link' => 'options.php?section=cron',
-            ),
-        ),
-    );
-
     $items['emails'] = array(
         'nav' => 'emails',
         'level' => array(9),
         'main' => array(
-            'label' => __('E-mail templates', 'cftp_admin'),
+            'label' => __('System e-mails', 'cftp_admin'),
             'icon' => 'envelope',
         ),
         'sub' => array(
             array(
-                'label' => __('Template Selection', 'cftp_admin'),
+                'label' => __('Themes', 'cftp_admin'),
                 'link' => 'email-templates.php?section=template_selection',
             ),
             array(
@@ -260,6 +213,53 @@ if (current_role_in(array(9, 8, 7))) {
             array(
                 'label' => __('Login authorization code', 'cftp_admin'),
                 'link' => 'email-templates.php?section=2fa_code',
+            ),
+        ),
+    );
+
+        $items['options'] = array(
+        'nav' => 'options',
+        'level' => array(9),
+        'main' => array(
+            'label' => __('Options', 'cftp_admin'),
+            'icon' => 'cog',
+        ),
+        'sub' => array(
+            array(
+                'label' => __('General options', 'cftp_admin'),
+                'link' => 'options.php?section=general',
+            ),
+            array(
+                'label' => __('Clients', 'cftp_admin'),
+                'link' => 'options.php?section=clients',
+            ),
+            array(
+                'label' => __('Privacy', 'cftp_admin'),
+                'link' => 'options.php?section=privacy',
+            ),
+            array(
+                'label' => __('E-mail notifications', 'cftp_admin'),
+                'link' => 'options.php?section=email',
+            ),
+            array(
+                'label' => __('Security', 'cftp_admin'),
+                'link' => 'options.php?section=security',
+            ),
+            array(
+                'label' => __('Branding', 'cftp_admin'),
+                'link' => 'options.php?section=branding',
+            ),
+            array(
+                'label' => __('Social Networks Login', 'cftp_admin'),
+                'link' => 'options.php?section=social_login',
+            ),
+            array(
+                'label' => __('LDAP Authentication', 'cftp_admin'),
+                'link' => 'options.php?section=ldap',
+            ),
+            array(
+                'label' => __('Scheduled tasks (cron)', 'cftp_admin'),
+                'link' => 'options.php?section=cron',
             ),
         ),
     );
