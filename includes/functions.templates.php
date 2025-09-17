@@ -261,3 +261,66 @@ function get_default_template_path()
     $path = ROOT_DIR.DS.'templates'.DS.'default'.DS;
     return $path;
 }
+
+/**
+ * Get Material Design icon for file type (Google Drive template)
+ */
+function get_material_file_icon($extension)
+{
+    $iconMap = [
+        // Documents
+        'pdf' => 'picture_as_pdf',
+        'doc' => 'description',
+        'docx' => 'description',
+        'xls' => 'grid_on',
+        'xlsx' => 'grid_on',
+        'ppt' => 'slideshow',
+        'pptx' => 'slideshow',
+        'txt' => 'description',
+        'rtf' => 'description',
+        
+        // Images
+        'jpg' => 'image',
+        'jpeg' => 'image',
+        'png' => 'image',
+        'gif' => 'image',
+        'bmp' => 'image',
+        'svg' => 'image',
+        'webp' => 'image',
+        
+        // Audio
+        'mp3' => 'audiotrack',
+        'wav' => 'audiotrack',
+        'flac' => 'audiotrack',
+        'aac' => 'audiotrack',
+        'ogg' => 'audiotrack',
+        
+        // Video
+        'mp4' => 'movie',
+        'avi' => 'movie',
+        'mov' => 'movie',
+        'wmv' => 'movie',
+        'flv' => 'movie',
+        'webm' => 'movie',
+        
+        // Archives
+        'zip' => 'archive',
+        'rar' => 'archive',
+        '7z' => 'archive',
+        'tar' => 'archive',
+        'gz' => 'archive',
+        
+        // Code
+        'html' => 'code',
+        'css' => 'code',
+        'js' => 'code',
+        'php' => 'code',
+        'py' => 'code',
+        'java' => 'code',
+        'cpp' => 'code',
+        'c' => 'code',
+        'sql' => 'code'
+    ];
+    
+    return $iconMap[strtolower($extension)] ?? 'insert_drive_file';
+}

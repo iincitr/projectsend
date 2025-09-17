@@ -385,6 +385,64 @@ class Files
         return $data;
     }
 
+    /**
+     * Get public file data suitable for API responses
+     * 
+     * @return array
+     */
+    public function getPublicData()
+    {
+        // Base file data
+        $data = [
+            'id' => $this->id,
+            'title' => $this->title,
+            'description' => $this->description,
+            'filename_original' => $this->filename_original,
+            'extension' => $this->extension,
+            'size' => $this->size,
+            'size_formatted' => $this->size_formatted,
+            'uploaded_date' => date(get_option('timeformat'), strtotime($this->uploaded_date)),
+            'expires' => $this->expires,
+            'expired' => (bool)$this->expired,
+            'download_link' => $this->download_link,
+            'is_image' => $this->isImage(),
+            'mime_type' => $this->mime_type
+        ];
+
+        // Add expiry date if file expires
+        if ($this->expires && $this->expiry_date) {
+            $data['expiry_date'] = date(get_option('timeformat'), strtotime($this->expiry_date));
+        }
+
+        // Add thumbnail for images
+        if ($this->isImage() && !$this->expired && !empty($this->full_path)) {
+            $thumbnail = make_thumbnail($this->full_path, null, 200, 200);
+            if ($thumbnail && isset($thumbnail['thumbnail']['url'])) {
+                $data['thumbnail'] = $thumbnail['thumbnail']['url'];
+            }
+        }
+
+        // Add image metadata if it's an image
+        if ($this->isImage() && !empty($this->full_path) && file_exists($this->full_path)) {
+            $image_info = getimagesize($this->full_path);
+            if ($image_info) {
+                $data['image_info'] = [
+                    'width' => $image_info[0],
+                    'height' => $image_info[1],
+                    'dimensions_formatted' => $image_info[0] . ' × ' . $image_info[1],
+                    'type' => image_type_to_mime_type($image_info[2]),
+                    'bits' => isset($image_info['bits']) ? $image_info['bits'] : null,
+                    'channels' => isset($image_info['channels']) ? $image_info['channels'] : null,
+                ];
+            }
+        }
+
+        // Add material icon for file type
+        $data['icon'] = get_material_file_icon($this->extension);
+
+        return $data;
+    }
+
     public function getSafeFilename()
     {
         return $this->filename_on_disk;

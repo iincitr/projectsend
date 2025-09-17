@@ -108,6 +108,39 @@ switch ($_GET['do']) {
         $download = new Download;
         $download->downloadZip($_GET['files']);
     break;
+
+    case 'get_file_info':
+        redirect_if_not_logged_in();
+        redirect_if_role_not_allowed($allowed_levels);
+        
+        header('Content-Type: application/json');
+        
+        if (!isset($_GET['file_id']) || empty($_GET['file_id'])) {
+            echo json_encode(['success' => false, 'error' => 'File ID is required']);
+            break;
+        }
+        
+        $file_id = (int)$_GET['file_id'];
+        
+        // Check if user can download this file
+        if (!user_can_download_file(CURRENT_USER_ID, $file_id)) {
+            echo json_encode(['success' => false, 'error' => 'Access denied']);
+            break;
+        }
+        
+        // Get file information
+        $file = new \ProjectSend\Classes\Files($file_id);
+        
+        if (!$file->id) {
+            echo json_encode(['success' => false, 'error' => 'File not found']);
+            break;
+        }
+        
+        // Get file data using the getPublicData method
+        $file_data = $file->getPublicData();
+        
+        echo json_encode(['success' => true, 'file' => $file_data]);
+    break;
 }
 
 exit;

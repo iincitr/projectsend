@@ -130,9 +130,13 @@ include_once 'lang/' . LOADED_LANG . '.mo.php';
     <script>
         window.base_url = '<?php echo BASE_URI; ?>';
     </script>
+
+    <?php render_custom_assets('head'); ?>
 </head>
 
 <body class="h-full bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <?php render_custom_assets('body_top'); ?>
+
     <!-- Top Navigation Bar -->
     <nav class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -500,5 +504,7 @@ include_once 'lang/' . LOADED_LANG . '.mo.php';
 
     <!-- Custom JavaScript -->
     <script src="<?php echo $this_template_url; ?>js/business.js"></script>
+
+    <?php render_custom_assets('body_bottom'); ?>
 </body>
 </html>
