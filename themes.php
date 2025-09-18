@@ -6,7 +6,7 @@ $allowed_levels = array(9);
 require_once 'bootstrap.php';
 log_in_required($allowed_levels);
 
-$page_title    = __("Templates", 'cftp_admin');
+$page_title = __("Themes", 'cftp_admin');
 
 $active_nav = 'themes';
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';
