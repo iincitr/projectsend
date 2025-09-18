@@ -1,3 +1,7 @@
+<?php
+    // Only show the folders_nav div if there are folders or we're inside a folder
+    if (!empty($folders) || !empty($_GET['folder_id'])) {
+?>
 <div id="folders_nav">
     <?php
         $ondrop_url = AJAX_PROCESS_URL.'?do=folder_move';
@@ -64,6 +68,9 @@
         </div>
     </template>
 </div>
+<?php
+    }
+?>
 
 <span id="folder_context_menu__links"
     data-url-share="<?php echo AJAX_PROCESS_URL.'?do=folder_share'; ?>"
