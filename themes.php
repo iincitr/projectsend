@@ -8,7 +8,7 @@ log_in_required($allowed_levels);
 
 $page_title    = __("Templates", 'cftp_admin');
 
-$active_nav = 'templates';
+$active_nav = 'themes';
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 
 $templates = look_for_templates();
@@ -32,19 +32,19 @@ if (isset($_GET['activate_template'])) {
     }
 
     /** Redirect so the options are reflected immediately */
-    $section_redirect = 'templates';
+    $section_redirect = 'themes';
 
-    ps_redirect(BASE_URI . 'templates.php');
+    ps_redirect(BASE_URI . 'themes.php');
 }
 ?>
 <div class="row">
-    <div class="col-12 col-sm-12 col-lg-12">
+    <div class="col-12 col-sm-12 col-lg-8">
         <div class="template_selector">
             <div class="row">
                 <?php
                     foreach ($templates as $template) {
                 ?>
-                    <div class="col-12 col-sm-6 col-md-3">
+                    <div class="col-12 col-sm-6 col-md-4">
                         <div class="template <?php if ($template['location'] == get_option('selected_clients_template')) { echo 'current_template';} ?>">
                             <div class="col-12">
                                 <div class="images">
@@ -119,7 +119,7 @@ if (isset($_GET['activate_template'])) {
                                     <?php
                                     } else {
                                     ?>
-                                        <a href="templates.php?activate_template=<?php echo $template['location']; ?>" class="btn btn-primary">
+                                        <a href="themes.php?activate_template=<?php echo $template['location']; ?>" class="btn btn-primary">
                                             <?php _e('Activate', 'cftp_admin'); ?>
                                         </a>
                                     <?php
@@ -132,6 +132,22 @@ if (isset($_GET['activate_template'])) {
                 <?php
                 }
                 ?>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-12 col-lg-4">
+        <div class="white-box">
+            <div class="white-box-interior template-suggestion-box">
+                <h3><i class="fa fa-lightbulb-o text-warning"></i> <?php _e('Client Area Themes', 'cftp_admin'); ?></h3>
+                <p><?php _e('Choose a theme that best represents your brand and provides the best experience for your clients.', 'cftp_admin'); ?></p>
+                <p><?php _e('You can switch themes at any time without losing any data.', 'cftp_admin'); ?></p>
+                <p><?php _e('Each theme offers different layouts and features:', 'cftp_admin'); ?></p>
+                <ul class="list-unstyled">
+                    <li><span class="feature-badge active"><span class="icon">✓</span> <?php _e('Client Files', 'cftp_admin'); ?></span> - <?php _e('Personal file browsing for logged-in users', 'cftp_admin'); ?></li>
+                    <li><span class="feature-badge active"><span class="icon">✓</span> <?php _e('Public Files', 'cftp_admin'); ?></span> - <?php _e('Public file listings for all visitors', 'cftp_admin'); ?></li>
+                    <li><span class="feature-badge active"><span class="icon">✓</span> <?php _e('Download Page', 'cftp_admin'); ?></span> - <?php _e('Custom download experience', 'cftp_admin'); ?></li>
+                </ul>
+                <p class="text-warning"><small><i class="fa fa-info-circle"></i> <?php _e('Note: If a theme does not include a specific feature, the layout and style from the default theme will be used instead.', 'cftp_admin'); ?></small></p>
             </div>
         </div>
     </div>

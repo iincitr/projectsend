@@ -18,7 +18,7 @@ if (get_option('selected_clients_template') !== 'default') {
     <div class="row">
         <div class="col-sm-12">
             <div class="system_msg">
-                <p><strong><?php _e('Important:', 'cftp_admin');?></strong> <?php echo sprintf(__('Only the default template supports folders at the moment. <a href="%s">Consider switching</a> if you plan to user this feature. A new release with updated templates will be available soon. Sorry for the inconvenience.', 'cftp_admin'), BASE_URI . 'templates.php'); ?></p>
+                <p><strong><?php _e('Important:', 'cftp_admin');?></strong> <?php echo sprintf(__('Only the default template supports folders at the moment. <a href="%s">Consider switching</a> if you plan to user this feature. A new release with updated templates will be available soon. Sorry for the inconvenience.', 'cftp_admin'), BASE_URI . 'themes.php'); ?></p>
             </div>
         </div>
     </div>

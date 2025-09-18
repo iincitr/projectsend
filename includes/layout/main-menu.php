@@ -140,17 +140,17 @@ if (current_role_in(array(9, 8, 7))) {
 
     $items[] = 'separator';
 
-    $items['templates'] = array(
-        'nav' => 'templates',
+    $items['themes'] = array(
+        'nav' => 'themes',
         'level' => array(9),
         'main' => array(
-            'label' => __('Templates', 'cftp_admin'),
+            'label' => __('Themes', 'cftp_admin'),
             'icon' => 'desktop',
         ),
         'sub' => array(
             array(
-                'label' => __('Templates', 'cftp_admin'),
-                'link' => 'templates.php',
+                'label' => __('Themes', 'cftp_admin'),
+                'link' => 'themes.php',
             ),
         ),
     );
