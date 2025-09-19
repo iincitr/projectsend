@@ -121,16 +121,13 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 ?>
 
 <div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fa fa-cog"></i>
+    <div class="col-12 col-sm-12 col-lg-6">
+        <div class="white-box">
+            <div class="white-box-interior">
+                <h3>
                     <?php echo sprintf(__('Settings for %s Theme', 'cftp_admin'), '<strong>' . html_output($theme_info['name'] ?? $theme_name) . '</strong>'); ?>
                 </h3>
-            </div>
 
-            <div class="card-body">
                 <form action="" method="post" class="form-horizontal">
                     <?php addCsrf(); ?>
 
@@ -142,16 +139,16 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                         ?>
 
                         <div class="form-group row">
-                            <label class="col-sm-3 col-form-label" for="<?php echo $field_name; ?>">
+                            <label class="col-sm-4 control-label" for="<?php echo $field_name; ?>">
                                 <?php echo html_output($setting_config['label'] ?? ucwords(str_replace('_', ' ', $setting_name))); ?>
                             </label>
-                            <div class="col-sm-9">
+                            <div class="col-sm-8">
                                 <?php switch ($type):
                                     case 'checkbox':
                                     case 'boolean': ?>
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" id="<?php echo $field_name; ?>" name="<?php echo $field_name; ?>" value="1" <?php echo $current_value ? 'checked' : ''; ?>>
-                                            <label class="form-check-label" for="<?php echo $field_name; ?>">
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox" id="<?php echo $field_name; ?>" name="<?php echo $field_name; ?>" value="1" <?php echo $current_value ? 'checked' : ''; ?>>
                                                 <?php echo html_output($setting_config['label'] ?? ucwords(str_replace('_', ' ', $setting_name))); ?>
                                             </label>
                                         </div>
@@ -165,7 +162,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                                         <?php break;
 
                                     case 'select': ?>
-                                        <select class="form-control" id="<?php echo $field_name; ?>" name="<?php echo $field_name; ?>">
+                                        <select class="form-select" id="<?php echo $field_name; ?>" name="<?php echo $field_name; ?>">
                                             <?php if (isset($setting_config['options'])): ?>
                                                 <?php foreach ($setting_config['options'] as $option_value => $option_label): ?>
                                                     <option value="<?php echo html_output($option_value); ?>" <?php echo ($current_value == $option_value) ? 'selected' : ''; ?>>
@@ -182,7 +179,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 
                                     case 'color': ?>
                                         <input type="color" class="form-control" id="<?php echo $field_name; ?>" name="<?php echo $field_name; ?>" value="<?php echo html_output($current_value); ?>" style="max-width: 100px; height: 40px;">
-                                        <small class="form-text text-muted">Current: <?php echo html_output($current_value); ?></small>
+                                        <small class="field_note form-text">Current: <?php echo html_output($current_value); ?></small>
                                         <?php break;
 
                                     default: // text input ?>
@@ -191,21 +188,21 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                                 endswitch; ?>
 
                                 <?php if (!empty($setting_config['description'])): ?>
-                                    <small class="form-text text-muted"><?php echo html_output($setting_config['description']); ?></small>
+                                    <p class="field_note"><?php echo html_output($setting_config['description']); ?></p>
                                 <?php endif; ?>
                             </div>
                         </div>
                     <?php endforeach; ?>
 
-                    <div class="form-group row">
-                        <div class="col-sm-9 offset-sm-3">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fa fa-save"></i> <?php _e('Save Settings', 'cftp_admin'); ?>
-                            </button>
-                            <a href="themes.php" class="btn btn-secondary">
-                                <i class="fa fa-arrow-left"></i> <?php _e('Back to Themes', 'cftp_admin'); ?>
-                            </a>
-                        </div>
+                    <div class="options_divide"></div>
+
+                    <div class="after_form_buttons">
+                        <button type="submit" class="btn btn-wide btn-primary empty">
+                            <?php _e('Save Settings', 'cftp_admin'); ?>
+                        </button>
+                        <a href="themes.php" class="btn btn-default btn-wide">
+                            <?php _e('Back to Themes', 'cftp_admin'); ?>
+                        </a>
                     </div>
                 </form>
             </div>
