@@ -7,7 +7,14 @@
 // Default footer type is 'client' for template.php
 $footer_type = isset($footer_type) ? $footer_type : 'client';
 
-require_once dirname(__FILE__) . '/entertainment.php'; // include 90s entertainment CSV helper
+// Check if entertainment section should be shown based on theme settings
+$show_entertainment = get_theme_option('retro90s', 'show_entertainment', true);
+if ($show_entertainment) {
+    require_once dirname(__FILE__) . '/entertainment.php'; // include 90s entertainment CSV helper
+}
+
+// Include visitor counter
+require_once dirname(__FILE__) . '/visitor_counter.php';
 ?>
 
 <?php if ($footer_type === 'public'): ?>

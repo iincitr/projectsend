@@ -71,12 +71,14 @@ function extract_template_info($template_directory)
             'client_files' => true,
             'public_files' => true,
             'download_page' => true,
+            'has_settings' => false,
         ];
     } else {
         $template_info['features'] = [
             'client_files' => file_exists($template_directory . DS . 'template.php'),
             'public_files' => file_exists($template_directory . DS . 'public.php'),
             'download_page' => file_exists($template_directory . DS . 'public-download.php'),
+            'has_settings' => file_exists($template_directory . DS . 'settings.php'),
         ];
     }
 

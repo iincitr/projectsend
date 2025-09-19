@@ -97,6 +97,51 @@ $bulk_actions_items = [
     <link rel="stylesheet" href="<?php echo $this_template_url; ?>font-awesome-4.6.3/css/font-awesome.min.css">
     <link rel="stylesheet" media="all" type="text/css" href="<?php echo $this_template_url; ?>main.css" />
 
+    <?php
+    // Dynamic CSS for theme settings
+    $retro_color_scheme = get_theme_option('retro90s', 'retro_color_scheme', 'neon');
+    $show_grid_animation = get_theme_option('retro90s', 'show_grid_animation', true);
+    $header_bg_color = get_theme_option('retro90s', 'header_background_color', '#000080');
+    ?>
+    <style>
+        <?php if (!$show_grid_animation): ?>
+        /* Disable animations when setting is off */
+        * {
+            animation: none !important;
+            -webkit-animation: none !important;
+            -moz-animation: none !important;
+            -o-animation: none !important;
+            -ms-animation: none !important;
+        }
+        <?php endif; ?>
+
+        <?php
+        // Color scheme variables
+        $color_schemes = [
+            'neon' => ['primary' => '#ff00ff', 'secondary' => '#00ffff', 'accent' => '#ffff00'],
+            'sunset' => ['primary' => '#ff4500', 'secondary' => '#800080', 'accent' => '#ffd700'],
+            'classic' => ['primary' => '#0000ff', 'secondary' => '#ffff00', 'accent' => '#ff0000'],
+            'matrix' => ['primary' => '#00ff00', 'secondary' => '#000000', 'accent' => '#008000']
+        ];
+
+        $colors = $color_schemes[$retro_color_scheme] ?? $color_schemes['neon'];
+        ?>
+
+        /* Color scheme overrides */
+        .retro-primary { color: <?php echo $colors['primary']; ?> !important; }
+        .retro-secondary { color: <?php echo $colors['secondary']; ?> !important; }
+        .retro-accent { color: <?php echo $colors['accent']; ?> !important; }
+
+        /* Apply color scheme to key elements */
+        marquee { color: <?php echo $colors['primary']; ?> !important; }
+        blink { color: <?php echo $colors['accent']; ?> !important; }
+
+        /* Retro glow effect with current color scheme */
+        .retro-glow {
+            text-shadow: 0 0 5px <?php echo $colors['primary']; ?>, 0 0 10px <?php echo $colors['primary']; ?>, 0 0 15px <?php echo $colors['primary']; ?>;
+        }
+    </style>
+
     <script src="<?php echo $this_template_url; ?>js/jquery.1.11.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
 
@@ -119,7 +164,7 @@ $bulk_actions_items = [
                 <tr>
                     <td bgcolor="#c0c0c0">
                         <table width="100%" cellpadding="4" cellspacing="1" border="0">
-                            <tr bgcolor="#000080">
+                            <tr bgcolor="<?php echo htmlspecialchars($header_bg_color); ?>">
                                 <td>
                                     <font face="Arial, sans-serif" color="#ffff00" size="5">
                                         <b>
@@ -185,7 +230,7 @@ $bulk_actions_items = [
 
                                 <!-- Files List Table -->
                                 <table width="100%" cellpadding="3" cellspacing="1" border="0">
-                                    <tr bgcolor="#000080">
+                                    <tr bgcolor="<?php echo htmlspecialchars($header_bg_color); ?>">
                                         <td width="30">
                                             <font face="Arial, sans-serif" color="#ffffff" size="1">
                                                 <b>✓</b>

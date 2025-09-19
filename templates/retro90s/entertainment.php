@@ -5,10 +5,16 @@
  */
 require_once dirname(__FILE__) . '/csv_helper.php'; // include 90s entertainment CSV helper
 
+// Get theme settings for entertainment section
+$entertainment_items_count = get_theme_option('retro90s', 'entertainment_items_count', 3);
+$entertainment_title = get_theme_option('retro90s', 'entertainment_title', '');
+$retro_color_scheme = get_theme_option('retro90s', 'retro_color_scheme', 'neon');
+$show_grid_animation = get_theme_option('retro90s', 'show_grid_animation', true);
+
 // Get random entertainment content for this page load
-$random_movies = getRandomMovies(6);
-$random_music = getRandomMusic(3);
-$random_videogames = getRandomVideoGames(3);
+$random_movies = getRandomMovies($entertainment_items_count * 2); // Double for movies since they split into columns
+$random_music = getRandomMusic($entertainment_items_count);
+$random_videogames = getRandomVideoGames($entertainment_items_count);
 ?>
 
 <!-- Retro Separator -->
@@ -32,7 +38,7 @@ $random_videogames = getRandomVideoGames(3);
             <center>
                 <br>
                 <font face="Arial, sans-serif" color="#666666" size="1">
-                    <blink>★ ★ ★</blink> ENTERTAINMENT ZONE <blink>★ ★ ★</blink>
+                    <blink>★ ★ ★</blink> <?php echo !empty($entertainment_title) ? htmlspecialchars($entertainment_title) : 'ENTERTAINMENT ZONE'; ?> <blink>★ ★ ★</blink>
                 </font>
             </center>
         </td>

@@ -140,6 +140,26 @@ if (current_role_in(array(9, 8, 7))) {
 
     $items[] = 'separator';
 
+    // Build themes submenu
+    $themes_submenu = array(
+        array(
+            'label' => __('Themes', 'cftp_admin'),
+            'link' => 'themes.php',
+        ),
+    );
+
+    // Add theme settings link if current theme has settings
+    $current_theme = get_option('selected_clients_template');
+    if ($current_theme && function_exists('theme_has_settings') && theme_has_settings($current_theme)) {
+        $themes_submenu[] = array(
+            'divider' => true,
+        );
+        $themes_submenu[] = array(
+            'label' => __('Theme Settings', 'cftp_admin'),
+            'link' => 'theme-settings.php?theme=' . urlencode($current_theme),
+        );
+    }
+
     $items['themes'] = array(
         'nav' => 'themes',
         'level' => array(9),
@@ -147,12 +167,7 @@ if (current_role_in(array(9, 8, 7))) {
             'label' => __('Themes', 'cftp_admin'),
             'icon' => 'desktop',
         ),
-        'sub' => array(
-            array(
-                'label' => __('Themes', 'cftp_admin'),
-                'link' => 'themes.php',
-            ),
-        ),
+        'sub' => $themes_submenu,
     );
 
     $items['emails'] = array(

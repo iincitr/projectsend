@@ -95,6 +95,12 @@ if (isset($_GET['activate_template'])) {
                                                 <span class="icon"><?php echo $template['features']['download_page'] ? '✓' : '○'; ?></span>
                                                 <?php _e('Download Page', 'cftp_admin'); ?>
                                             </span>
+
+                                            <span class="feature-badge <?php echo $template['features']['has_settings'] ? 'active' : 'inactive'; ?>"
+                                                  title="<?php echo $template['features']['has_settings'] ? __('Theme has configurable settings', 'cftp_admin') : __('Theme does not have configurable settings', 'cftp_admin'); ?>">
+                                                <span class="icon"><?php echo $template['features']['has_settings'] ? '⚙' : '○'; ?></span>
+                                                <?php _e('Customizable', 'cftp_admin'); ?>
+                                            </span>
                                         </div>
                                     </div>
                                     <?php endif; ?>
@@ -116,6 +122,11 @@ if (isset($_GET['activate_template'])) {
                                         <a href="#" class="btn btn-pslight disabled">
                                             <?php _e('Active', 'cftp_admin'); ?>
                                         </a>
+                                        <?php if (!empty($template['features']['has_settings'])): ?>
+                                        <a href="theme-settings.php?theme=<?php echo urlencode($template['location']); ?>" class="btn btn-secondary">
+                                            <i class="fa fa-cog"></i> <?php _e('Settings', 'cftp_admin'); ?>
+                                        </a>
+                                        <?php endif; ?>
                                     <?php
                                     } else {
                                     ?>
@@ -146,6 +157,7 @@ if (isset($_GET['activate_template'])) {
                     <li><span class="feature-badge active"><span class="icon">✓</span> <?php _e('Client Files', 'cftp_admin'); ?></span> - <?php _e('Personal file browsing for logged-in users', 'cftp_admin'); ?></li>
                     <li><span class="feature-badge active"><span class="icon">✓</span> <?php _e('Public Files', 'cftp_admin'); ?></span> - <?php _e('Public file listings for all visitors', 'cftp_admin'); ?></li>
                     <li><span class="feature-badge active"><span class="icon">✓</span> <?php _e('Download Page', 'cftp_admin'); ?></span> - <?php _e('Custom download experience', 'cftp_admin'); ?></li>
+                    <li><span class="feature-badge active"><span class="icon">⚙</span> <?php _e('Customizable', 'cftp_admin'); ?></span> - <?php _e('Configurable theme options and preferences', 'cftp_admin'); ?></li>
                 </ul>
                 <p class="text-warning"><small><i class="fa fa-info-circle"></i> <?php _e('Note: If a theme does not include a specific feature, the layout and style from the default theme will be used instead.', 'cftp_admin'); ?></small></p>
             </div>

@@ -138,6 +138,7 @@ define('TABLE_FILES_RELATIONS', TABLES_PREFIX . 'files_relations');
 define('TABLE_DOWNLOADS', TABLES_PREFIX . 'downloads');
 define('TABLE_NOTIFICATIONS', TABLES_PREFIX . 'notifications');
 define('TABLE_OPTIONS', TABLES_PREFIX . 'options');
+define('TABLE_THEME_SETTINGS', TABLES_PREFIX . 'theme_settings');
 define('TABLE_USERS', TABLES_PREFIX . 'users');
 define('TABLE_USER_META', TABLES_PREFIX . 'user_meta');
 define('TABLE_GROUPS', TABLES_PREFIX . 'groups');
