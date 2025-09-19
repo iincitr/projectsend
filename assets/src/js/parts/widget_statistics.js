@@ -6,6 +6,59 @@
         $(document).ready(function(){
             var chart;
 
+            // Get current theme colors
+            function getThemeColors() {
+                var isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+                return {
+                    textColor: isDarkMode ? '#e9ecef' : '#333333',
+                    gridColor: isDarkMode ? '#4a5568' : '#e5e5e5',
+                    tooltipBg: isDarkMode ? '#2d3748' : '#fff'
+                };
+            }
+
+            // Update chart colors for current theme
+            function updateChartColors() {
+                if (!chart) return;
+
+                var colors = getThemeColors();
+
+                // Update legend
+                if (chart.options.legend && chart.options.legend.labels) {
+                    chart.options.legend.labels.fontColor = colors.textColor;
+                }
+
+                // Update scales
+                if (chart.options.scales) {
+                    if (chart.options.scales.xAxes) {
+                        chart.options.scales.xAxes.forEach(axis => {
+                            if (axis.ticks) axis.ticks.fontColor = colors.textColor;
+                            if (axis.gridLines) axis.gridLines.color = colors.gridColor;
+                        });
+                    }
+                    if (chart.options.scales.yAxes) {
+                        chart.options.scales.yAxes.forEach(axis => {
+                            if (axis.ticks) axis.ticks.fontColor = colors.textColor;
+                            if (axis.gridLines) axis.gridLines.color = colors.gridColor;
+                        });
+                    }
+                }
+
+                // Update tooltips
+                if (chart.options.tooltips) {
+                    chart.options.tooltips.backgroundColor = colors.tooltipBg;
+                    chart.options.tooltips.titleFontColor = colors.textColor;
+                    chart.options.tooltips.bodyFontColor = colors.textColor;
+                    chart.options.tooltips.borderColor = colors.gridColor;
+                }
+
+                chart.update();
+            }
+
+            // Listen for theme changes
+            document.addEventListener('themechange', function() {
+                updateChartColors();
+            });
+
             // Statistics chart
             function ajax_widget_statistics(days) {
                 var _chart_container = $('#widget_statistics #chart_container');
@@ -23,10 +76,8 @@
                     var obj = data;
                     _chart_container.append('<canvas id="chart_statistics"><canvas>');
 
-                    // Detect current theme for chart colors
-                    var isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
-                    var textColor = isDarkMode ? '#e9ecef' : '#333333';
-                    var gridColor = isDarkMode ? '#4a5568' : '#e5e5e5';
+                    // Get theme colors using centralized function
+                    var colors = getThemeColors();
 
                     chart = new Chart(document.getElementById('chart_statistics'), {
                         type: 'line',
@@ -39,34 +90,34 @@
                             tooltips: {
                                 mode: 'index',
                                 intersect: false,
-                                backgroundColor: isDarkMode ? '#2d3748' : '#fff',
-                                titleFontColor: textColor,
-                                bodyFontColor: textColor,
-                                borderColor: gridColor,
+                                backgroundColor: colors.tooltipBg,
+                                titleFontColor: colors.textColor,
+                                bodyFontColor: colors.textColor,
+                                borderColor: colors.gridColor,
                                 borderWidth: 1
                             },
                             legend: {
                                 labels: {
-                                    fontColor: textColor
+                                    fontColor: colors.textColor
                                 }
                             },
                             scales: {
                                 xAxes: [{
                                     display: true,
                                     ticks: {
-                                        fontColor: textColor
+                                        fontColor: colors.textColor
                                     },
                                     gridLines: {
-                                        color: gridColor
+                                        color: colors.gridColor
                                     }
                                 }],
                                 yAxes: [{
                                     display: true,
                                     ticks: {
-                                        fontColor: textColor
+                                        fontColor: colors.textColor
                                     },
                                     gridLines: {
-                                        color: gridColor
+                                        color: colors.gridColor
                                     }
                                 }]
                             },
