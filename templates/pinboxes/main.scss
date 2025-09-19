@@ -426,6 +426,10 @@ p.welcome {
     border: 1px solid $highlight_hover !important;
 }
 
+.download_link .button {
+    margin-bottom: 10px;
+}
+
 .photo {
     &.selected {
         border-color: $highlight;
