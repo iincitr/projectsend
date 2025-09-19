@@ -42,5 +42,52 @@
                 }
             });
         }
+
+        // Mail system options visibility control
+        const mailSystemSelect = document.getElementById('mail_system_use');
+        if (elementExists(mailSystemSelect)) {
+            function toggleMailFields() {
+                const selectedValue = mailSystemSelect.value;
+                const authFields = document.querySelectorAll('.mail-auth-field');
+                const smtpFields = document.querySelectorAll('.mail-smtp-field');
+
+                // Find SMTP section header
+                const h3Elements = document.querySelectorAll('h3');
+                let smtpSection = null;
+                h3Elements.forEach(h3 => {
+                    if (h3.textContent.includes('SMTP options')) {
+                        smtpSection = h3;
+                    }
+                });
+
+                // Hide all conditional fields initially
+                authFields.forEach(field => field.style.display = 'none');
+                smtpFields.forEach(field => field.style.display = 'none');
+
+                // Hide SMTP section header
+                if (smtpSection) {
+                    smtpSection.style.display = 'none';
+                }
+
+                // Show username/password fields for SMTP and Gmail
+                if (selectedValue === 'smtp' || selectedValue === 'gmail') {
+                    authFields.forEach(field => field.style.display = '');
+                }
+
+                // Show SMTP-specific fields and section only for SMTP
+                if (selectedValue === 'smtp') {
+                    smtpFields.forEach(field => field.style.display = '');
+                    if (smtpSection) {
+                        smtpSection.style.display = '';
+                    }
+                }
+            }
+
+            // Set initial state
+            toggleMailFields();
+
+            // Listen for changes
+            mailSystemSelect.addEventListener('change', toggleMailFields);
+        }
     };
 })();

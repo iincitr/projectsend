@@ -656,6 +656,10 @@ function current_user_can_upload()
 
 function current_user_can_upload_public()
 {
+    if (!defined('CURRENT_USER_LEVEL')) {
+        return false;
+    }
+
     switch (CURRENT_USER_LEVEL) {
         case 9:
         case 8:
@@ -663,7 +667,10 @@ function current_user_can_upload_public()
             return true;
             break;
         case 0:
-            return client_can_upload_public(CURRENT_USER_ID);
+            if (defined('CURRENT_USER_ID')) {
+                return client_can_upload_public(CURRENT_USER_ID);
+            }
+            return false;
             break;
         default:
             break;
@@ -1555,9 +1562,10 @@ function add_body_class($custom = '')
     if (user_is_logged_in()) {
         $classes[] = 'logged-in';
 
-        $logged_type = CURRENT_USER_LEVEL == '0' ? 'client' : 'admin';
-
-        $classes[] = 'logged-as-' . $logged_type;
+        if (defined('CURRENT_USER_LEVEL')) {
+            $logged_type = CURRENT_USER_LEVEL == '0' ? 'client' : 'admin';
+            $classes[] = 'logged-as-' . $logged_type;
+        }
     }
 
     if (!empty($custom) && is_array($custom)) {
@@ -1872,9 +1880,15 @@ function user_can_edit_file($user_id = null, $file_id = null)
     return false;
 }
 
-function record_new_download($user_id = CURRENT_USER_ID, $file_id = null)
+function record_new_download($user_id = null, $file_id = null)
 {
     global $dbh;
+
+    // Use CURRENT_USER_ID if no user_id provided and constant is defined
+    if ($user_id === null && defined('CURRENT_USER_ID')) {
+        $user_id = CURRENT_USER_ID;
+    }
+
     if (empty($file_id)) {
         return false;
     }
@@ -1934,9 +1948,15 @@ function record_new_download($user_id = CURRENT_USER_ID, $file_id = null)
     return false;
 }
 
-function user_can_download_file($user_id = CURRENT_USER_ID, $file_id = null)
+function user_can_download_file($user_id = null, $file_id = null)
 {
     global $dbh;
+
+    // Use CURRENT_USER_ID if no user_id provided and constant is defined
+    if ($user_id === null && defined('CURRENT_USER_ID')) {
+        $user_id = CURRENT_USER_ID;
+    }
+
     if (empty($file_id)) {
         return false;
     }
@@ -1946,7 +1966,7 @@ function user_can_download_file($user_id = CURRENT_USER_ID, $file_id = null)
     }
 
 
-    if (CURRENT_USER_LEVEL != 0) {
+    if (defined('CURRENT_USER_LEVEL') && CURRENT_USER_LEVEL != 0) {
         return true;
     }
 
@@ -2527,6 +2547,10 @@ function regenerate_single_thumbnail($file_id, $width, $height) {
  */
 function client_get_profile_link()
 {
+    if (!defined('CURRENT_USER_LEVEL') || !defined('CURRENT_USER_ID')) {
+        return BASE_URI;
+    }
+
     $my_account_link = (CURRENT_USER_LEVEL == 0) ? 'clients-edit.php' : 'users-edit.php';
     return BASE_URI . $my_account_link . '?id=' . CURRENT_USER_ID;
 }

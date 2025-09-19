@@ -172,8 +172,17 @@ function password_change_required()
     }
 }
 
-function user_can_upload_any_file_type($user_id = CURRENT_USER_ID)
+function user_can_upload_any_file_type($user_id = null)
 {
+    // Use CURRENT_USER_ID if no user_id provided and constant is defined
+    if ($user_id === null) {
+        if (defined('CURRENT_USER_ID')) {
+            $user_id = CURRENT_USER_ID;
+        } else {
+            return false;
+        }
+    }
+
     $user = new \ProjectSend\Classes\Users($user_id);
     $properties = $user->getProperties();
 

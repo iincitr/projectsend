@@ -18,7 +18,6 @@ switch ($section) {
             'footer_custom_enable',
             'files_default_expire',
             'files_default_public',
-            'upload_chunk_size',
             'uploads_organize_folders_by_date',
             'files_descriptions_use_ckeditor',
             'use_browser_lang',
@@ -102,6 +101,7 @@ switch ($section) {
             'cron_send_emails',
             'cron_delete_expired_files',
             'cron_delete_orphan_files',
+            'cron_save_log_database',
             'cron_email_summary_send',
         );
         break;
@@ -204,7 +204,7 @@ if ($_POST) {
     // Check if all the options are filled.
     for ($i = 0; $i < $options_total; $i++) {
         if (!in_array($keys[$i], $allowed_empty_values)) {
-            if (empty($_POST[$keys[$i]]) && $_POST[$keys[$i]] != '0') {
+            if (empty($_POST[$keys[$i]]) && $_POST[$keys[$i]] !== '0' && $_POST[$keys[$i]] !== 0) {
                 $options_missing++;
             }
         }

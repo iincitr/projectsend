@@ -74,6 +74,9 @@ require_once ROOT_DIR . '/includes/functions.categories.php';
 // Search, filters and actions forms
 require_once ROOT_DIR . '/includes/functions.forms.php';
 
+// Options forms helper functions
+require_once ROOT_DIR . '/includes/functions.forms.options.php';
+
 // Search, filters and actions forms
 require_once ROOT_DIR . '/includes/functions.groups.php';
 
