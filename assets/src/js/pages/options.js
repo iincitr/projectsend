@@ -89,5 +89,120 @@
             // Listen for changes
             mailSystemSelect.addEventListener('change', toggleMailFields);
         }
+
+        // Branding section - Logo preview and upload functionality
+        const logoPreview = document.getElementById('logo-preview-img');
+        if (elementExists(logoPreview)) {
+            // Debug SVG visibility
+            console.log('Logo preview element found:', logoPreview);
+            console.log('Logo src:', logoPreview.src);
+
+            // Add error handling for logo loading
+            logoPreview.addEventListener('load', function() {
+                console.log('Logo loaded successfully');
+            });
+
+            logoPreview.addEventListener('error', function() {
+                console.error('Logo failed to load');
+                console.error('Failed URL:', logoPreview.src);
+            });
+        }
+
+        const logoInput = document.getElementById('select_logo');
+        const logoWarning = document.getElementById('logo-upload-warning');
+        if (elementExists(logoInput) && elementExists(logoPreview)) {
+            logoInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Validate file type
+                    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/svg+xml'];
+                    if (!validTypes.includes(file.type)) {
+                        alert('Please select a valid image file (JPG, PNG, GIF, SVG)');
+                        logoInput.value = '';
+                        return;
+                    }
+
+                    // Validate file size (10MB)
+                    if (file.size > 10 * 1024 * 1024) {
+                        alert('File size must be less than 10MB');
+                        logoInput.value = '';
+                        return;
+                    }
+
+                    // Show preview
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        logoPreview.src = e.target.result;
+                        logoPreview.classList.add('preview-selected');
+                        if (elementExists(logoWarning)) {
+                            logoWarning.style.display = 'block';
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    // Reset preview if no file selected
+                    logoPreview.classList.remove('preview-selected');
+                    if (elementExists(logoWarning)) {
+                        logoWarning.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        // Branding section - Favicon preview and upload functionality
+        const faviconInput = document.getElementById('select_favicon');
+        const faviconPreview = document.getElementById('favicon-preview-img');
+        const faviconWarning = document.getElementById('favicon-upload-warning');
+        if (elementExists(faviconInput) && elementExists(faviconPreview)) {
+            faviconInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Validate file type
+                    const validTypes = ['image/x-icon', 'image/vnd.microsoft.icon', 'image/png', 'image/gif', 'image/jpeg', 'image/jpg', 'image/svg+xml'];
+                    if (!validTypes.includes(file.type)) {
+                        alert('Please select a valid favicon file (ICO, PNG, GIF, JPG, SVG)');
+                        faviconInput.value = '';
+                        return;
+                    }
+
+                    // Validate file size (1MB)
+                    if (file.size > 1024 * 1024) {
+                        alert('Favicon file size must be less than 1MB');
+                        faviconInput.value = '';
+                        return;
+                    }
+
+                    // Show preview
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        faviconPreview.src = e.target.result;
+                        faviconPreview.classList.add('preview-selected');
+                        if (elementExists(faviconWarning)) {
+                            faviconWarning.style.display = 'block';
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    // Reset preview if no file selected
+                    faviconPreview.classList.remove('preview-selected');
+                    if (elementExists(faviconWarning)) {
+                        faviconWarning.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        // Hide upload warnings when form is submitted
+        const form = document.getElementById('options');
+        if (elementExists(form)) {
+            form.addEventListener('submit', function() {
+                if (elementExists(logoWarning)) {
+                    logoWarning.style.display = 'none';
+                }
+                if (elementExists(faviconWarning)) {
+                    faviconWarning.style.display = 'none';
+                }
+            });
+        }
     };
 })();
