@@ -78,3 +78,6 @@ test-results
 
 # Misc
 .idea/
+*.md
+!README.md
+!SECURITY.md
