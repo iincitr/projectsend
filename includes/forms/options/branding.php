@@ -67,6 +67,63 @@ $form_sections = [
                     <?php
                 }
             ]
+        ]
+    ],
+    [
+        'title' => __('Favicon', 'cftp_admin'),
+        'description' => __('Upload a favicon image (16x16 or 32x32 pixels recommended). Supported formats: .ico, .png, .gif, .jpg', 'cftp_admin'),
+        'fields' => [
+            [
+                'type' => 'custom',
+                'name' => 'current_favicon_display',
+                'render_callback' => function($field) {
+                    $favicon_filename = get_option('favicon_filename');
+                    ?>
+                    <div id="current_favicon">
+                        <?php if (!empty($favicon_filename)) {
+                            $favicon_path = ADMIN_UPLOADS_DIR . DS . $favicon_filename;
+                            $favicon_url = ADMIN_UPLOADS_URI . $favicon_filename;
+                            if (file_exists($favicon_path)) {
+                        ?>
+                            <div class="form-group row">
+                                <label class="col-sm-4 control-label"><?php _e('Current favicon','cftp_admin'); ?></label>
+                                <div class="col-sm-8">
+                                    <div id="current_favicon_img">
+                                        <img src="<?php echo $favicon_url; ?>" style="max-width: 32px; max-height: 32px;">
+                                    </div>
+                                    <div class="mt-2">
+                                        <a class="btn btn-pslight confirm_generic" href="<?php echo BASE_URI . 'options.php?section=branding&clear=favicon'; ?>"><?php _e('Delete current favicon'); ?></a>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php } } else { ?>
+                            <div class="form-group row">
+                                <div class="col-sm-8 offset-sm-4">
+                                    <p class="text-muted"><?php _e('No favicon currently set','cftp_admin'); ?></p>
+                                </div>
+                            </div>
+                        <?php } ?>
+                    </div>
+                    <?php
+                }
+            ],
+            [
+                'type' => 'custom',
+                'name' => 'favicon_upload',
+                'render_callback' => function($field) {
+                    ?>
+                    <div id="form_upload_favicon">
+                        <div class="form-group row">
+                            <label class="col-sm-4 control-label"><?php _e('Select favicon to upload','cftp_admin'); ?></label>
+                            <div class="col-sm-8">
+                                <input type="file" name="select_favicon" class="empty" accept=".ico, .png, .gif, .jpg, .jpeg" />
+                                <p class="field_note form-text"><?php _e('For best results, use a square image (16x16, 32x32, or 64x64 pixels).','cftp_admin'); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                    <?php
+                }
+            ]
         ],
         'divider' => false // No divider at the end
     ]

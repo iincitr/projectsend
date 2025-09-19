@@ -126,6 +126,13 @@ if ($section == 'branding' && !empty($_GET['clear']) && $_GET['clear'] == 'logo'
     ps_redirect(BASE_URI . 'options.php?section=branding');
 }
 
+// Clear favicon
+if ($section == 'branding' && !empty($_GET['clear']) && $_GET['clear'] == 'favicon') {
+    save_option('favicon_filename', null);
+    $flash->success(__('Options updated successfully.', 'cftp_admin'));
+    ps_redirect(BASE_URI . 'options.php?section=branding');
+}
+
 /** Form sent */
 if ($_POST) {
     /**
@@ -215,6 +222,14 @@ if ($_POST) {
         $upload_logo = option_file_upload($_FILES['select_logo'], 'image', 'logo_filename', 29);
         if ($upload_logo['status'] != 'success') {
             $flash->error($upload_logo['message']);
+        }
+    }
+
+    // If uploading a favicon on the branding page
+    if (isset($_FILES['select_favicon']) && !empty($_FILES['select_favicon']['name'])) {
+        $upload_favicon = option_file_upload($_FILES['select_favicon'], 'image', 'favicon_filename', 30);
+        if ($upload_favicon['status'] != 'success') {
+            $flash->error($upload_favicon['message']);
         }
     }
 

@@ -1487,6 +1487,20 @@ function meta_noindex()
  */
 function meta_favicon()
 {
+    $custom_favicon = get_option('favicon_filename');
+
+    if (!empty($custom_favicon)) {
+        // Use custom favicon
+        $favicon_path = ADMIN_UPLOADS_DIR . DS . $custom_favicon;
+        if (file_exists($favicon_path)) {
+            $favicon_url = ADMIN_UPLOADS_URI . $custom_favicon;
+            echo '<link rel="icon" href="' . $favicon_url . '">';
+            echo '<link rel="shortcut icon" href="' . $favicon_url . '">';
+            return;
+        }
+    }
+
+    // Use default favicon set
     $favicon_location = BASE_URI . 'assets/img/favicon/';
     echo '<link rel="apple-touch-icon" sizes="180x180" href="' . $favicon_location . 'apple-touch-icon.png">';
     echo '<link rel="icon" type="image/png" sizes="32x32" href="' . $favicon_location . 'favicon-32x32.png">';
