@@ -1251,7 +1251,7 @@ function generate_random_string($length = 10)
 
 function get_file_type_by_mime($full_path)
 {
-    if (!file_exists($full_path)) {
+    if (empty($full_path) || !file_exists($full_path)) {
         return null;
     }
 
