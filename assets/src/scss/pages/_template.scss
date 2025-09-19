@@ -2,7 +2,7 @@
     .template {
         margin-bottom:40px;
         padding:15px;
-        background:white;
+        background:var(--bg-card);
         overflow:hidden;
         position:relative;
 
@@ -12,7 +12,7 @@
 
         h4 {
             font-size:1.5em;
-            color:black;
+            color:var(--text-primary);
             margin-top:25px;
         }
 

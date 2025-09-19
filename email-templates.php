@@ -56,8 +56,8 @@ if ($_POST) {
 ?>
 <div class="row">
     <div class="col-12 col-sm-12 <?php echo ($section == 'template_selection') ? '' : 'col-lg-8'; ?>">
-        <div class="white-box">
-            <div class="white-box-interior">
+        <div class="ps-card">
+            <div class="ps-card-body">
                 <form action="email-templates.php" id="form_email_template" name="templatesform" method="post" enctype="multipart/form-data" class="form-horizontal">
                     <?php addCsrf(); ?>
                     <input type="hidden" name="section" value="<?php echo $section; ?>">
@@ -247,8 +247,8 @@ if ($_POST) {
 
     <?php if ($section == 'header_footer') { ?>
     <div class="col-12 col-sm-12 col-lg-4">
-        <div class="white-box">
-            <div class="white-box-interior template-suggestion-box">
+        <div class="ps-card">
+            <div class="ps-card-body template-suggestion-box">
                 <h3><i class="fa fa-lightbulb-o text-warning"></i> <?php _e('Email Templates', 'cftp_admin'); ?></h3>
                 <p><?php _e('Looking for a quick start? Choose from our professionally designed email themes that include pre-styled headers and footers.', 'cftp_admin'); ?></p>
                 <p><?php _e('Themes provide consistent branding and professional layouts that you can apply instantly.', 'cftp_admin'); ?></p>

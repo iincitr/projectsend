@@ -56,6 +56,7 @@ let assetsJs = [
 
 let appJs = [
     'assets/src/js/obj.js',
+    'assets/src/js/components/*.js',
     'assets/src/js/main.js',
     'assets/src/js/helpers.js',
     'assets/src/js/pages/*.js',

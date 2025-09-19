@@ -83,7 +83,7 @@
 
                 &.divider {
                     margin: 10px 0;
-                    border-bottom: 1px solid #ccc;
+                    border-bottom: 1px solid var(--border-medium);
                 }
 
                 a {
@@ -179,7 +179,7 @@
                 border-top:none;
                 padding:0;
                 display:none;
-                border:1px solid #f0f0f0;
+                border:1px solid var(--border-medium);
 
                 > li {
                     position:relative;

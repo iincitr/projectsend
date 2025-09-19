@@ -1,12 +1,12 @@
 // Home widgets
 body.dashboard {
     .widget {
-        background:white;
+        background:var(--bg-card);
         display:block;
         width:100%;
         margin-bottom:30px;
         border-radius: 8px;
-        box-shadow: var(--global_box_shadow);
+        box-shadow: var(--shadow-md);
     
         .widget_int {
             padding:15px;
@@ -19,7 +19,7 @@ body.dashboard {
             margin:0 !important;
             color:var(--widget_title_color);
             background: var(--widget_title_background);
-            border-bottom:1px solid #dedede;
+            border-bottom:1px solid var(--border-light);
             border-radius: 2px 2px 0 0;
         }
     
@@ -44,8 +44,8 @@ body.dashboard {
     
             li {
                 flex: 1;
-                background: red;
-                color: white;
+                background: var(--color-error);
+                color: var(--text-inverse);
                 padding: 20px;
                 position: relative;
                 border-radius: 8px;
@@ -96,20 +96,20 @@ body.dashboard {
     
                 li {
                     padding: 7px;
-                    border-bottom: 1px solid #dedede;
+                    border-bottom: 1px solid var(--border-light);
                     display: flex;
-    
+
                     &:nth-child(odd) {
-                        background: #f6f6f6;
+                        background: var(--bg-hover);
                     }
-    
+
                     &:hover {
-                        background: #fbf8e9;
+                        background: var(--bg-selected);
                     }
     
                     i {
                         margin:0 1em;
-                        color: #1ec4a7;
+                        color: var(--color-success);
                         text-align: center;
                         font-size: 14px;
                     }
@@ -130,7 +130,7 @@ body.dashboard {
                         word-break: break-all;
     
                         .item_part1, .item_part2, .item_part4 {
-                            color: var(--main_color);
+                            color: var(--color-primary);
                             font-weight: bold;
                         }
                     }
@@ -144,11 +144,11 @@ body.dashboard {
     
         li {
             padding:7px;
-            border-bottom:1px solid #EFEFEF;
+            border-bottom:1px solid var(--border-light);
             overflow:hidden;
     
             &:nth-child(odd) {
-                background:#fafafa;
+                background:var(--bg-hover);
             }
     
             &:last-child {
@@ -157,7 +157,7 @@ body.dashboard {
     
             .date {
                 font-size:.9em;
-                color:#999;
+                color:var(--text-muted);
             }
     
             .log_ico {
@@ -176,7 +176,7 @@ body.dashboard {
             }
     
             span.secondary {
-                color:#86AE00;
+                color:var(--color-success);
             }
         }
     }
@@ -185,7 +185,7 @@ body.dashboard {
         text-align:right;
         padding-top:5px;
         margin-top:5px;
-        border-top:1px solid #EFEFEF;
+        border-top:1px solid var(--border-light);
     }
     
     // Home NEWS widget
@@ -195,7 +195,7 @@ body.dashboard {
         padding:0;
     
         .date {
-            color:#999;
+            color:var(--text-muted);
             font-size:.9em;
         }
     
@@ -278,8 +278,8 @@ body.dashboard {
         #stats_tooltip {
             position:absolute;
             display:none;
-            background:black;
-            color:#FFFFFF;
+            background:var(--bg-dark);
+            color:var(--text-inverse);
             padding:5px;
         }
     

@@ -122,8 +122,8 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 
 <div class="row">
     <div class="col-12 col-sm-12 col-lg-6">
-        <div class="white-box">
-            <div class="white-box-interior">
+        <div class="ps-card">
+            <div class="ps-card-body">
                 <h3>
                     <?php echo sprintf(__('Settings for %s Theme', 'cftp_admin'), '<strong>' . html_output($theme_info['name'] ?? $theme_name) . '</strong>'); ?>
                 </h3>

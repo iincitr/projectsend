@@ -147,8 +147,8 @@ if (isset($_GET['activate_template'])) {
         </div>
     </div>
     <div class="col-12 col-sm-12 col-lg-4">
-        <div class="white-box">
-            <div class="white-box-interior template-suggestion-box">
+        <div class="ps-card">
+            <div class="ps-card-body template-suggestion-box">
                 <h3><i class="fa fa-lightbulb-o text-warning"></i> <?php _e('Client Area Themes', 'cftp_admin'); ?></h3>
                 <p><?php _e('Choose a theme that best represents your brand and provides the best experience for your clients.', 'cftp_admin'); ?></p>
                 <p><?php _e('You can switch themes at any time without losing any data.', 'cftp_admin'); ?></p>

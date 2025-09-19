@@ -22,6 +22,12 @@
                     // var obj = JSON.parse(data);
                     var obj = data;
                     _chart_container.append('<canvas id="chart_statistics"><canvas>');
+
+                    // Detect current theme for chart colors
+                    var isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+                    var textColor = isDarkMode ? '#e9ecef' : '#333333';
+                    var gridColor = isDarkMode ? '#4a5568' : '#e5e5e5';
+
                     chart = new Chart(document.getElementById('chart_statistics'), {
                         type: 'line',
                         data: obj.chart,
@@ -32,14 +38,36 @@
                             },
                             tooltips: {
                                 mode: 'index',
-                                intersect: false
+                                intersect: false,
+                                backgroundColor: isDarkMode ? '#2d3748' : '#fff',
+                                titleFontColor: textColor,
+                                bodyFontColor: textColor,
+                                borderColor: gridColor,
+                                borderWidth: 1
+                            },
+                            legend: {
+                                labels: {
+                                    fontColor: textColor
+                                }
                             },
                             scales: {
                                 xAxes: [{
                                     display: true,
+                                    ticks: {
+                                        fontColor: textColor
+                                    },
+                                    gridLines: {
+                                        color: gridColor
+                                    }
                                 }],
                                 yAxes: [{
-                                    display: true
+                                    display: true,
+                                    ticks: {
+                                        fontColor: textColor
+                                    },
+                                    gridLines: {
+                                        color: gridColor
+                                    }
                                 }]
                             },
                             elements: {

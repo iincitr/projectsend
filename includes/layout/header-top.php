@@ -21,6 +21,13 @@
                     <span><?php echo CURRENT_USER_NAME; ?></span>
                 </li>
             <?php } ?>
+            <li class="nav-item">
+                <a href="#" id="theme-toggle" class="theme-toggle" title="<?php _e('Toggle dark/light theme', 'cftp_admin'); ?>">
+                    <i class="fa fa-moon-o theme-icon-dark" aria-hidden="true"></i>
+                    <i class="fa fa-sun-o theme-icon-light" aria-hidden="true" style="display: none;"></i>
+                    <span class="sr-only"><?php _e('Toggle theme', 'cftp_admin'); ?></span>
+                </a>
+            </li>
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" id="language_dropdown" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" data-bs-toggle="dropdown" >
                     <i class="fa fa-globe" aria-hidden="true"></i> <span><?php _e('Language', 'cftp_admin'); ?></span> <span class="caret"></span>

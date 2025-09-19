@@ -140,8 +140,8 @@ include_once ADMIN_VIEWS_DIR . DS . 'header-unlogged.php';
 ?>
 <div class="row justify-content-md-center">
     <div class="col-12 col-sm-12 col-lg-4">
-        <div class="white-box">
-            <div class="white-box-interior">
+        <div class="ps-card">
+            <div class="ps-card-body">
                 <div class="ajax_response">
                 </div>
 

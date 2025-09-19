@@ -11,8 +11,8 @@ $favicon_filename = get_option('favicon_filename');
 <input type="hidden" name="MAX_FILE_SIZE" value="1000000000">
 
 <!-- Logo Section -->
-<div class="white-box">
-    <div class="white-box-interior">
+<div class="ps-card">
+    <div class="ps-card-body">
         <div class="form-group row">
             <div class="col-sm-12">
                 <h3><?php _e('Company Logo', 'cftp_admin'); ?></h3>
@@ -90,8 +90,8 @@ $favicon_filename = get_option('favicon_filename');
 <div class="options_divide"></div>
 
 <!-- Favicon Section -->
-<div class="white-box">
-    <div class="white-box-interior">
+<div class="ps-card">
+    <div class="ps-card-body">
         <div class="form-group row">
             <div class="col-sm-12">
                 <h3><?php _e('Website Favicon', 'cftp_admin'); ?></h3>

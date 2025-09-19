@@ -62,7 +62,7 @@
     }
 
     .file_editor {
-        background:white;
+        background:var(--bg-card);
         padding:30px 10px 10px;
         box-shadow: var(--global_box_shadow);
         border-radius: 8px;
@@ -74,7 +74,7 @@
             }
     
             @include bk(xs) {
-                background:white;
+                background:var(--bg-card);
                 margin-bottom:25px;
             }
         }
@@ -88,7 +88,7 @@
         }
 
         footer {
-            border-top: 1px solid #dedede;
+            border-top: 1px solid var(--border-light);
             padding-top: 1rem;
             margin-top: 1rem;
 

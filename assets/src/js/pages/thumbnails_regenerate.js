@@ -150,8 +150,8 @@
 
         function createProgressContainer() {
             var progressHtml = '<div id="thumbnail-progress" class="mt-4">' +
-                '<div class="white-box">' +
-                '<div class="white-box-interior">' +
+                '<div class="ps-card">' +
+                '<div class="ps-card-body">' +
                 '<h6>' + json_strings.thumbnails_regenerate.processing_title + '</h6>' +
                 '<div class="progress mb-3" style="height: 25px;">' +
                 '<div class="progress-bar progress-bar-striped progress-bar-animated" ' +

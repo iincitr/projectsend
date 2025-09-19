@@ -90,8 +90,8 @@ if ($_POST) {
 <!-- Date Range Filter Section -->
 <div class="row">
     <div class="col-12">
-        <div class="white-box">
-            <div class="white-box-interior">
+        <div class="ps-card">
+            <div class="ps-card-body">
                 <h5><?php _e('Date Range Filter', 'cftp_admin'); ?></h5>
                         <form action="thumbnails-regenerate.php" method="get" id="date-filter-form">
                             <div class="row align-items-end">
@@ -143,8 +143,8 @@ if ($_POST) {
 <!-- Regeneration Options Section -->
 <div class="row mt-3">
     <div class="col-12">
-        <div class="white-box">
-            <div class="white-box-interior">
+        <div class="ps-card">
+            <div class="ps-card-body">
                 <h5><?php _e('Regeneration Options', 'cftp_admin'); ?></h5>
                 
                 <form action="thumbnails-regenerate.php" name="regenerate_thumbnails" method="post" enctype="multipart/form-data" class="form-horizontal" id="thumbnails-form">

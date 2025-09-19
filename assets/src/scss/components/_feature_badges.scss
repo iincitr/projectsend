@@ -22,7 +22,7 @@
 
         &.active {
             background-color: #28a745 !important;
-            color: white !important;
+            color: var(--text-inverse) !important;
         }
 
         &.inactive {
@@ -54,7 +54,7 @@
 
     &.active {
         background-color: #28a745 !important;
-        color: white !important;
+        color: var(--text-inverse) !important;
     }
 
     &.inactive {
