@@ -105,5 +105,5 @@ global $assets_loader;
 $assets_loader = new \ProjectSend\Classes\AssetsLoader();
 
 global $permissions;
-$user_id = (user_is_logged_in()) ? CURRENT_USER_ID : null;
+$user_id = (user_is_logged_in() && defined('CURRENT_USER_ID')) ? CURRENT_USER_ID : null;
 $permissions = new \ProjectSend\Classes\Permissions($user_id);
