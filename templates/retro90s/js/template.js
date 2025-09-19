@@ -64,12 +64,27 @@ function initializeEventHandlers() {
     $('.batch_checkbox').change(function() {
         updateBulkActions();
     });
-    
+
     // Preview link handling
     $('.preview-link').click(function(e) {
         e.preventDefault();
         var url = $(this).data('url');
         showPreview(url);
+    });
+
+    // ESC key to close modal (very important for user experience!)
+    $(document).keydown(function(e) {
+        if (e.keyCode === 27 && isPreviewOpen) { // ESC key
+            closePreview();
+        }
+    });
+
+    // Click background to close modal (modern UX in 90s style!)
+    $(document).on('click', '#previewModal', function(e) {
+        // Close if clicking outside the modal content
+        if (!$(e.target).closest('#previewModalContent').length) {
+            closePreview();
+        }
     });
     
     // Form submission with classic confirmation
