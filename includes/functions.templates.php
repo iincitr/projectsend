@@ -76,7 +76,7 @@ function extract_template_info($template_directory)
         $template_info['features'] = [
             'client_files' => file_exists($template_directory . DS . 'template.php'),
             'public_files' => file_exists($template_directory . DS . 'public.php'),
-            'download_page' => file_exists($template_directory . DS . 'download.php'),
+            'download_page' => file_exists($template_directory . DS . 'public-download.php'),
         ];
     }
 
