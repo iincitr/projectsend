@@ -67,6 +67,20 @@
     color: var(--text-inverse);
 }
 
+// Light mode: ensure active thead cells with sorting have white text
+.footable > thead > tr > th.active.footable-sorted,
+.footable > thead > tr > th.active.footable-sorted-asc,
+.footable > thead > tr > th.active.footable-sorted-desc {
+    background-color: var(--color-primary);
+    color: #ffffff !important;
+}
+
+.footable > thead > tr > th.active.footable-sorted a,
+.footable > thead > tr > th.active.footable-sorted-asc a,
+.footable > thead > tr > th.active.footable-sorted-desc a {
+    color: #ffffff !important;
+}
+
 // Dark mode specific footable overrides
 [data-theme="dark"] {
     .footable > thead > tr > th.footable-sorted,
@@ -111,6 +125,14 @@
 }
 .footable > tbody img {
     vertical-align: middle;
+}
+
+// Resize thumbnails in table view to 50x50
+.footable > tbody img.thumbnail {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
 }
 .footable > tbody > tr:hover > td {
     background: var(--bg-hover) !important;

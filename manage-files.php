@@ -16,7 +16,21 @@ $page_id = 'manage_files';
 
 $current_url = get_form_action_with_existing_parameters(basename(__FILE__), array('modify_id', 'modify_type'));
 
-if (CURRENT_USER_LEVEL == 0) {
+// Handle view preference with cookie
+$view_mode = 'cards'; // default
+$cookie_name = 'projectsend_manage_files_view_preference';
+
+// Check if view parameter is in URL
+if (isset($_GET['view']) && in_array($_GET['view'], ['table', 'cards'])) {
+    $view_mode = $_GET['view'];
+    // Save preference in cookie (expires in 30 days)
+    setcookie($cookie_name, $view_mode, time() + (30 * 24 * 60 * 60), '/');
+} elseif (isset($_COOKIE[$cookie_name]) && in_array($_COOKIE[$cookie_name], ['table', 'cards'])) {
+    // Use cookie preference if no URL parameter
+    $view_mode = $_COOKIE[$cookie_name];
+}
+
+if (defined('CURRENT_USER_LEVEL') && CURRENT_USER_LEVEL == 0) {
     if (count_user_uploads(CURRENT_USER_ID) == 0 && get_option('clients_can_upload') != 1) {
         exit_with_error_code(403);
     }
@@ -493,16 +507,134 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
         <input type="hidden" name="modify_id" id="modify_id" value="<?php echo $this_id; ?>" />
     <?php } ?>
 
+
+    <!-- Shared Control Bar for Both Views -->
+    <?php if ($count_for_pagination > 0): ?>
+    <div class="shared-control-bar mb-3">
+        <div class="control-bar-left">
+            <!-- Select All Button -->
+            <button class="select-all-btn" id="shared-select-all" type="button">
+                <i class="fa fa-square-o"></i>
+                <span><?php _e('Select All', 'cftp_admin'); ?></span>
+            </button>
+
+            <!-- Sort Dropdown -->
+            <div class="sort-dropdown">
+                <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fa fa-sort"></i> <?php _e('Sort', 'cftp_admin'); ?>
+                </button>
+                <ul class="dropdown-menu">
+                    <?php
+                    // Generate sort options for the shared control bar
+                    // Build sort options with separate ASC/DESC entries
+                    $current_params = $_GET;
+                    $current_orderby = $_GET['orderby'] ?? '';
+                    $current_order = $_GET['order'] ?? '';
+
+                    $sort_options = [];
+
+                    // Helper function to build sort URL
+                    $build_sort_url = function($orderby, $order) use ($current_params) {
+                        $params = $current_params;
+                        $params['orderby'] = $orderby;
+                        $params['order'] = $order;
+                        return 'manage-files.php?' . http_build_query($params);
+                    };
+
+                    // Title options
+                    $sort_options[] = ['url' => $build_sort_url('filename', 'asc'), 'label' => __('Title A-Z', 'cftp_admin'), 'active' => $current_orderby == 'filename' && $current_order == 'asc'];
+                    $sort_options[] = ['url' => $build_sort_url('filename', 'desc'), 'label' => __('Title Z-A', 'cftp_admin'), 'active' => $current_orderby == 'filename' && $current_order == 'desc'];
+
+                    // Date options
+                    $sort_options[] = ['url' => $build_sort_url('timestamp', 'desc'), 'label' => __('Newest first', 'cftp_admin'), 'active' => $current_orderby == 'timestamp' && $current_order == 'desc'];
+                    $sort_options[] = ['url' => $build_sort_url('timestamp', 'asc'), 'label' => __('Oldest first', 'cftp_admin'), 'active' => $current_orderby == 'timestamp' && $current_order == 'asc'];
+
+                    // Description options
+                    $sort_options[] = ['url' => $build_sort_url('description', 'asc'), 'label' => __('Description A-Z', 'cftp_admin'), 'active' => $current_orderby == 'description' && $current_order == 'asc'];
+                    $sort_options[] = ['url' => $build_sort_url('description', 'desc'), 'label' => __('Description Z-A', 'cftp_admin'), 'active' => $current_orderby == 'description' && $current_order == 'desc'];
+
+                    // Public permissions options
+                    $sort_options[] = ['url' => $build_sort_url('public_allow', 'desc'), 'label' => __('Public first', 'cftp_admin'), 'active' => $current_orderby == 'public_allow' && $current_order == 'desc'];
+                    $sort_options[] = ['url' => $build_sort_url('public_allow', 'asc'), 'label' => __('Private first', 'cftp_admin'), 'active' => $current_orderby == 'public_allow' && $current_order == 'asc'];
+
+                    // Expiry options
+                    $sort_options[] = ['url' => $build_sort_url('expires', 'asc'), 'label' => __('Expiring soon', 'cftp_admin'), 'active' => $current_orderby == 'expires' && $current_order == 'asc'];
+                    $sort_options[] = ['url' => $build_sort_url('expires', 'desc'), 'label' => __('No expiry first', 'cftp_admin'), 'active' => $current_orderby == 'expires' && $current_order == 'desc'];
+
+                    // Download count options
+                    $sort_options[] = ['url' => $build_sort_url('download_count', 'desc'), 'label' => __('Most downloaded', 'cftp_admin'), 'active' => $current_orderby == 'download_count' && $current_order == 'desc'];
+                    $sort_options[] = ['url' => $build_sort_url('download_count', 'asc'), 'label' => __('Least downloaded', 'cftp_admin'), 'active' => $current_orderby == 'download_count' && $current_order == 'asc'];
+
+                    foreach ($sort_options as $option) {
+                        $active_class = $option['active'] ? ' active' : '';
+                        $icon = '';
+                        if ($option['active']) {
+                            $current_order = isset($_GET['order']) ? $_GET['order'] : 'desc';
+                            $icon = ($current_order == 'asc') ? ' <i class="fa fa-sort-up"></i>' : ' <i class="fa fa-sort-down"></i>';
+                        }
+                        echo '<li><a class="dropdown-item' . $active_class . '" href="' . $option['url'] . '">' . $option['label'] . $icon . '</a></li>';
+                    }
+                    ?>
+                </ul>
+            </div>
+        </div>
+
+        <div class="control-bar-right">
+            <!-- View Toggle -->
+            <div class="view-toggle">
+                <div class="btn-group view-toggle-buttons" role="group" aria-label="<?php _e('View toggle', 'cftp_admin'); ?>">
+                    <?php
+                    // Build URLs preserving other parameters
+                    $current_params = $_GET;
+
+                    // Table view URL (set view=table)
+                    $table_params = $current_params;
+                    $table_params['view'] = 'table';
+                    $table_url = basename(__FILE__) . '?' . http_build_query($table_params);
+
+                    // Cards view URL (set view=cards)
+                    $cards_params = $current_params;
+                    $cards_params['view'] = 'cards';
+                    $cards_url = basename(__FILE__) . '?' . http_build_query($cards_params);
+
+                    // Determine active states
+                    $table_class = ($view_mode === 'table') ? 'btn-primary' : 'btn-outline-secondary';
+                    $cards_class = ($view_mode === 'cards') ? 'btn-primary' : 'btn-outline-secondary';
+                    ?>
+                    <a href="<?php echo $cards_url; ?>" class="btn btn-sm <?php echo $cards_class; ?>" title="<?php _e('Card view', 'cftp_admin'); ?>">
+                        <i class="fa fa-th-large"></i> <?php _e('Cards', 'cftp_admin'); ?>
+                    </a>
+                    <a href="<?php echo $table_url; ?>" class="btn btn-sm <?php echo $table_class; ?>" title="<?php _e('Table view', 'cftp_admin'); ?>">
+                        <i class="fa fa-list"></i> <?php _e('Table', 'cftp_admin'); ?>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <div class="row">
         <div class="col-12">
             <?php
                 if ($count_for_pagination > 0) {
-                    // Generate the table using the class.
-                    $table = new \ProjectSend\Classes\Layout\Table([
-                        'id' => 'files_tbl',
-                        'class' => 'footable table',
-                        'origin' => basename(__FILE__),
-                    ]);
+                    // Use the view mode determined from URL parameter or cookie
+                    $use_card_view = ($view_mode === 'cards');
+
+                    if ($use_card_view) {
+                        // Generate the modern card list
+                        $table = new \ProjectSend\Classes\Layout\CardList([
+                            'id' => 'files_list',
+                            'class' => 'files-card-list',
+                            'origin' => basename(__FILE__),
+                        ]);
+                    } else {
+                        // Generate the table using the class.
+                        $table = new \ProjectSend\Classes\Layout\Table([
+                            'id' => 'files_tbl',
+                            'class' => 'footable table',
+                            'origin' => basename(__FILE__),
+                        ]);
+                    }
 
                     /**
                      * Set the conditions to true or false once here to
@@ -511,21 +643,17 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                      */
                     $conditions = array(
                         'select_all' => true,
-                        'is_not_client' => (CURRENT_USER_LEVEL != '0') ? true : false,
-                        'can_set_public' => (CURRENT_USER_LEVEL != '0' || current_user_can_upload_public()) ? true : false,
-                        'can_set_expiration' => (CURRENT_USER_LEVEL != '0' || get_option('clients_can_set_expiration_date') == '1') ? true : false,
-                        'can_set_categories' => (CURRENT_USER_LEVEL != '0' || get_option('clients_can_set_categories') == '1') ? true : false,
-                        'total_downloads' => (CURRENT_USER_LEVEL != '0' && !isset($search_on)) ? true : false,
+                        'is_not_client' => (defined('CURRENT_USER_LEVEL') && CURRENT_USER_LEVEL != '0') ? true : false,
+                        'can_set_public' => (defined('CURRENT_USER_LEVEL') && (CURRENT_USER_LEVEL != '0' || current_user_can_upload_public())) ? true : false,
+                        'can_set_expiration' => (defined('CURRENT_USER_LEVEL') && (CURRENT_USER_LEVEL != '0' || get_option('clients_can_set_expiration_date') == '1')) ? true : false,
+                        'can_set_categories' => (defined('CURRENT_USER_LEVEL') && (CURRENT_USER_LEVEL != '0' || get_option('clients_can_set_categories') == '1')) ? true : false,
+                        'total_downloads' => (defined('CURRENT_USER_LEVEL') && CURRENT_USER_LEVEL != '0' && !isset($search_on)) ? true : false,
                         'is_search_on' => (isset($search_on)) ? true : false,
                     );
 
                     $thead_columns = array(
                         array(
-                            'select_all' => true,
-                            'attributes' => array(
-                                'class' => array('td_checkbox'),
-                            ),
-                            'condition' => $conditions['select_all'],
+                            'content' => '',  // Empty column for checkboxes
                         ),
                         array(
                             'sortable' => true,
@@ -655,7 +783,7 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                             $preview_cell = '<button class="btn btn-warning btn-sm btn-wide get-preview" data-url="' . BASE_URI . 'process.php?do=get_preview&file_id=' . $file->id . '">' . __('Preview', 'cftp_admin') . '</button>';
                         }
                         if (file_is_image($file->full_path)) {
-                            $thumbnail = make_thumbnail($file->full_path, null, 50, 50);
+                            $thumbnail = make_thumbnail($file->full_path, 'proportional', 300, 300, 90);
                             if (!empty($thumbnail['thumbnail']['url'])) {
                                 $preview_cell = '<a href="#" class="get-preview" data-url="' . BASE_URI . 'process.php?do=get_preview&file_id=' . $file->id . '">
                                             <img alt="" src="' . $thumbnail['thumbnail']['url'] . '" class="thumbnail" />
@@ -739,7 +867,7 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
 
                         // Download count and link on the unfiltered files table no specific client or group selected)
                         if (!isset($search_on)) {
-                            if (CURRENT_USER_LEVEL != '0') {
+                            if (defined('CURRENT_USER_LEVEL') && CURRENT_USER_LEVEL != '0') {
                                 if ($row["download_count"] > 0) {
                                     $btn_class = 'downloaders btn-primary';
                                 } else {
@@ -750,16 +878,20 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                             }
                         }
 
-                        $title_content = '<a href="' . $file->download_link . '" target="_blank">' . $file->title . '</a>';
+                        // Title content for table view (includes extra info)
+                        $title_content_table = '<a href="' . $file->download_link . '" target="_blank">' . $file->title . '</a>';
                         if ($file->title != $file->filename_original) {
-                            $title_content .= '<br><small>'.$file->filename_original.'</small>';
+                            $title_content_table .= '<br><small>'.$file->filename_original.'</small>';
                         }
                         if (file_is_image($file->full_path)) {
                             $dimensions = $file->getDimensions();
                             if (!empty($dimensions)) {
-                                $title_content .= '<br><div class="file_meta"><small>'.$dimensions['width'].' x '.$dimensions['height'].' px</small></div>';
+                                $title_content_table .= '<br><div class="file_meta"><small>'.$dimensions['width'].' x '.$dimensions['height'].' px</small></div>';
                             }
                         }
+
+                        // Simple title content for card view (title + link only)
+                        $title_content = '<a href="' . $file->download_link . '" target="_blank">' . $file->title . '</a>';
 
                         //* Add the cells to the row
                         $tbody_cells = array(
@@ -772,7 +904,8 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                                 'attributes' => array(
                                     'class' => array('file_name'),
                                 ),
-                                'content' => $title_content,
+                                'content' => $title_content_table, // Full content for table view
+                                'card_content' => $title_content, // Simple content for card view
                             ),
                             array(
                                 'content' => $preview_cell,
@@ -825,7 +958,14 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                                 'condition' => $conditions['total_downloads'],
                             ),
                             array(
-                                'content' => '<a href="files-edit.php?ids=' . $file->id . '" class="btn btn-primary btn-sm"><i class="fa fa-pencil"></i><span class="button_label">' . __('Edit', 'cftp_admin') . '</span></a>',
+                                'content' => $row['download_count'] . ' ' . __('downloads', 'cftp_admin'),
+                                'condition' => true, // Always include for card view
+                                'attributes' => array(
+                                    'column_name' => 'card_download_count', // Custom identifier for card processing
+                                ),
+                            ),
+                            array(
+                                'content' => '<a href="files-edit.php?ids=' . $file->id . '" class="btn btn-primary btn-sm" title="' . __('Edit file', 'cftp_admin') . '"><i class="fa fa-pencil"></i><span class="button_label">' . __('Edit', 'cftp_admin') . '</span></a>',
                             ),
                         );
 
@@ -854,6 +994,29 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
         ]);
     }
 ?>
+
+<!-- File Info Panel Overlay -->
+<div id="info-panel-overlay" class="file-info-overlay" style="display: none;"></div>
+
+<!-- File Info Panel -->
+<div id="file-info-panel" class="file-info-panel">
+    <div class="file-info-header">
+        <h3><?php _e('File Information', 'cftp_admin'); ?></h3>
+        <button id="close-info-panel" class="close-panel-btn" type="button">
+            <i class="fa fa-times"></i>
+        </button>
+    </div>
+
+    <div class="file-info-content">
+        <div id="file-info-loading" class="info-loading">
+            <div class="loading-spinner"></div>
+            <p><?php _e('Loading file information...', 'cftp_admin'); ?></p>
+        </div>
+        <div id="file-info-data" style="display: none;">
+            <!-- File info will be loaded here -->
+        </div>
+    </div>
+</div>
 
 <?php
 include_once ADMIN_VIEWS_DIR . DS . 'footer.php';
