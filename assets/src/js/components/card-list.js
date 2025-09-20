@@ -61,14 +61,8 @@
                 });
             }
 
-            // Card view select all button
-            if (this.cardSelectAllBtn) {
-                this.cardSelectAllBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const allSelected = this.selectedItems.size === this.checkboxes.length;
-                    this.handleSelectAll(!allSelected);
-                });
-            }
+            // Note: Card view select all button is now handled by SharedControlBar component
+            // No event listener needed here as SharedControlBar handles the #shared-select-all button
 
             // Batch operations
             this.setupBatchOperations();
