@@ -461,7 +461,20 @@ class CardList
     private function parsePublicStatus($content)
     {
         if (strpos($content, 'Download') !== false || strpos($content, 'btn-primary') !== false) {
-            return '<div class="status-icon public-yes public_link" data-type="file"><i class="fa fa-globe"></i> Public</div>';
+            // Extract data attributes from the original content
+            $data_attrs = '';
+
+            // Extract data-public-url
+            if (preg_match('/data-public-url="([^"]*)"/', $content, $matches)) {
+                $data_attrs .= ' data-public-url="' . htmlspecialchars($matches[1]) . '"';
+            }
+
+            // Extract data-title
+            if (preg_match('/data-title="([^"]*)"/', $content, $matches)) {
+                $data_attrs .= ' data-title="' . htmlspecialchars($matches[1]) . '"';
+            }
+
+            return '<div class="status-icon public-yes public_link" data-type="file"' . $data_attrs . '><i class="fa fa-globe"></i> Public</div>';
         } else {
             return '<div class="status-icon public-no"><i class="fa fa-lock"></i> Private</div>';
         }

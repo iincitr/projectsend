@@ -56,7 +56,8 @@
             }
         }
 
-        .sort-dropdown {
+        .sort-dropdown,
+        .per-page-dropdown {
             .dropdown-toggle {
                 border: 1px solid var(--border-medium);
                 background: var(--bg-card);
@@ -91,8 +92,8 @@
                     }
 
                     &.active {
-                        background: var(--color-primary-light);
-                        color: var(--color-primary);
+                        background: var(--color-primary);
+                        color: white;
                         font-weight: 500;
 
                         i {

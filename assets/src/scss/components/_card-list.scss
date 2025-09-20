@@ -663,6 +663,71 @@
             &:hover {
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             }
+
+            // Fix details button in dark mode
+            .file-info-btn {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(255, 255, 255, 0.3);
+                color: rgba(255, 255, 255, 0.9);
+
+                &:hover {
+                    background: rgba(255, 255, 255, 0.2);
+                    border-color: rgba(255, 255, 255, 0.5);
+                    color: white;
+                }
+            }
+
+            // Fix status tags in dark mode
+            .status-icon {
+                // Public status
+                &.public-yes {
+                    background: rgba(76, 175, 80, 0.2);
+                    color: #81c784;
+
+                    &:hover {
+                        background: rgba(76, 175, 80, 0.3);
+                        color: #a5d6a7;
+                    }
+                }
+
+                &.public-no {
+                    background: rgba(255, 255, 255, 0.1);
+                    color: rgba(255, 255, 255, 0.6);
+                }
+
+                // Assignment status
+                &.assigned-yes {
+                    background: rgba(33, 150, 243, 0.2);
+                    color: #64b5f6;
+                }
+
+                &.assigned-no {
+                    background: rgba(255, 152, 0, 0.2);
+                    color: #ffb74d;
+                }
+
+                // Expiry status
+                &.expires-never {
+                    background: rgba(76, 175, 80, 0.2);
+                    color: #81c784;
+                }
+
+                &.expires-soon {
+                    background: rgba(33, 150, 243, 0.2);
+                    color: #64b5f6;
+                }
+
+                &.expires-expired {
+                    background: rgba(244, 67, 54, 0.2);
+                    color: #ef5350;
+                }
+
+                // Download counter
+                &.downloads {
+                    background: rgba(156, 39, 176, 0.2);
+                    color: #ba68c8;
+                }
+            }
         }
 
         .card-list-batch-bar {

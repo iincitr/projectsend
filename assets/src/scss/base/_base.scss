@@ -290,6 +290,18 @@ form .alert {
     margin:10px 0 10px auto !important;
 }
 
+// Public link modal styles
+.public_link_modal {
+    textarea {
+        color: var(--text-primary) !important;
+        background: var(--bg-card);
+
+        &:read-only {
+            background: var(--bg-hover);
+        }
+    }
+}
+
 // Misc
 .format_url {
     word-break:break-all;

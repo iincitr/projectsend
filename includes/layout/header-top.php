@@ -42,7 +42,7 @@
                     <?php
                         }
                     ?>
-                    <?php if ( user_is_logged_in() && CURRENT_USER_LEVEL != 0) { ?>
+                    <?php if ( user_is_logged_in() && defined('CURRENT_USER_LEVEL') && CURRENT_USER_LEVEL != 0) { ?>
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <a class="dropdown-item" href="<?php echo TRANSLATIONS_URL; ?>" target="_blank">
@@ -52,7 +52,7 @@
                     <?php } ?>
                 </ul>
             </li>
-            <?php if ( user_is_logged_in() ) {
+            <?php if ( user_is_logged_in() && defined('CURRENT_USER_NAME') && defined('CURRENT_USER_ID') ) {
                 // Extract user initials for avatar
                 $user_name = CURRENT_USER_NAME;
                 $words = explode(' ', trim($user_name));

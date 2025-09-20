@@ -375,13 +375,29 @@ if ($query_table_files === true) {
     $cq .= " LIMIT :limit_start, :limit_number";
     $sql = $dbh->prepare($cq);
 
-    $pagination_page = (isset($_GET["page"])) ? $_GET["page"] : 1;
-    $pagination_start = ($pagination_page - 1) * get_option('pagination_results_per_page');
-    $params[':limit_start'] = $pagination_start;
-    $params[':limit_number'] = get_option('pagination_results_per_page');
+    // Handle per page override via URL parameter
+    $results_per_page = get_option('pagination_results_per_page');
+    if (isset($_GET['per_page']) && is_numeric($_GET['per_page']) && $_GET['per_page'] > 0 && $_GET['per_page'] <= 100) {
+        $results_per_page = (int)$_GET['per_page'];
+    }
 
-    $sql->execute($params);
+    $pagination_page = (isset($_GET["page"])) ? $_GET["page"] : 1;
+    $pagination_start = ($pagination_page - 1) * $results_per_page;
+
+    // Bind non-LIMIT parameters first
+    foreach ($params as $key => $value) {
+        $sql->bindValue($key, $value);
+    }
+
+    // Bind LIMIT parameters as integers
+    $sql->bindValue(':limit_start', (int)$pagination_start, PDO::PARAM_INT);
+    $sql->bindValue(':limit_number', (int)$results_per_page, PDO::PARAM_INT);
+
+    $sql->execute();
     $count = $sql->rowCount();
+
+    // Debug output (remove after testing) - commented out
+    // error_log("LIMIT DEBUG: start=" . $pagination_start . ", per_page=" . $results_per_page . ", actual_count=" . $count . ", total=" . $count_for_pagination);
 } else {
     $count_for_pagination = 0;
 }
@@ -518,65 +534,97 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                 <span><?php _e('Select All', 'cftp_admin'); ?></span>
             </button>
 
-            <!-- Sort Dropdown -->
-            <div class="sort-dropdown">
-                <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="fa fa-sort"></i> <?php _e('Sort', 'cftp_admin'); ?>
-                </button>
-                <ul class="dropdown-menu">
-                    <?php
-                    // Generate sort options for the shared control bar
-                    // Build sort options with separate ASC/DESC entries
-                    $current_params = $_GET;
-                    $current_orderby = $_GET['orderby'] ?? '';
-                    $current_order = $_GET['order'] ?? '';
+            <?php
+            // Shared dropdown component function
+            function render_control_dropdown($config) {
+                echo '<div class="' . $config['class'] . '">';
+                echo '<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">';
+                echo '<i class="fa ' . $config['icon'] . '"></i> ' . $config['button_text'];
+                echo '</button>';
+                echo '<ul class="dropdown-menu">';
 
-                    $sort_options = [];
+                foreach ($config['options'] as $option) {
+                    $active_class = $option['active'] ? ' active' : '';
+                    $icon = isset($option['icon']) ? $option['icon'] : '';
+                    echo '<li><a class="dropdown-item' . $active_class . '" href="' . $option['url'] . '">' . $option['label'] . $icon . '</a></li>';
+                }
 
-                    // Helper function to build sort URL
-                    $build_sort_url = function($orderby, $order) use ($current_params) {
-                        $params = $current_params;
-                        $params['orderby'] = $orderby;
-                        $params['order'] = $order;
-                        return 'manage-files.php?' . http_build_query($params);
-                    };
+                echo '</ul>';
+                echo '</div>';
+            }
 
-                    // Title options
-                    $sort_options[] = ['url' => $build_sort_url('filename', 'asc'), 'label' => __('Title A-Z', 'cftp_admin'), 'active' => $current_orderby == 'filename' && $current_order == 'asc'];
-                    $sort_options[] = ['url' => $build_sort_url('filename', 'desc'), 'label' => __('Title Z-A', 'cftp_admin'), 'active' => $current_orderby == 'filename' && $current_order == 'desc'];
+            // Prepare shared parameters
+            $current_params = $_GET;
+            $current_orderby = $_GET['orderby'] ?? '';
+            $current_order = $_GET['order'] ?? '';
 
-                    // Date options
-                    $sort_options[] = ['url' => $build_sort_url('timestamp', 'desc'), 'label' => __('Newest first', 'cftp_admin'), 'active' => $current_orderby == 'timestamp' && $current_order == 'desc'];
-                    $sort_options[] = ['url' => $build_sort_url('timestamp', 'asc'), 'label' => __('Oldest first', 'cftp_admin'), 'active' => $current_orderby == 'timestamp' && $current_order == 'asc'];
+            // Helper function to build sort URL
+            $build_sort_url = function($orderby, $order) use ($current_params) {
+                $params = $current_params;
+                $params['orderby'] = $orderby;
+                $params['order'] = $order;
+                return 'manage-files.php?' . http_build_query($params);
+            };
 
-                    // Description options
-                    $sort_options[] = ['url' => $build_sort_url('description', 'asc'), 'label' => __('Description A-Z', 'cftp_admin'), 'active' => $current_orderby == 'description' && $current_order == 'asc'];
-                    $sort_options[] = ['url' => $build_sort_url('description', 'desc'), 'label' => __('Description Z-A', 'cftp_admin'), 'active' => $current_orderby == 'description' && $current_order == 'desc'];
+            // Helper function to build per page URL
+            $build_per_page_url = function($per_page) use ($current_params) {
+                $params = $current_params;
+                $params['per_page'] = $per_page;
+                unset($params['page']); // Reset to page 1 when changing per page
+                return 'manage-files.php?' . http_build_query($params);
+            };
 
-                    // Public permissions options
-                    $sort_options[] = ['url' => $build_sort_url('public_allow', 'desc'), 'label' => __('Public first', 'cftp_admin'), 'active' => $current_orderby == 'public_allow' && $current_order == 'desc'];
-                    $sort_options[] = ['url' => $build_sort_url('public_allow', 'asc'), 'label' => __('Private first', 'cftp_admin'), 'active' => $current_orderby == 'public_allow' && $current_order == 'asc'];
+            // Sort dropdown configuration
+            $sort_options = [];
+            $sort_options[] = ['url' => $build_sort_url('filename', 'asc'), 'label' => __('Title A-Z', 'cftp_admin'), 'active' => $current_orderby == 'filename' && $current_order == 'asc'];
+            $sort_options[] = ['url' => $build_sort_url('filename', 'desc'), 'label' => __('Title Z-A', 'cftp_admin'), 'active' => $current_orderby == 'filename' && $current_order == 'desc'];
+            $sort_options[] = ['url' => $build_sort_url('timestamp', 'desc'), 'label' => __('Newest first', 'cftp_admin'), 'active' => $current_orderby == 'timestamp' && $current_order == 'desc'];
+            $sort_options[] = ['url' => $build_sort_url('timestamp', 'asc'), 'label' => __('Oldest first', 'cftp_admin'), 'active' => $current_orderby == 'timestamp' && $current_order == 'asc'];
+            $sort_options[] = ['url' => $build_sort_url('description', 'asc'), 'label' => __('Description A-Z', 'cftp_admin'), 'active' => $current_orderby == 'description' && $current_order == 'asc'];
+            $sort_options[] = ['url' => $build_sort_url('description', 'desc'), 'label' => __('Description Z-A', 'cftp_admin'), 'active' => $current_orderby == 'description' && $current_order == 'desc'];
+            $sort_options[] = ['url' => $build_sort_url('public_allow', 'desc'), 'label' => __('Public first', 'cftp_admin'), 'active' => $current_orderby == 'public_allow' && $current_order == 'desc'];
+            $sort_options[] = ['url' => $build_sort_url('public_allow', 'asc'), 'label' => __('Private first', 'cftp_admin'), 'active' => $current_orderby == 'public_allow' && $current_order == 'asc'];
+            $sort_options[] = ['url' => $build_sort_url('expires', 'asc'), 'label' => __('Expiring soon', 'cftp_admin'), 'active' => $current_orderby == 'expires' && $current_order == 'asc'];
+            $sort_options[] = ['url' => $build_sort_url('expires', 'desc'), 'label' => __('No expiry first', 'cftp_admin'), 'active' => $current_orderby == 'expires' && $current_order == 'desc'];
+            $sort_options[] = ['url' => $build_sort_url('download_count', 'desc'), 'label' => __('Most downloaded', 'cftp_admin'), 'active' => $current_orderby == 'download_count' && $current_order == 'desc'];
+            $sort_options[] = ['url' => $build_sort_url('download_count', 'asc'), 'label' => __('Least downloaded', 'cftp_admin'), 'active' => $current_orderby == 'download_count' && $current_order == 'asc'];
 
-                    // Expiry options
-                    $sort_options[] = ['url' => $build_sort_url('expires', 'asc'), 'label' => __('Expiring soon', 'cftp_admin'), 'active' => $current_orderby == 'expires' && $current_order == 'asc'];
-                    $sort_options[] = ['url' => $build_sort_url('expires', 'desc'), 'label' => __('No expiry first', 'cftp_admin'), 'active' => $current_orderby == 'expires' && $current_order == 'desc'];
+            // Add sort direction icons for active items
+            foreach ($sort_options as &$option) {
+                if ($option['active']) {
+                    $option['icon'] = ($current_order == 'asc') ? ' <i class="fa fa-sort-up"></i>' : ' <i class="fa fa-sort-down"></i>';
+                }
+            }
 
-                    // Download count options
-                    $sort_options[] = ['url' => $build_sort_url('download_count', 'desc'), 'label' => __('Most downloaded', 'cftp_admin'), 'active' => $current_orderby == 'download_count' && $current_order == 'desc'];
-                    $sort_options[] = ['url' => $build_sort_url('download_count', 'asc'), 'label' => __('Least downloaded', 'cftp_admin'), 'active' => $current_orderby == 'download_count' && $current_order == 'asc'];
+            // Render Sort Dropdown
+            render_control_dropdown([
+                'class' => 'sort-dropdown',
+                'icon' => 'fa-sort',
+                'button_text' => __('Sort', 'cftp_admin'),
+                'options' => $sort_options
+            ]);
 
-                    foreach ($sort_options as $option) {
-                        $active_class = $option['active'] ? ' active' : '';
-                        $icon = '';
-                        if ($option['active']) {
-                            $current_order = isset($_GET['order']) ? $_GET['order'] : 'desc';
-                            $icon = ($current_order == 'asc') ? ' <i class="fa fa-sort-up"></i>' : ' <i class="fa fa-sort-down"></i>';
-                        }
-                        echo '<li><a class="dropdown-item' . $active_class . '" href="' . $option['url'] . '">' . $option['label'] . $icon . '</a></li>';
-                    }
-                    ?>
-                </ul>
-            </div>
+            // Per page dropdown configuration
+            $per_page_options = [10, 25, 50, 100];
+            $current_per_page = isset($_GET['per_page']) ? (int)$_GET['per_page'] : get_option('pagination_results_per_page');
+            $per_page_dropdown_options = [];
+
+            foreach ($per_page_options as $option) {
+                $per_page_dropdown_options[] = [
+                    'url' => $build_per_page_url($option),
+                    'label' => $option . ' ' . __('per page', 'cftp_admin'),
+                    'active' => ($current_per_page == $option)
+                ];
+            }
+
+            // Render Per Page Dropdown
+            render_control_dropdown([
+                'class' => 'per-page-dropdown',
+                'icon' => 'fa-list-ol',
+                'button_text' => $results_per_page . ' ' . __('per page', 'cftp_admin'),
+                'options' => $per_page_dropdown_options
+            ]);
+            ?>
         </div>
 
         <div class="control-bar-right">
@@ -991,6 +1039,7 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
             'link' => 'manage-files.php',
             'current' => $pagination_page,
             'item_count' => $count_for_pagination,
+            'items_per_page' => $results_per_page,
         ]);
     }
 ?>
