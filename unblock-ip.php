@@ -3,7 +3,7 @@
  * Unblock an IP from the failed logins table
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['edit_settings']);
+check_access_enhanced(null, ['unblock_ip']);
 
 $page_title = __('Unblock IP', 'cftp_admin');
 

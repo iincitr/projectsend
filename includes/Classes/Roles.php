@@ -300,23 +300,13 @@ class Roles
 
             // Insert new permissions
             if (!empty($permissions)) {
-                $sql = "INSERT INTO " . TABLE_ROLE_PERMISSIONS . " (role_id, role_level, permission, granted)
-                        VALUES (:role_id, :role_level, :permission, 1)";
+                $sql = "INSERT INTO " . TABLE_ROLE_PERMISSIONS . " (role_id, permission, granted)
+                        VALUES (:role_id, :permission, 1)";
                 $statement = $this->dbh->prepare($sql);
 
                 foreach ($permissions as $permission) {
-                    // Get role_level for backward compatibility
-                    $role_level_map = [
-                        'System Administrator' => 9,
-                        'Account Manager' => 8,
-                        'Uploader' => 7,
-                        'Client' => 0
-                    ];
-                    $role_level = isset($role_level_map[$this->name]) ? $role_level_map[$this->name] : $this->id;
-
                     $statement->execute([
                         'role_id' => $this->id,
-                        'role_level' => $role_level,
                         'permission' => $permission
                     ]);
                 }
@@ -327,7 +317,7 @@ class Roles
 
             // Log the action
             $this->logger->addEntry([
-                'action' => 53, // Custom action for permission update
+                'action' => 60, // Custom action for permission update
                 'owner_id' => defined('CURRENT_USER_ID') ? CURRENT_USER_ID : 1, // Default to user 1 if no current user
                 'affected_account_name' => $this->name,
                 'details' => "Permissions updated for role {$this->name} (" . count($permissions) . " permissions)"
@@ -502,22 +492,7 @@ class Roles
      */
     public static function getRoleByLevel($level)
     {
-        global $dbh;
-
-        // First try to find by role_level if the column still exists
-        try {
-            $sql = "SELECT * FROM " . TABLE_ROLES . " WHERE role_level = :level";
-            $statement = $dbh->prepare($sql);
-            $statement->execute(['level' => $level]);
-            $result = $statement->fetch(PDO::FETCH_ASSOC);
-            if ($result) {
-                return $result;
-            }
-        } catch (Exception $e) {
-            // role_level column might not exist anymore
-        }
-
-        // Fallback: map known levels to role names
+        // Map known levels to role names
         $level_to_name_map = [
             9 => 'System Administrator',
             8 => 'Account Manager',

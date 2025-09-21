@@ -7,6 +7,8 @@ use \PDO;
 
 class Folder
 {
+    protected $dbh;
+    protected $logger;
     protected $id;
     protected $uuid;
     protected $name;
@@ -14,6 +16,8 @@ class Folder
     protected $parent;
     protected $user_id;
     protected $public;
+    protected $validation_passed;
+    protected $validation_errors;
 
     public function __construct($id = null)
     {
@@ -71,22 +75,22 @@ class Folder
     {
         $this->id = $id;
 
-        $this->statement = $this->dbh->prepare("SELECT * FROM " . TABLE_FOLDERS . " WHERE id=:id");
-        $this->statement->bindParam(':id', $this->id, PDO::PARAM_INT);
-        $this->statement->execute();
-        $this->statement->setFetchMode(PDO::FETCH_ASSOC);
+        $statement = $this->dbh->prepare("SELECT * FROM " . TABLE_FOLDERS . " WHERE id=:id");
+        $statement->bindParam(':id', $this->id, PDO::PARAM_INT);
+        $statement->execute();
+        $statement->setFetchMode(PDO::FETCH_ASSOC);
 
-        if ($this->statement->rowCount() == 0) {
+        if ($statement->rowCount() == 0) {
             return false;
         }
     
-        while ($this->row = $this->statement->fetch() ) {
-            $this->uuid = html_output($this->row['uuid']);
-            $this->name = html_output($this->row['name']);
-            $this->slug = html_output($this->row['slug']);
-            $this->parent = html_output($this->row['parent']);
-            $this->user_id = html_output($this->row['user_id']);
-            $this->public = html_output($this->row['public']);
+        while ($row = $statement->fetch() ) {
+            $this->uuid = html_output($row['uuid']);
+            $this->name = html_output($row['name']);
+            $this->slug = html_output($row['slug']);
+            $this->parent = html_output($row['parent']);
+            $this->user_id = html_output($row['user_id']);
+            $this->public = html_output($row['public']);
         }
     }
 
@@ -302,7 +306,7 @@ class Folder
 
     public function currentUserCanAssignToFolder()
     {
-        if (current_role_in(['System Administrator', 'Account Manager', 'Uploader'])) {
+        if (current_user_can('edit_files')) {
             return true;
         }
 

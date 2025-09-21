@@ -361,6 +361,52 @@ class Users
     }
 
     /**
+     * Check if a user can edit this user account
+     * @param int $user_id User ID to check (defaults to current user)
+     * @return bool
+     */
+    public function canUserEdit($user_id = null)
+    {
+        if ($user_id === null) {
+            if (defined('CURRENT_USER_ID')) {
+                $user_id = \CURRENT_USER_ID;
+            } else {
+                return false; // No user logged in
+            }
+        }
+
+        // Users can edit themselves
+        if ($this->id == $user_id) {
+            return true;
+        }
+
+        // Check based on account type
+        if ($this->isClient()) {
+            // For clients: Users with edit_clients permission can edit all clients
+            if (\current_user_can('edit_clients')) {
+                return true;
+            }
+
+            // Users with create_clients permission can edit their own created clients
+            if (\current_user_can('create_clients') && $this->created_by == \CURRENT_USER_USERNAME) {
+                return true;
+            }
+        } else {
+            // For system users: Users with edit_users permission can edit all users
+            if (\current_user_can('edit_users')) {
+                return true;
+            }
+
+            // Users with create_users permission can edit their own created users
+            if (\current_user_can('create_users') && $this->created_by == \CURRENT_USER_USERNAME) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Validate the information from the form.
      */
     public function validate()
@@ -574,20 +620,60 @@ class Users
 
     /**
      * Edit an existing user.
+     * @return array Result with status and message
      */
     public function edit()
     {
         if (empty($this->id)) {
-            return false;
+            return [
+                'status' => 'error',
+                'message' => __('User ID is required for editing.', 'cftp_admin')
+            ];
         }
 
-        $state = array(
-            'query' => 0,
-        );
+        // Check permissions
+        $current_user_id = defined('CURRENT_USER_ID') ? \CURRENT_USER_ID : null;
+        $current_username = defined('CURRENT_USER_USERNAME') ? \CURRENT_USER_USERNAME : null;
+
+        $can_edit = false;
+
+        // Users can edit themselves
+        if ($this->id == $current_user_id) {
+            $can_edit = true;
+        }
+        // Check based on account type
+        elseif ($this->isClient()) {
+            // For clients: Users with edit_clients permission can edit all clients
+            if (\current_user_can('edit_clients')) {
+                $can_edit = true;
+            }
+            // Users with create_clients permission can edit their own created clients
+            elseif (\current_user_can('create_clients') && $this->created_by == $current_username) {
+                $can_edit = true;
+            }
+        } else {
+            // For system users: Users with edit_users permission can edit all users
+            if (\current_user_can('edit_users')) {
+                $can_edit = true;
+            }
+            // Users with create_users permission can edit their own created users
+            elseif (\current_user_can('create_users') && $this->created_by == $current_username) {
+                $can_edit = true;
+            }
+        }
+
+        if (!$can_edit) {
+            return [
+                'status' => 'error',
+                'message' => __('You do not have permission to edit this user.', 'cftp_admin')
+            ];
+        }
 
         if (!$this->validate()) {
-            $state = [];
-            return $state;
+            return [
+                'status' => 'error',
+                'message' => __('Validation errors occurred.', 'cftp_admin')
+            ];
         }
 
         $previous_data = get_user_by_id($this->id);
@@ -651,21 +737,27 @@ class Users
 
             $this->limitUploadToSave($this->limit_upload_to);
 
-            $state['query'] = 1;
-
             $log_action_number = $this->isClient() ? 14 : 13;
 
             /** Record the action log */
             $this->logger->addEntry([
                 'action' => $log_action_number,
-                'owner_id' => CURRENT_USER_ID,
+                'owner_id' => defined('CURRENT_USER_ID') ? \CURRENT_USER_ID : 1,
                 'affected_account' => $this->id,
                 'affected_account_name' => $this->username,
                 'username_column' => true
             ]);
+
+            return [
+                'status' => 'success',
+                'message' => __('User updated successfully.', 'cftp_admin')
+            ];
         }
 
-        return $state;
+        return [
+            'status' => 'error',
+            'message' => __('Failed to update user.', 'cftp_admin')
+        ];
     }
 
     /**

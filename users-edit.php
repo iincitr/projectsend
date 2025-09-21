@@ -119,10 +119,10 @@ if ($_POST) {
     $edit_user->setType("existing_user");
     $edit_response = $edit_user->edit();
 
-    if ($edit_response['query'] == 1) {
-        $flash->success(__('User saved successfully'));
+    if ($edit_response['status'] === 'success') {
+        $flash->success($edit_response['message']);
     } else {
-        $flash->error(__('There was an error saving to the database'));
+        $flash->error($edit_response['message']);
     }
 
     ps_redirect(BASE_URI . 'users-edit.php?id=' . $user_id);

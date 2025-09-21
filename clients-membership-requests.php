@@ -3,7 +3,7 @@
  * Show the list of current clients.
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['manage_groups']);
+check_access_enhanced(null, ['approve_groups_memberships_requests']);
 
 $active_nav = 'groups';
 $this_page = 'clients-membership-requests.php';

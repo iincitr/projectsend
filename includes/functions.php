@@ -541,7 +541,7 @@ function get_user_by_id($id)
 {
     global $dbh;
 
-    $statement = $dbh->prepare("SELECT * FROM " . TABLE_USERS . " WHERE id=:id");
+    $statement = $dbh->prepare("SELECT u.*, r.name as role_name FROM " . TABLE_USERS . " u LEFT JOIN " . TABLE_ROLES . " r ON u.role_id = r.id WHERE u.id=:id");
     $statement->bindParam(':id', $id, PDO::PARAM_INT);
     $statement->execute();
     $statement->setFetchMode(PDO::FETCH_ASSOC);
@@ -553,6 +553,7 @@ function get_user_by_id($id)
             'name' => html_output($row['name']),
             'email' => html_output($row['email']),
             'role_id' => html_output($row['role_id']),
+            'role_name' => html_output($row['role_name']),
             'active' => html_output($row['active']),
             'max_file_size' => html_output($row['max_file_size']),
             'created_date' => html_output($row['timestamp']),
@@ -718,7 +719,7 @@ function get_all_system_user_roles()
         // Get all active non-client roles from database
         $sql = "SELECT name FROM " . TABLE_ROLES . "
                 WHERE active = 1 AND name != 'Client'
-                ORDER BY role_level DESC";
+                ORDER BY id ASC";
 
         try {
             $statement = $dbh->prepare($sql);
@@ -754,12 +755,12 @@ function get_admin_roles()
         // Get all roles with user management permissions
         $sql = "SELECT DISTINCT r.name
                 FROM " . TABLE_ROLES . " r
-                INNER JOIN " . TABLE_ROLE_PERMISSIONS . " rp ON r.role_level = rp.role_level
+                INNER JOIN " . TABLE_ROLE_PERMISSIONS . " rp ON r.id = rp.role_id
                 WHERE r.active = 1
                 AND r.name != 'Client'
                 AND rp.granted = 1
                 AND rp.permission IN ('create_clients', 'edit_clients', 'create_users', 'manage_clients', 'manage_users')
-                ORDER BY r.role_level DESC";
+                ORDER BY r.id ASC";
 
         try {
             $statement = $dbh->prepare($sql);
@@ -818,7 +819,7 @@ function get_available_roles_for_assignment($include_clients = false)
     $sql = "SELECT id, name, description, is_system_role, active
             FROM " . TABLE_ROLES . "
             $where_clause
-            ORDER BY role_level DESC";
+            ORDER BY id ASC";
 
     $statement = $dbh->prepare($sql);
     $statement->execute();

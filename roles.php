@@ -8,6 +8,7 @@ check_access_enhanced(null, ['edit_settings']);
 
 $active_nav = 'users';
 $page_title = __('User Roles Management', 'cftp_admin');
+$page_id = 'roles';
 
 // Get all roles
 $roles = get_all_roles();
@@ -19,9 +20,6 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
     <div class="col-12">
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-lg-6">
-                <h1 class="page-title">
-                    <?php echo $page_title; ?>
-                </h1>
             </div>
             <div class="col-xs-12 col-sm-12 col-lg-6 text-end">
                 <?php if (custom_roles_enabled()): ?>
@@ -46,11 +44,9 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
             </div>
         <?php endif; ?>
 
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title"><?php _e('User Roles', 'cftp_admin'); ?></h5>
-            </div>
-            <div class="card-body">
+        <div class="ps-card">
+            <div class="ps-card-body">
+                <h5><?php _e('User Roles', 'cftp_admin'); ?></h5>
                 <?php if (empty($roles)): ?>
                     <p class="text-muted"><?php _e('No roles found.', 'cftp_admin'); ?></p>
                 <?php else: ?>
@@ -91,17 +87,9 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                                         </td>
                                         <td>
                                             <span class="badge bg-light text-dark"><?php echo $user_count; ?></span>
-                                            <?php if ($user_count > 0): ?>
-                                                <a href="users.php?role=<?php echo $role['id']; ?>" class="btn btn-sm btn-outline-primary ms-1">
-                                                    <i class="fa fa-users"></i>
-                                                </a>
-                                            <?php endif; ?>
                                         </td>
                                         <td>
                                             <span class="badge bg-info"><?php echo count($permissions); ?></span>
-                                            <a href="role-permissions.php?role=<?php echo $role['id']; ?>" class="btn btn-sm btn-outline-secondary ms-1">
-                                                <i class="fa fa-key"></i>
-                                            </a>
                                         </td>
                                         <td>
                                             <?php if ($role['is_system_role']): ?>
@@ -122,6 +110,18 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                                                 <a href="role-permissions.php?role=<?php echo $role['id']; ?>" class="btn btn-sm btn-outline-secondary" title="<?php _e('Manage Permissions', 'cftp_admin'); ?>">
                                                     <i class="fa fa-key"></i>
                                                 </a>
+
+                                                <?php if ($user_count > 0): ?>
+                                                    <?php if ($role['name'] === 'Client'): ?>
+                                                        <a href="clients.php" class="btn btn-sm btn-outline-primary" title="<?php _e('View Clients', 'cftp_admin'); ?>">
+                                                            <i class="fa fa-users"></i>
+                                                        </a>
+                                                    <?php else: ?>
+                                                        <a href="users.php?role=<?php echo $role['id']; ?>" class="btn btn-sm btn-outline-primary" title="<?php _e('View Users', 'cftp_admin'); ?>">
+                                                            <i class="fa fa-users"></i>
+                                                        </a>
+                                                    <?php endif; ?>
+                                                <?php endif; ?>
 
                                                 <?php if (!$role['is_system_role'] && custom_roles_enabled()): ?>
                                                     <a href="roles-edit.php?role=<?php echo $role['id']; ?>" class="btn btn-sm btn-outline-primary" title="<?php _e('Edit Role', 'cftp_admin'); ?>">
@@ -154,70 +154,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
     </div>
 </div>
 
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title"><?php _e('Role Hierarchy', 'cftp_admin'); ?></h5>
-            </div>
-            <div class="card-body">
-                <p class="text-muted"><?php _e('Roles are organized in hierarchy, with higher privileges roles having more access:', 'cftp_admin'); ?></p>
 
-                <div class="row">
-                    <?php
-                    $role_hierarchy = \ProjectSend\Classes\Roles::getRoleHierarchy();
-                    foreach ($role_hierarchy as $role):
-                        $role_type = '';
-                        if ($role['name'] == 'System Administrator') $role_type = 'Super Admin';
-                        elseif ($role['name'] == 'Account Manager') $role_type = 'Admin';
-                        elseif ($role['name'] == 'Uploader') $role_type = 'User';
-                        elseif ($role['name'] == 'Client') $role_type = 'Client';
-                        else $role_type = 'Custom Role';
-                    ?>
-                        <div class="col-md-3 mb-3">
-                            <div class="card border-<?php echo $role['name'] == 'System Administrator' ? 'danger' : ($role['name'] == 'Account Manager' ? 'warning' : ($role['name'] == 'Uploader' ? 'info' : 'secondary')); ?>">
-                                <div class="card-header text-center">
-                                    <strong><?php echo $role_type; ?></strong>
-                                </div>
-                                <div class="card-body text-center">
-                                    <h6><?php echo html_output($role['name']); ?></h6>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Handle role deletion
-    document.querySelectorAll('.delete-role').forEach(function(button) {
-        button.addEventListener('click', function() {
-            const roleId = this.dataset.role;
-            const roleName = this.dataset.name;
-
-            if (confirm('<?php _e('Are you sure you want to delete the role', 'cftp_admin'); ?> "' + roleName + '"?\n\n<?php _e('This action cannot be undone.', 'cftp_admin'); ?>')) {
-                // Create form and submit
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = 'process.php';
-
-                form.innerHTML = `
-                    <input type="hidden" name="do" value="delete_role">
-                    <input type="hidden" name="role_id" value="${roleId}">
-                    <?php echo addCsrf('return'); ?>
-                `;
-
-                document.body.appendChild(form);
-                form.submit();
-            }
-        });
-    });
-});
-</script>
 
 <?php
 include_once ADMIN_VIEWS_DIR . DS . 'footer.php';

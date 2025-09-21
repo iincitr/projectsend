@@ -14,6 +14,7 @@ if (!custom_roles_enabled()) {
 
 $active_nav = 'users';
 $page_title = __('Add New Role', 'cftp_admin');
+$page_id = 'roles_add';
 
 // Process form submission
 if ($_POST) {
@@ -68,9 +69,6 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
     <div class="col-12">
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-lg-6">
-                <h1 class="page-title">
-                    <?php echo $page_title; ?>
-                </h1>
             </div>
             <div class="col-xs-12 col-sm-12 col-lg-6 text-end">
                 <a href="roles.php" class="btn btn-secondary">
@@ -83,11 +81,9 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 
 <div class="row">
     <div class="col-12 col-lg-8">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title"><?php _e('Role Information', 'cftp_admin'); ?></h5>
-            </div>
-            <div class="card-body">
+        <div class="ps-card">
+            <div class="ps-card-body">
+                <h5><?php _e('Role Information', 'cftp_admin'); ?></h5>
                 <form action="" method="post" class="form-horizontal" id="role_form">
                     <?php addCsrf(); ?>
 
@@ -203,11 +199,9 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
     </div>
 
     <div class="col-12 col-lg-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title"><?php _e('Permissions Preview', 'cftp_admin'); ?></h5>
-            </div>
-            <div class="card-body">
+        <div class="ps-card">
+            <div class="ps-card-body">
+                <h5><?php _e('Permissions Preview', 'cftp_admin'); ?></h5>
                 <p class="text-muted"><?php _e('Create the role first and then customize permissions as needed.', 'cftp_admin'); ?></p>
 
                 <div id="permissions-preview" style="display: none;">
@@ -232,86 +226,6 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
     </div>
 </div>
 
-<style>
-.permission-category-create {
-    border-left: 3px solid #e9ecef;
-    padding-left: 1rem;
-}
-
-.permission-checkbox-create:checked + .form-check-label {
-    color: #0d6efd;
-}
-
-.category-toggle-create {
-    font-size: 0.75rem;
-}
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const roleLevel = document.getElementById('role_level');
-    const permissionsPreview = document.getElementById('permissions-preview');
-    const previewLevel = document.getElementById('preview-level');
-    const permissionsList = document.getElementById('permissions-list');
-
-    // Default permissions for each level (simplified)
-    const defaultPermissions = {
-        9: ['Full system access', 'Manage users', 'Manage settings', 'Manage roles'],
-        8: ['Manage clients', 'Manage files', 'View statistics'],
-        7: ['Upload files', 'Manage own files'],
-        6: ['Upload files', 'View own files'],
-        5: ['Upload files', 'View own files'],
-        4: ['Upload files', 'View own files'],
-        3: ['Upload files', 'View own files'],
-        2: ['Upload files', 'View own files'],
-        1: ['Upload files', 'View own files']
-    };
-
-    roleLevel.addEventListener('change', function() {
-        const level = parseInt(this.value);
-
-        if (level && defaultPermissions[level]) {
-            previewLevel.textContent = level;
-
-            const perms = defaultPermissions[level] || ['Basic file access'];
-            permissionsList.innerHTML = perms.map(perm =>
-                '<span class="badge bg-secondary me-1 mb-1">' + perm + '</span>'
-            ).join('');
-
-            permissionsPreview.style.display = 'block';
-        } else {
-            permissionsPreview.style.display = 'none';
-        }
-    });
-
-    // Permission management for role creation
-    const permissionCheckboxes = document.querySelectorAll('.permission-checkbox-create');
-    const selectAllBtn = document.getElementById('select-all-permissions');
-    const selectNoneBtn = document.getElementById('select-none-permissions');
-    const categoryToggles = document.querySelectorAll('.category-toggle-create');
-
-    // Select all permissions
-    selectAllBtn.addEventListener('click', function() {
-        permissionCheckboxes.forEach(cb => cb.checked = true);
-    });
-
-    // Select no permissions
-    selectNoneBtn.addEventListener('click', function() {
-        permissionCheckboxes.forEach(cb => cb.checked = false);
-    });
-
-    // Category toggles
-    categoryToggles.forEach(toggle => {
-        toggle.addEventListener('click', function() {
-            const category = this.dataset.category;
-            const categoryCheckboxes = document.querySelectorAll(`.permission-checkbox-create[data-category="${category}"]`);
-            const allChecked = Array.from(categoryCheckboxes).every(cb => cb.checked);
-
-            categoryCheckboxes.forEach(cb => cb.checked = !allChecked);
-        });
-    });
-});
-</script>
 
 <?php
 include_once ADMIN_VIEWS_DIR . DS . 'footer.php';

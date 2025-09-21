@@ -1,5 +1,5 @@
 <?php
-    if (!current_role_in(['System Administrator'])) {
+    if (!current_user_can('view_dashboard_counters')) {
         exit;
     }
 

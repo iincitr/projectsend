@@ -118,7 +118,7 @@ class GroupsMemberships
         $group_ids = is_array( $arguments['group_ids'] ) ? $arguments['group_ids'] : array( $arguments['group_ids'] );
         $added_by = $arguments['added_by'];
         
-        if ( defined('REGISTERING') or current_role_in(['System Administrator', 'Account Manager']) ) {
+        if ( defined('REGISTERING') or current_user_can('manage_groups') ) {
             $results = [
                 'added' => 0,
                 'queue' => count( $group_ids ),
@@ -152,7 +152,7 @@ class GroupsMemberships
         $group_ids = is_array( $arguments['group_ids'] ) ? $arguments['group_ids'] : array( $arguments['group_ids'] );
         $added_by = $arguments['added_by'];
 
-        if ( current_role_in(['System Administrator', 'Account Manager']) ) {
+        if ( current_user_can('manage_groups') ) {
             $results = [
                 'added' => 0,
                 'queue' => count( $group_ids ),
@@ -245,7 +245,7 @@ class GroupsMemberships
     
     function groupRequestMembership($arguments)
     {
-        if ( current_role_in(['System Administrator', 'Account Manager']) || ( defined('REGISTERING') ) || ( defined('EDITING_SELF_ACCOUNT') ) ) {
+        if ( current_user_can('manage_groups') || ( defined('REGISTERING') ) || ( defined('EDITING_SELF_ACCOUNT') ) ) {
             if (get_option('clients_can_select_group') == 'public' || get_option('clients_can_select_group') == 'all') {
                 $client_id = $arguments['client_id'];
                 $group_ids = is_array( $arguments['group_ids'] ) ? $arguments['group_ids'] : array( $arguments['group_ids'] );

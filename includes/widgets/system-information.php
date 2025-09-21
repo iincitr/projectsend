@@ -3,7 +3,7 @@
 		require_once '../../bootstrap.php';
     }
     
-    if (!current_role_in(['System Administrator'])) {
+    if (!current_user_can('view_system_info')) {
         exit;
     }
 ?>

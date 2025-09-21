@@ -5,7 +5,7 @@
  * selected client.
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['view_files_list']);
+check_access_enhanced(null, ['edit_files']);
 
 $active_nav = 'files';
 

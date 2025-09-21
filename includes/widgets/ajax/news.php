@@ -3,7 +3,7 @@ require_once '../../../bootstrap.php';
 
 header("Content-type: application/json");
 
-if (!current_role_in(['System Administrator'])) {
+if (!current_user_can('view_news')) {
     ps_redirect(BASE_URI);
 }
 

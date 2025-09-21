@@ -91,6 +91,12 @@
             case 'thumbnails_regenerate':
                 admin.pages.thumbnailsRegenerate();
                 break;
+            case 'roles':
+                admin.pages.roles();
+                break;
+            case 'role_permissions':
+                admin.pages.rolePermissions();
+                break;
             default:
                 // do nothing
                 break;

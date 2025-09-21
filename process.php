@@ -96,9 +96,12 @@ switch ($_GET['do']) {
         break;
     case 'dismiss_upgraded_notice':
         redirect_if_not_logged_in();
-        redirect_if_role_not_allowed(['System Administrator', 'Account Manager', 'Uploader']);
+        if (!current_user_can('edit_settings')) {
+            exit_with_error_code(403);
+        }
         save_option('show_upgrade_success_message', 'false');
         ps_redirect(BASE_URI.'dashboard.php');
+        break;
     case 'return_files_ids':
         redirect_if_not_logged_in();
         redirect_if_role_not_allowed($allowed_levels);

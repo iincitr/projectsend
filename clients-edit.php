@@ -118,14 +118,14 @@ if ($_POST) {
         $memberships->updateMembershipRequests($arguments);
     }
 
-    if ($edit_response['query'] == 1) {
+    if ($edit_response['status'] === 'success') {
         if ($client_id == CURRENT_USER_ID) {
             $flash->success(__('Profile edited successfully'));
         } else {
-            $flash->success(__('Client saved successfully'));
+            $flash->success($edit_response['message']);
         }
     } else {
-        $flash->error(__('There was an error saving to the database'));
+        $flash->error($edit_response['message']);
     }
 
     ps_redirect(BASE_URI . 'clients-edit.php?id=' . $client_id);

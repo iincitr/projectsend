@@ -4,7 +4,7 @@
  *
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['edit_settings']);
+check_access_enhanced(null, ['create_assets']);
 
 $asset = new \ProjectSend\Classes\CustomAsset();
 

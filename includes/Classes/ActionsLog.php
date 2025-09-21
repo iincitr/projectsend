@@ -16,6 +16,7 @@ class ActionsLog
     private $affected_account;
     private $affected_file_name;
     private $affected_account_name;
+    private $details;
 
     private $dbh;
 
@@ -28,7 +29,7 @@ class ActionsLog
 
     public function getActivitiesReferences()
     {
-        $this->activities_references = array(
+        $activities_references = array(
             1    => __('Account logs in through the form', 'cftp_admin'),
             //24	=> __('Account logs in through cookies','cftp_admin'),
             31    => __('Account (user or client) logs out', 'cftp_admin'),
@@ -81,7 +82,7 @@ class ActionsLog
             48    => __('An email template was updated', 'cftp_admin'),
         );
 
-        return $this->activities_references;
+        return $activities_references;
     }
 
     /**
@@ -162,7 +163,7 @@ class ActionsLog
 
         $lq .= ")";
 
-        $this->sql_query = $dbh->prepare($lq);
-        $this->sql_query->execute($params);
+        $statement = $dbh->prepare($lq);
+        $statement->execute($params);
     }
 }

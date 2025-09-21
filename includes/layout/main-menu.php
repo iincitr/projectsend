@@ -9,12 +9,11 @@ use ProjectSend\Classes\Files;
 $items = [];
 
 /**
- * Items for system users
+ * Items for system users (non-clients)
  */
-if (current_role_in(['System Administrator', 'Account Manager', 'Uploader'])) {
+if (!current_role_in(['Client'])) {
     $items['dashboard'] = array(
         'nav' => 'dashboard',
-        'roles' => ['System Administrator', 'Account Manager', 'Uploader'],
         'main' => array(
             'label' => __('Dashboard', 'cftp_admin'),
             'icon' => 'tachometer',
@@ -26,7 +25,6 @@ if (current_role_in(['System Administrator', 'Account Manager', 'Uploader'])) {
 
     $items['files'] = array(
         'nav' => 'files',
-        'roles' => ['System Administrator', 'Account Manager', 'Uploader'],
         'main' => array(
             'label' => __('Files', 'cftp_admin'),
             'icon' => 'file',
@@ -46,10 +44,12 @@ if (current_role_in(['System Administrator', 'Account Manager', 'Uploader'])) {
             array(
                 'label' => __('Manage downloads', 'cftp_admin'),
                 'link' => 'manage-downloads.php',
+                'permission' => 'edit_files',
             ),
             array(
                 'label' => __('Find orphan files', 'cftp_admin'),
                 'link' => 'import-orphans.php',
+                'permission' => 'import_orphans',
             ),
             array(
                 'divider' => true,
@@ -57,13 +57,14 @@ if (current_role_in(['System Administrator', 'Account Manager', 'Uploader'])) {
             array(
                 'label' => __('Categories', 'cftp_admin'),
                 'link' => 'categories.php',
+                'permissions' => ['create_categories', 'edit_categories', 'delete_categories'],
             ),
         ),
     );
 
     $items['clients'] = array(
         'nav' => 'clients',
-        'permission' => 'manage_clients',
+        'permissions' => ['manage_clients', 'create_clients', 'edit_clients', 'delete_clients', 'approve_account_requests'],
         'main' => array(
             'label' => __('Clients', 'cftp_admin'),
             'icon' => 'address-card',
@@ -73,10 +74,12 @@ if (current_role_in(['System Administrator', 'Account Manager', 'Uploader'])) {
             array(
                 'label' => __('Add new', 'cftp_admin'),
                 'link' => 'clients-add.php',
+                'permission' => 'create_clients',
             ),
             array(
                 'label' => __('Manage clients', 'cftp_admin'),
                 'link' => 'clients.php',
+                'permission' => 'manage_clients',
                 //'badge'	=> COUNT_CLIENTS_INACTIVE,
             ),
             array(
@@ -86,13 +89,14 @@ if (current_role_in(['System Administrator', 'Account Manager', 'Uploader'])) {
                 'label' => __('Account requests', 'cftp_admin'),
                 'link' => 'clients-requests.php',
                 'badge' => count_account_requests(),
+                'permission' => 'approve_account_requests',
             ),
         ),
     );
 
     $items['groups'] = array(
         'nav' => 'groups',
-        'permission' => 'manage_groups',
+        'permissions' => ['manage_groups', 'create_groups', 'edit_groups', 'delete_groups', 'approve_groups_memberships_requests'],
         'main' => array(
             'label' => __('Clients groups', 'cftp_admin'),
             'icon' => 'th-large',
@@ -102,10 +106,12 @@ if (current_role_in(['System Administrator', 'Account Manager', 'Uploader'])) {
             array(
                 'label' => __('Add new', 'cftp_admin'),
                 'link' => 'groups-add.php',
+                'permission' => 'create_groups',
             ),
             array(
                 'label' => __('Manage groups', 'cftp_admin'),
                 'link' => 'groups.php',
+                'permission' => 'manage_groups',
             ),
             array(
                 'divider' => true,
@@ -114,13 +120,14 @@ if (current_role_in(['System Administrator', 'Account Manager', 'Uploader'])) {
                 'label' => __('Membership requests', 'cftp_admin'),
                 'link' => 'clients-membership-requests.php',
                 'badge' => count_groups_requests_for_existing_clients(),
+                'permission' => 'approve_groups_memberships_requests',
             ),
         ),
     );
 
     $items['users'] = array(
         'nav' => 'users',
-        'permission' => 'manage_users',
+        'permissions' => ['manage_users', 'create_users', 'edit_users', 'delete_users', 'edit_settings'],
         'main' => array(
             'label' => __('System Users', 'cftp_admin'),
             'icon' => 'users',
@@ -129,10 +136,12 @@ if (current_role_in(['System Administrator', 'Account Manager', 'Uploader'])) {
             array(
                 'label' => __('Add new', 'cftp_admin'),
                 'link' => 'users-add.php',
+                'permission' => 'create_users',
             ),
             array(
                 'label' => __('Manage system users', 'cftp_admin'),
                 'link' => 'users.php',
+                'permission' => 'manage_users',
                 //'badge' => COUNT_USERS_INACTIVE,
             ),
             array(
@@ -170,7 +179,7 @@ if (current_role_in(['System Administrator', 'Account Manager', 'Uploader'])) {
 
     $items['themes'] = array(
         'nav' => 'themes',
-        'permission' => 'edit_settings',
+        'permission' => 'change_template',
         'main' => array(
             'label' => __('Themes', 'cftp_admin'),
             'icon' => 'desktop',
@@ -180,7 +189,7 @@ if (current_role_in(['System Administrator', 'Account Manager', 'Uploader'])) {
 
     $items['emails'] = array(
         'nav' => 'emails',
-        'permission' => 'edit_settings',
+        'permission' => 'edit_email_templates',
         'main' => array(
             'label' => __('System e-mails', 'cftp_admin'),
             'icon' => 'envelope',
@@ -291,7 +300,7 @@ if (current_role_in(['System Administrator', 'Account Manager', 'Uploader'])) {
 
     $items['tools'] = array(
         'nav' => 'tools',
-        'permission' => 'edit_settings',
+        'permissions' => ['view_actions_log', 'test_email', 'create_assets', 'edit_assets', 'delete_assets', 'edit_settings'],
         'main' => array(
             'label' => __('Tools', 'cftp_admin'),
             'icon' => 'wrench',
@@ -300,26 +309,32 @@ if (current_role_in(['System Administrator', 'Account Manager', 'Uploader'])) {
             array(
                 'label' => __('Actions log', 'cftp_admin'),
                 'link' => 'actions-log.php',
+                'permission' => 'view_actions_log',
             ),
             array(
                 'label' => __('Cron log', 'cftp_admin'),
                 'link' => 'cron-log.php',
+                'permission' => 'edit_settings',
             ),
             array(
                 'label' => __('Test email configuration', 'cftp_admin'),
                 'link' => 'email-test.php',
+                'permission' => 'test_email',
             ),
             array(
                 'label' => __('Unblock IP', 'cftp_admin'),
                 'link' => 'unblock-ip.php',
+                'permission' => 'unblock_ip',
             ),
             array(
                 'label' => __('Custom HTML/CSS/JS', 'cftp_admin'),
                 'link' => 'custom-assets.php',
+                'permissions' => ['create_assets', 'edit_assets', 'delete_assets'],
             ),
             array(
                 'label' => __('Regenerate thumbnails', 'cftp_admin'),
                 'link' => 'thumbnails-regenerate.php',
+                'permission' => 'edit_settings',
             ),
         ),
     );
@@ -353,7 +368,6 @@ else {
 
     $items['view_files'] = array(
         'nav' => 'template',
-        'roles' => ['System Administrator', 'Account Manager', 'Uploader', 'Client'],
         'main' => array(
             'label' => __('View my files', 'cftp_admin'),
             'link' => CLIENT_VIEW_FILE_LIST_URL_PATH,
@@ -378,9 +392,20 @@ foreach ($items as $item) {
     $has_access = false;
     if (!empty($item['permission'])) {
         $has_access = current_user_can($item['permission']);
-    }
-    if (!$has_access && !empty($item['roles'])) {
+    } elseif (!empty($item['permissions'])) {
+        // Multiple permissions - user needs ANY of them
+        foreach ($item['permissions'] as $perm) {
+            if (current_user_can($perm)) {
+                $has_access = true;
+                break;
+            }
+        }
+    } elseif (!empty($item['roles'])) {
         $has_access = current_role_in($item['roles']);
+    } else {
+        // If no specific permission or role requirement, allow access
+        // (items are already filtered by the main if/else condition)
+        $has_access = true;
     }
 
     if ($has_access) {
@@ -410,6 +435,15 @@ foreach ($items as $item) {
                     $sub_has_access = true; // Default to show if no restrictions
                     if (!empty($subitem['permission'])) {
                         $sub_has_access = current_user_can($subitem['permission']);
+                    } elseif (!empty($subitem['permissions'])) {
+                        // Multiple permissions - user needs ANY of them
+                        $sub_has_access = false;
+                        foreach ($subitem['permissions'] as $perm) {
+                            if (current_user_can($perm)) {
+                                $sub_has_access = true;
+                                break;
+                            }
+                        }
                     } elseif (!empty($subitem['roles'])) {
                         $sub_has_access = current_role_in($subitem['roles']);
                     }

@@ -74,15 +74,15 @@ switch ($user_form_type) {
 			if ($extra_fields == true) {
 		?>
 			<div class="form-group row">
-				<label for="level" class="col-sm-4 control-label"><?php _e('Role','cftp_admin'); ?></label>
+				<label for="role_id" class="col-sm-4 control-label"><?php _e('Role','cftp_admin'); ?></label>
 				<div class="col-sm-8">
-					<select class="form-select" name="level" id="level" required>
+					<select class="form-select" name="role_id" id="role_id" required>
                         <?php
                             // Get available roles from database for system users (exclude client role)
-                            $roles_query = "SELECT role_level, name, description, is_system_role
+                            $roles_query = "SELECT id, name, description, is_system_role
                                           FROM " . TABLE_ROLES . "
                                           WHERE active = 1 AND name != 'Client'
-                                          ORDER BY role_level DESC";
+                                          ORDER BY id ASC";
                             $roles_stmt = $dbh->prepare($roles_query);
                             $roles_stmt->execute();
 

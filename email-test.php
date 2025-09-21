@@ -4,7 +4,7 @@
  * sent by the system.
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['edit_settings']);
+check_access_enhanced(null, ['test_email']);
 
 $page_title = __('Test email configuration', 'cftp_admin');
 

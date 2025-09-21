@@ -91,10 +91,10 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 
 // Add the role filter
 if (isset($_GET['role']) && $_GET['role'] != 'all') {
-    $cq .= " AND level=:level";
+    $cq .= " AND role_id=:role_id";
     $no_results_error = 'filter';
 
-    $params[':level'] = $_GET['role'];
+    $params[':role_id'] = $_GET['role'];
 }
 
 // Add the active filter

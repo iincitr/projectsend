@@ -3,7 +3,7 @@
         require_once '../../bootstrap.php';
     }
 
-    if (!current_role_in(['System Administrator', 'Account Manager', 'Uploader'])) {
+    if (!current_user_can('view_statistics')) {
         exit;
     }
     $days_buttons = array(15, 30, 60);

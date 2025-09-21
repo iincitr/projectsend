@@ -23,6 +23,7 @@ if (!$role->exists()) {
 }
 
 $page_title = sprintf(__('Edit Role: %s', 'cftp_admin'), $role->name);
+$page_id = 'roles_edit';
 
 // Process form submission
 if ($_POST) {
@@ -73,9 +74,6 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
     <div class="col-12">
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-lg-6">
-                <h1 class="page-title">
-                    <?php echo $page_title; ?>
-                </h1>
             </div>
             <div class="col-xs-12 col-sm-12 col-lg-6 text-end">
                 <a href="roles.php" class="btn btn-secondary">
@@ -91,16 +89,14 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 
 <div class="row">
     <div class="col-12 col-lg-8">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">
+        <div class="ps-card">
+            <div class="ps-card-body">
+                <h5>
                     <?php _e('Role Information', 'cftp_admin'); ?>
                     <?php if ($role->is_system_role): ?>
                         <span class="badge bg-primary ms-2"><?php _e('System Role', 'cftp_admin'); ?></span>
                     <?php endif; ?>
                 </h5>
-            </div>
-            <div class="card-body">
                 <?php if ($role->is_system_role): ?>
                     <div class="alert alert-info">
                         <i class="fa fa-info-circle"></i>
@@ -156,11 +152,9 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
     </div>
 
     <div class="col-12 col-lg-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title"><?php _e('Role Statistics', 'cftp_admin'); ?></h5>
-            </div>
-            <div class="card-body">
+        <div class="ps-card">
+            <div class="ps-card-body">
+                <h5><?php _e('Role Statistics', 'cftp_admin'); ?></h5>
                 <div class="row text-center">
                     <div class="col-6">
                         <h4 class="text-primary"><?php echo $user_count; ?></h4>
@@ -213,31 +207,6 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const deleteButton = document.getElementById('delete-role');
-
-    if (deleteButton) {
-        deleteButton.addEventListener('click', function() {
-            if (confirm('<?php _e('Are you sure you want to delete this role?', 'cftp_admin'); ?>\n\n<?php _e('This action cannot be undone.', 'cftp_admin'); ?>')) {
-                // Create form and submit
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = 'process.php';
-
-                form.innerHTML = `
-                    <input type="hidden" name="do" value="delete_role">
-                    <input type="hidden" name="role_level" value="<?php echo $role->id; ?>">
-                    <?php echo addCsrf('return'); ?>
-                `;
-
-                document.body.appendChild(form);
-                form.submit();
-            }
-        });
-    }
-});
-</script>
 
 <?php
 include_once ADMIN_VIEWS_DIR . DS . 'footer.php';

@@ -22,7 +22,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 
 define('CAN_INCLUDE_FILES', true);
 
-if (current_role_in(['System Administrator'])) {
+if (current_user_can('view_dashboard_counters')) {
     include_once WIDGETS_FOLDER . 'counters.php';
 }
 ?>
@@ -38,7 +38,7 @@ if (current_role_in(['System Administrator'])) {
                 <?php include_once WIDGETS_FOLDER . 'news.php'; ?>
             </div>
             <?php
-            if (current_role_in(['System Administrator'])) {
+            if (current_user_can('view_system_info')) {
             ?>
                 <div class="col-sm-6">
                     <?php include_once WIDGETS_FOLDER . 'system-information.php'; ?>
@@ -50,7 +50,7 @@ if (current_role_in(['System Administrator'])) {
     </div>
 
     <?php
-    if (current_role_in(['System Administrator'])) {
+    if (current_user_can('view_actions_log')) {
     ?>
         <div class="col-sm-4 container_widget_actions_log">
             <?php include_once WIDGETS_FOLDER . 'actions-log.php'; ?>

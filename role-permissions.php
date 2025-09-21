@@ -23,6 +23,7 @@ if (!$role->exists()) {
 }
 
 $page_title = sprintf(__('Manage Permissions: %s', 'cftp_admin'), $role->name);
+$page_id = 'role_permissions';
 
 // Process form submission
 if ($_POST) {
@@ -63,9 +64,6 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
     <div class="col-12">
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-lg-6">
-                <h1 class="page-title">
-                    <?php echo $page_title; ?>
-                </h1>
             </div>
             <div class="col-xs-12 col-sm-12 col-lg-6 text-end">
                 <a href="roles-edit.php?role=<?php echo $role->id; ?>" class="btn btn-secondary">
@@ -81,11 +79,11 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 
 <div class="row">
     <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <div class="row align-items-center">
+        <div class="ps-card">
+            <div class="ps-card-body">
+                <div class="row align-items-center mb-3">
                     <div class="col">
-                        <h5 class="card-title mb-0">
+                        <h5 class="mb-0">
                             <?php _e('Permissions', 'cftp_admin'); ?>
                             <?php if ($role->is_system_role): ?>
                                 <span class="badge bg-primary ms-2"><?php _e('System Role', 'cftp_admin'); ?></span>
@@ -105,8 +103,6 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                     </div>
                     <?php endif; ?>
                 </div>
-            </div>
-            <div class="card-body">
                 <form action="" method="post" id="permissions_form">
                     <?php addCsrf(); ?>
 
@@ -196,129 +192,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
     </div>
 </div>
 
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title"><?php _e('Permission Summary', 'cftp_admin'); ?></h5>
-            </div>
-            <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-md-3">
-                        <h4 class="text-primary" id="selected-count"><?php echo count($current_permissions); ?></h4>
-                        <p class="text-muted"><?php _e('Selected', 'cftp_admin'); ?></p>
-                    </div>
-                    <div class="col-md-3">
-                        <h4 class="text-secondary" id="total-count"><?php echo count(get_available_permissions()); ?></h4>
-                        <p class="text-muted"><?php _e('Total Available', 'cftp_admin'); ?></p>
-                    </div>
-                    <div class="col-md-3">
-                        <h4 class="text-info"><?php echo $role->getUserCount(); ?></h4>
-                        <p class="text-muted"><?php _e('Users Affected', 'cftp_admin'); ?></p>
-                    </div>
-                    <div class="col-md-3">
-                        <h4 class="text-warning" id="changes-count">0</h4>
-                        <p class="text-muted"><?php _e('Unsaved Changes', 'cftp_admin'); ?></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const permissionCheckboxes = document.querySelectorAll('.permission-checkbox');
-    const selectAllBtn = document.getElementById('select-all');
-    const selectNoneBtn = document.getElementById('select-none');
-    const categoryToggles = document.querySelectorAll('.category-toggle');
-    const selectedCount = document.getElementById('selected-count');
-    const changesCount = document.getElementById('changes-count');
-
-    // Store initial state
-    const initialState = Array.from(permissionCheckboxes).map(cb => cb.checked);
-    let changeCount = 0;
-
-    function updateCounts() {
-        const checked = document.querySelectorAll('.permission-checkbox:checked').length;
-        selectedCount.textContent = checked;
-
-        // Calculate changes
-        changeCount = 0;
-        permissionCheckboxes.forEach((cb, index) => {
-            if (cb.checked !== initialState[index]) {
-                changeCount++;
-            }
-        });
-        changesCount.textContent = changeCount;
-        changesCount.className = changeCount > 0 ? 'text-warning' : 'text-muted';
-    }
-
-    // Select all permissions
-    selectAllBtn.addEventListener('click', function() {
-        permissionCheckboxes.forEach(cb => cb.checked = true);
-        updateCounts();
-    });
-
-    // Select no permissions
-    selectNoneBtn.addEventListener('click', function() {
-        permissionCheckboxes.forEach(cb => cb.checked = false);
-        updateCounts();
-    });
-
-    // Category toggles
-    categoryToggles.forEach(toggle => {
-        toggle.addEventListener('click', function() {
-            const category = this.dataset.category;
-            const categoryCheckboxes = document.querySelectorAll(`.permission-checkbox[data-category="${category}"]`);
-            const allChecked = Array.from(categoryCheckboxes).every(cb => cb.checked);
-
-            categoryCheckboxes.forEach(cb => cb.checked = !allChecked);
-            updateCounts();
-        });
-    });
-
-    // Update counts when checkboxes change
-    permissionCheckboxes.forEach(cb => {
-        cb.addEventListener('change', updateCounts);
-    });
-
-    // Warn about unsaved changes
-    window.addEventListener('beforeunload', function(e) {
-        if (changeCount > 0) {
-            e.preventDefault();
-            e.returnValue = '';
-        }
-    });
-
-    // Don't warn when submitting form
-    document.getElementById('permissions_form').addEventListener('submit', function() {
-        window.removeEventListener('beforeunload', arguments.callee);
-    });
-
-    // Initial count update
-    updateCounts();
-});
-</script>
-
-<style>
-.permission-category {
-    border-left: 3px solid #e9ecef;
-    padding-left: 1rem;
-}
-
-.form-check-label {
-    cursor: pointer;
-}
-
-.form-check-input:checked + .form-check-label {
-    color: #0d6efd;
-}
-
-.category-toggle {
-    font-size: 0.75rem;
-}
-</style>
 
 <?php
 include_once ADMIN_VIEWS_DIR . DS . 'footer.php';
