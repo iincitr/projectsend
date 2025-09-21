@@ -147,6 +147,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                                             case 'users': echo 'users'; break;
                                             case 'groups': echo 'th-large'; break;
                                             case 'system': echo 'cogs'; break;
+                                            case 'dashboard': echo 'dashboard'; break;
                                             case 'categories': echo 'tags'; break;
                                             case 'assets': echo 'code'; break;
                                             default: echo 'circle';

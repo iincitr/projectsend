@@ -117,7 +117,8 @@ switch ($_GET['do']) {
 
     case 'get_file_info':
         redirect_if_not_logged_in();
-        redirect_if_role_not_allowed($allowed_levels);
+        // Skip role-based check, rely on permission-based check below
+        // This allows custom roles with appropriate permissions to access this endpoint
 
         header('Content-Type: application/json');
 
@@ -128,9 +129,13 @@ switch ($_GET['do']) {
 
         $file_id = (int)$_GET['file_id'];
 
-        // Check if user can download this file
-        if (!user_can_download_file(CURRENT_USER_ID, $file_id)) {
-            echo json_encode(['success' => false, 'error' => 'Access denied']);
+        // Check if user can access this file's information
+        // For file info, we use edit permissions only (not download permissions)
+        // This ensures users can only get detailed info about files they can edit
+        $can_access = user_can_edit_file(CURRENT_USER_ID, $file_id);
+
+        if (!$can_access) {
+            echo json_encode(['success' => false, 'error' => 'Access denied - you do not have permission to view this file information']);
             break;
         }
 

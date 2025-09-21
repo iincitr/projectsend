@@ -285,6 +285,7 @@ class Permissions {
                 'users' => __('User Management', 'cftp_admin'),
                 'groups' => __('Group Management', 'cftp_admin'),
                 'system' => __('System Administration', 'cftp_admin'),
+                'dashboard' => __('Dashboard', 'cftp_admin'),
                 'assets' => __('Asset Management', 'cftp_admin'),
             ];
         }
@@ -314,6 +315,9 @@ class Permissions {
                     break;
                 case 'system':
                     $categories[$category] = __('System Administration', 'cftp_admin');
+                    break;
+                case 'dashboard':
+                    $categories[$category] = __('Dashboard', 'cftp_admin');
                     break;
                 case 'assets':
                     $categories[$category] = __('Asset Management', 'cftp_admin');

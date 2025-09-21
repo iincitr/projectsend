@@ -275,6 +275,13 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
             // Generate the table of files ready to be edited
             if (!empty($editable)) {
                 include_once FORMS_DIR . DS . 'file_editor.php';
+            } else {
+                // No files can be edited - show error message
+                echo '<div class="alert alert-warning">';
+                echo '<h4>' . __('No files available for editing', 'cftp_admin') . '</h4>';
+                echo '<p>' . __('You do not have permission to edit the requested files, or the files do not exist.', 'cftp_admin') . '</p>';
+                echo '<a href="manage-files.php" class="btn btn-primary">' . __('Back to Files', 'cftp_admin') . '</a>';
+                echo '</div>';
             }
         }
         ?>

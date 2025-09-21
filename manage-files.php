@@ -305,6 +305,13 @@ if ($query_table_files === true) {
         $conditions[] = "folder_id IS NULL";
     }
 
+    // Filter by ownership if user doesn't have edit_others_files permission
+    if (!current_user_can('edit_others_files')) {
+        // Only show files uploaded by the current user
+        $conditions[] = "user_id = :owner_user_id";
+        $params[':owner_user_id'] = CURRENT_USER_ID;
+    }
+
     // Filter by assignations
     if (isset($_GET['assigned']) && !empty($_GET['assigned'])) {
         if (array_key_exists($_GET['assigned'], $filter_options_assigned)) {

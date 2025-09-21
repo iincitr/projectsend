@@ -2252,22 +2252,29 @@ function user_can_edit_file($user_id = null, $file_id = null)
     }
 
     $user = get_user_by_id($user_id);
+    $file = get_file_by_id($file_id);
 
-    // Check if user has admin or account manager role
-    if (in_array($user['role_name'], ['System Administrator', 'Account Manager'])) {
+    if (!$user || !$file) {
+        return false;
+    }
+
+    // Get user's role permissions
+    $role_permissions = get_role_permissions($user['role_id']);
+
+    // Check if user has permission to edit others' files
+    if (in_array('edit_others_files', $role_permissions)) {
         return true;
-        // Special case for uploader?
-        // } elseif ($user['role_name'] == 'Uploader') {
-        //     return true;
-    } else {
-        $file = get_file_by_id($file_id);
+    }
 
+    // Check if user has permission to edit files and this is their own file
+    if (in_array('edit_files', $role_permissions)) {
         // Pre-update when column didn't exist
         if ($file['user_id'] == null) {
             if ($user['username'] == $file['uploaded_by']) {
                 return true;
             }
         }
+
         if ($user['id'] == $file['user_id']) {
             return true;
         }
