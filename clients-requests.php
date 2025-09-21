@@ -3,7 +3,7 @@
  * Show the list of current clients.
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['manage_clients']);
+check_access_enhanced(null, ['manage_clients', 'approve_account_requests'], 'any');
 
 $active_nav = 'clients';
 $this_page = 'clients-requests.php';
@@ -204,7 +204,7 @@ if (!$count) {
 
 // Header buttons
 $header_action_buttons = [];
-if (current_user_can('manage_clients')) {
+if (current_user_can('create_clients') || current_user_can('manage_clients')) {
     $header_action_buttons = [
         [
             'url' => 'clients-add.php',

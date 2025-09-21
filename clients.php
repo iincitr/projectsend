@@ -3,7 +3,7 @@
  * Show the list of current clients.
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['manage_clients']);
+check_access_enhanced(null, ['manage_clients', 'create_clients', 'edit_clients', 'delete_clients'], 'any');
 
 $active_nav = 'clients';
 
@@ -144,7 +144,7 @@ if (!$count) {
 
 // Header buttons
 $header_action_buttons = [];
-if (current_user_can('manage_clients')) {
+if (current_user_can('create_clients') || current_user_can('manage_clients')) {
     $header_action_buttons = [
         [
             'url' => 'clients-add.php',
@@ -177,9 +177,11 @@ $elements_found_count = $count_for_pagination;
 $bulk_actions_items = [
     'none' => __('Select action', 'cftp_admin'),
 ];
-if (current_user_can('manage_clients')) {
+if (current_user_can('manage_clients') || current_user_can('edit_clients')) {
     $bulk_actions_items['activate'] = __('Activate', 'cftp_admin');
     $bulk_actions_items['deactivate'] = __('Deactivate', 'cftp_admin');
+}
+if (current_user_can('manage_clients') || current_user_can('delete_clients')) {
     $bulk_actions_items['delete'] = __('Delete', 'cftp_admin');
 }
 
@@ -377,7 +379,7 @@ include_once LAYOUT_DIR . DS . 'search-filters-bar.php';
                         ),
                         array(
                             'actions' => true,
-                            'content' =>  (current_user_can('manage_clients') ? '<a href="clients-edit.php?id=' . $client->id . '" class="btn btn-primary btn-sm"><i class="fa fa-pencil"></i><span class="button_label">' . __('Edit', 'cftp_admin') . '</span></a>' : '') . "\n"
+                            'content' =>  ((current_user_can('manage_clients') || current_user_can('edit_clients') || (current_user_can('create_clients') && $client->created_by == CURRENT_USER_USERNAME)) ? '<a href="clients-edit.php?id=' . $client->id . '" class="btn btn-primary btn-sm"><i class="fa fa-pencil"></i><span class="button_label">' . __('Edit', 'cftp_admin') . '</span></a>' : '') . "\n"
                         ),
                     );
 

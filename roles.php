@@ -13,11 +13,16 @@ $page_id = 'roles';
 // Get all roles
 $roles = get_all_roles();
 
+// Results count and form actions
+$elements_found_count = count($roles);
+$bulk_actions_items = []; // No bulk actions for roles
+
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 ?>
 
 <div class="row">
     <div class="col-12">
+        <?php include_once LAYOUT_DIR . DS . 'form-counts-actions.php'; ?>
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-lg-6">
             </div>
@@ -44,113 +49,148 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
             </div>
         <?php endif; ?>
 
-        <div class="ps-card">
-            <div class="ps-card-body">
-                <h5><?php _e('User Roles', 'cftp_admin'); ?></h5>
-                <?php if (empty($roles)): ?>
-                    <p class="text-muted"><?php _e('No roles found.', 'cftp_admin'); ?></p>
-                <?php else: ?>
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th><?php _e('Role Name', 'cftp_admin'); ?></th>
-                                    <th><?php _e('Description', 'cftp_admin'); ?></th>
-                                    <th><?php _e('Users', 'cftp_admin'); ?></th>
-                                    <th><?php _e('Permissions', 'cftp_admin'); ?></th>
-                                    <th><?php _e('Type', 'cftp_admin'); ?></th>
-                                    <th><?php _e('Status', 'cftp_admin'); ?></th>
-                                    <th><?php _e('Actions', 'cftp_admin'); ?></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($roles as $role):
-                                    $role_obj = new \ProjectSend\Classes\Roles($role['id']);
-                                    $user_count = $role_obj->getUserCount();
-                                    $permissions = get_role_permissions($role['id']);
-                                ?>
-                                    <tr>
-                                        <td>
-                                            <strong><?php echo html_output($role['name']); ?></strong>
-                                            <span class="badge bg-<?php echo $role['name'] == 'System Administrator' ? 'danger' : ($role['name'] == 'Account Manager' ? 'warning' : ($role['name'] == 'Uploader' ? 'info' : 'secondary')); ?> ms-2">
-                                                <?php
-                                                if ($role['name'] == 'System Administrator') echo 'Super Admin';
-                                                elseif ($role['name'] == 'Account Manager') echo 'Admin';
-                                                elseif ($role['name'] == 'Uploader') echo 'User';
-                                                elseif ($role['name'] == 'Client') echo 'Client';
-                                                else echo 'Custom';
-                                                ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <small class="text-muted"><?php echo html_output($role['description']); ?></small>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-light text-dark"><?php echo $user_count; ?></span>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-info"><?php echo count($permissions); ?></span>
-                                        </td>
-                                        <td>
-                                            <?php if ($role['is_system_role']): ?>
-                                                <span class="badge bg-primary"><?php _e('System', 'cftp_admin'); ?></span>
-                                            <?php else: ?>
-                                                <span class="badge bg-success"><?php _e('Custom', 'cftp_admin'); ?></span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <?php if ($role['active']): ?>
-                                                <span class="badge bg-success"><?php _e('Active', 'cftp_admin'); ?></span>
-                                            <?php else: ?>
-                                                <span class="badge bg-secondary"><?php _e('Inactive', 'cftp_admin'); ?></span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <a href="role-permissions.php?role=<?php echo $role['id']; ?>" class="btn btn-sm btn-outline-secondary" title="<?php _e('Manage Permissions', 'cftp_admin'); ?>">
-                                                    <i class="fa fa-key"></i>
-                                                </a>
+        <?php if (empty($roles)): ?>
+            <p class="text-muted"><?php _e('No roles found.', 'cftp_admin'); ?></p>
+        <?php else: ?>
+            <?php
+            // Generate the table using the class.
+            $table = new \ProjectSend\Classes\Layout\Table([
+                'id' => 'roles_tbl',
+                'class' => 'footable table',
+                'origin' => basename(__FILE__),
+            ]);
 
-                                                <?php if ($user_count > 0): ?>
-                                                    <?php if ($role['name'] === 'Client'): ?>
-                                                        <a href="clients.php" class="btn btn-sm btn-outline-primary" title="<?php _e('View Clients', 'cftp_admin'); ?>">
-                                                            <i class="fa fa-users"></i>
-                                                        </a>
-                                                    <?php else: ?>
-                                                        <a href="users.php?role=<?php echo $role['id']; ?>" class="btn btn-sm btn-outline-primary" title="<?php _e('View Users', 'cftp_admin'); ?>">
-                                                            <i class="fa fa-users"></i>
-                                                        </a>
-                                                    <?php endif; ?>
-                                                <?php endif; ?>
+            $thead_columns = array(
+                array(
+                    'content' => __('Role Name', 'cftp_admin'),
+                ),
+                array(
+                    'content' => __('Description', 'cftp_admin'),
+                    'hide' => 'phone',
+                ),
+                array(
+                    'content' => __('Users', 'cftp_admin'),
+                ),
+                array(
+                    'content' => __('Permissions', 'cftp_admin'),
+                    'hide' => 'phone',
+                ),
+                array(
+                    'content' => __('Type', 'cftp_admin'),
+                    'hide' => 'phone',
+                ),
+                array(
+                    'content' => __('Status', 'cftp_admin'),
+                ),
+                array(
+                    'content' => __('Actions', 'cftp_admin'),
+                    'hide' => 'phone',
+                ),
+            );
+            $table->thead($thead_columns);
 
-                                                <?php if (!$role['is_system_role'] && custom_roles_enabled()): ?>
-                                                    <a href="roles-edit.php?role=<?php echo $role['id']; ?>" class="btn btn-sm btn-outline-primary" title="<?php _e('Edit Role', 'cftp_admin'); ?>">
-                                                        <i class="fa fa-edit"></i>
-                                                    </a>
+            foreach ($roles as $role) {
+                $table->addRow();
 
-                                                    <?php if ($user_count == 0): ?>
-                                                        <button type="button" class="btn btn-sm btn-outline-danger delete-role"
-                                                                data-role="<?php echo $role['id']; ?>"
-                                                                data-name="<?php echo html_output($role['name']); ?>"
-                                                                title="<?php _e('Delete Role', 'cftp_admin'); ?>">
-                                                            <i class="fa fa-trash"></i>
-                                                        </button>
-                                                    <?php endif; ?>
-                                                <?php else: ?>
-                                                    <a href="roles-edit.php?role=<?php echo $role['id']; ?>" class="btn btn-sm btn-outline-secondary" title="<?php _e('View Details', 'cftp_admin'); ?>">
-                                                        <i class="fa fa-eye"></i>
-                                                    </a>
-                                                <?php endif; ?>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
+                $role_obj = new \ProjectSend\Classes\Roles($role['id']);
+                $user_count = $role_obj->getUserCount();
+                $permissions = get_role_permissions($role['id']);
+
+                // Determine role type badge
+                $role_badge = '';
+                $badge_class = 'secondary';
+                if ($role['name'] == 'System Administrator') {
+                    $role_badge = 'Super Admin';
+                    $badge_class = 'danger';
+                } elseif ($role['name'] == 'Account Manager') {
+                    $role_badge = 'Admin';
+                    $badge_class = 'warning';
+                } elseif ($role['name'] == 'Uploader') {
+                    $role_badge = 'User';
+                    $badge_class = 'info';
+                } elseif ($role['name'] == 'Client') {
+                    $role_badge = 'Client';
+                    $badge_class = 'secondary';
+                } else {
+                    $role_badge = 'Custom';
+                    $badge_class = 'secondary';
+                }
+
+                // Status badge
+                $status_badge_label = $role['active'] ? __('Active', 'cftp_admin') : __('Inactive', 'cftp_admin');
+                $status_badge_class = $role['active'] ? 'bg-success' : 'bg-secondary';
+
+                // Type badge
+                $type_badge = $role['is_system_role'] ? __('System', 'cftp_admin') : __('Custom', 'cftp_admin');
+                $type_badge_class = $role['is_system_role'] ? 'bg-primary' : 'bg-success';
+
+                // Build action buttons
+                $action_buttons = '';
+
+                // Permissions button - different styles based on editability
+                if ($role['permissions_editable']) {
+                    $action_buttons .= '<a href="role-permissions.php?role=' . $role['id'] . '" class="btn btn-primary btn-sm"><i class="fa fa-key"></i><span class="button_label">' . __('Permissions', 'cftp_admin') . '</span></a>' . "\n";
+                } else {
+                    $action_buttons .= '<a href="role-permissions.php?role=' . $role['id'] . '" class="btn btn-pslight btn-sm"><i class="fa fa-lock"></i><span class="button_label">' . __('View Permissions', 'cftp_admin') . '</span></a>' . "\n";
+                }
+
+                // View Users/Clients button
+                if ($user_count > 0) {
+                    if ($role['name'] === 'Client') {
+                        $action_buttons .= '<a href="clients.php" class="btn btn-primary btn-sm"><i class="fa fa-users"></i><span class="button_label">' . __('View', 'cftp_admin') . '</span></a>' . "\n";
+                    } else {
+                        $action_buttons .= '<a href="users.php?role=' . $role['id'] . '" class="btn btn-primary btn-sm"><i class="fa fa-users"></i><span class="button_label">' . __('View', 'cftp_admin') . '</span></a>' . "\n";
+                    }
+                }
+
+                // Edit/View button
+                if (!$role['is_system_role'] && custom_roles_enabled()) {
+                    $action_buttons .= '<a href="roles-edit.php?role=' . $role['id'] . '" class="btn btn-primary btn-sm"><i class="fa fa-pencil"></i><span class="button_label">' . __('Edit', 'cftp_admin') . '</span></a>' . "\n";
+                } else {
+                    $action_buttons .= '<a href="roles-edit.php?role=' . $role['id'] . '" class="btn btn-pslight btn-sm"><i class="fa fa-eye"></i><span class="button_label">' . __('View', 'cftp_admin') . '</span></a>' . "\n";
+                }
+
+                // Delete button
+                if (!$role['is_system_role'] && custom_roles_enabled() && $user_count == 0) {
+                    $action_buttons .= '<button type="button" class="btn btn-danger btn-sm delete-role" data-role="' . $role['id'] . '" data-name="' . html_output($role['name']) . '"><i class="fa fa-trash"></i><span class="button_label">' . __('Delete', 'cftp_admin') . '</span></button>' . "\n";
+                }
+
+                // Add the cells to the row
+                $tbody_cells = array(
+                    array(
+                        'content' => '<strong>' . html_output($role['name']) . '</strong> <span class="badge bg-' . $badge_class . ' ms-2">' . $role_badge . '</span>',
+                    ),
+                    array(
+                        'content' => '<small class="text-muted">' . html_output($role['description']) . '</small>',
+                    ),
+                    array(
+                        'content' => '<span class="badge bg-light text-dark">' . $user_count . '</span>',
+                    ),
+                    array(
+                        'content' => '<span class="badge bg-info">' . count($permissions) . '</span>',
+                    ),
+                    array(
+                        'content' => '<span class="badge ' . $type_badge_class . '">' . $type_badge . '</span>',
+                    ),
+                    array(
+                        'content' => '<span class="badge ' . $status_badge_class . '">' . $status_badge_label . '</span>',
+                    ),
+                    array(
+                        'actions' => true,
+                        'content' => $action_buttons,
+                    ),
+                );
+
+                foreach ($tbody_cells as $cell) {
+                    $table->addCell($cell);
+                }
+
+                $table->end_row();
+            }
+
+            echo $table->render();
+            ?>
+        <?php endif; ?>
     </div>
 </div>
 

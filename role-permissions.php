@@ -27,9 +27,15 @@ $page_id = 'role_permissions';
 
 // Process form submission
 if ($_POST) {
-    // CRITICAL: System Admin (level 9) permissions cannot be edited
-    if ($role->name == 'System Administrator') {
-        $flash->error(__('System Administrator permissions cannot be modified. System Admin always has ALL permissions.', 'cftp_admin'));
+    // Check if role permissions can be edited
+    if (!$role->permissions_editable) {
+        if ($role->name == 'System Administrator') {
+            $flash->error(__('System Administrator permissions cannot be modified. System Admin always has ALL permissions.', 'cftp_admin'));
+        } elseif ($role->name == 'Client') {
+            $flash->error(__('Client role permissions cannot be modified. This is a core system role.', 'cftp_admin'));
+        } else {
+            $flash->error(__('This role\'s permissions cannot be modified.', 'cftp_admin'));
+        }
         ps_redirect('role-permissions.php?role=' . $role->id);
     }
 
@@ -90,7 +96,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                             <?php endif; ?>
                         </h5>
                     </div>
-                    <?php if ($role->name != 'System Administrator'): ?>
+                    <?php if ($role->permissions_editable): ?>
                     <div class="col-auto">
                         <div class="btn-group" role="group">
                             <button type="button" class="btn btn-sm btn-outline-success" id="select-all">
@@ -108,11 +114,19 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 
                     <div class="row">
                         <div class="col-12">
-                            <?php if ($role->name == 'System Administrator'): ?>
+                            <?php if (!$role->permissions_editable): ?>
                                 <div class="alert alert-info">
                                     <i class="fa fa-lock"></i>
-                                    <strong><?php _e('System Administrator Role', 'cftp_admin'); ?></strong><br>
-                                    <?php _e('System Administrator permissions cannot be modified. This role automatically has ALL permissions for security and system integrity.', 'cftp_admin'); ?>
+                                    <?php if ($role->name == 'System Administrator'): ?>
+                                        <strong><?php _e('System Administrator Role', 'cftp_admin'); ?></strong><br>
+                                        <?php _e('System Administrator permissions cannot be modified. This role automatically has ALL permissions for security and system integrity.', 'cftp_admin'); ?>
+                                    <?php elseif ($role->name == 'Client'): ?>
+                                        <strong><?php _e('Client Role', 'cftp_admin'); ?></strong><br>
+                                        <?php _e('Client role permissions cannot be modified. This is a core system role with predefined permissions.', 'cftp_admin'); ?>
+                                    <?php else: ?>
+                                        <strong><?php _e('Protected Role', 'cftp_admin'); ?></strong><br>
+                                        <?php _e('This role\'s permissions cannot be modified.', 'cftp_admin'); ?>
+                                    <?php endif; ?>
                                 </div>
                             <?php else: ?>
                                 <p class="text-muted">
@@ -139,7 +153,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                                         }
                                         ?>"></i>
                                         <?php echo $permission_categories[$category]; ?>
-                                        <?php if ($role->name != 'System Administrator'): ?>
+                                        <?php if ($role->permissions_editable): ?>
                                         <button type="button" class="btn btn-sm btn-outline-secondary ms-2 category-toggle"
                                                 data-category="<?php echo $category; ?>">
                                             <?php _e('Toggle All', 'cftp_admin'); ?>
@@ -160,7 +174,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                                                    class="form-check-input permission-checkbox"
                                                    data-category="<?php echo $category; ?>"
                                                    <?php echo in_array($permission_key, $current_permissions) ? 'checked' : ''; ?>
-                                                   <?php echo ($role->name == 'System Administrator') ? 'disabled' : ''; ?> />
+                                                   <?php echo (!$role->permissions_editable) ? 'disabled' : ''; ?> />
                                             <label for="perm_<?php echo $permission_key; ?>" class="form-check-label">
                                                 <strong><?php echo $permission_data['label']; ?></strong>
                                                 <?php if (!empty($permission_data['description'])): ?>
@@ -176,13 +190,13 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 
                     <div class="row mt-4">
                         <div class="col-12">
-                            <?php if ($role->name != 'System Administrator'): ?>
-                                <button type="submit" class="btn btn-primary btn-lg">
+                            <?php if ($role->permissions_editable): ?>
+                                <button type="submit" class="btn btn-primary">
                                     <i class="fa fa-check"></i> <?php _e('Update Permissions', 'cftp_admin'); ?>
                                 </button>
                             <?php endif; ?>
                             <a href="roles.php" class="btn btn-secondary">
-                                <?php echo ($role->name == 'System Administrator') ? __('Back to Roles', 'cftp_admin') : __('Cancel', 'cftp_admin'); ?>
+                                <?php echo (!$role->permissions_editable) ? __('Back to Roles', 'cftp_admin') : __('Cancel', 'cftp_admin'); ?>
                             </a>
                         </div>
                     </div>

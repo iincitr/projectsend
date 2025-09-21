@@ -15,6 +15,7 @@ class Roles
     public $name;
     public $description;
     public $is_system_role;
+    public $permissions_editable;
     public $active;
     public $created_date;
     public $permissions = [];
@@ -46,6 +47,7 @@ class Roles
             $this->name = $role['name'];
             $this->description = $role['description'];
             $this->is_system_role = (bool)$role['is_system_role'];
+            $this->permissions_editable = (bool)$role['permissions_editable'];
             $this->active = (bool)$role['active'];
             $this->created_date = $role['created_date'];
 

@@ -3,7 +3,7 @@
  * Show the form to add a new client.
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['manage_clients']);
+check_access_enhanced(null, ['create_clients', 'manage_clients'], 'any');
 
 $active_nav = 'clients';
 

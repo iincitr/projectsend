@@ -3,7 +3,7 @@
  * Show the form to edit an existing client.
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['manage_clients', 'edit_own_client_profile']);
+check_access_enhanced(null, ['manage_clients', 'edit_clients', 'create_clients', 'edit_own_client_profile'], 'any');
 
 $active_nav = 'clients';
 
