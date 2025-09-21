@@ -4,12 +4,11 @@ use ProjectSend\Classes\Download;
 use ProjectSend\Classes\ActionsLog;
 
 /** Process an action */
-$allowed_levels = array(9, 8, 7, 0);
 require_once 'bootstrap.php';
 
 // Allow get_public_file_info without login requirement
 if (!isset($_GET['do']) || $_GET['do'] !== 'get_public_file_info') {
-    log_in_required($allowed_levels);
+    redirect_if_not_logged_in();
 }
 
 global $auth;
@@ -97,7 +96,7 @@ switch ($_GET['do']) {
         break;
     case 'dismiss_upgraded_notice':
         redirect_if_not_logged_in();
-        redirect_if_role_not_allowed([9,8,7]);
+        redirect_if_role_not_allowed(['System Administrator', 'Account Manager', 'Uploader']);
         save_option('show_upgrade_success_message', 'false');
         ps_redirect(BASE_URI.'dashboard.php');
     case 'return_files_ids':
@@ -251,6 +250,45 @@ switch ($_GET['do']) {
         } catch (Exception $e) {
             echo json_encode(['success' => false, 'error' => 'Exception occurred: ' . $e->getMessage(), 'debug' => 'Exception in get_public_file_info']);
         }
+    break;
+
+    case 'delete_role':
+        // Only super admins can delete roles
+        if (!current_user_is_super_admin()) {
+            $flash->error(__('You do not have permission to delete roles.', 'cftp_admin'));
+            ps_redirect('roles.php');
+        }
+
+        if (empty($_POST['role_id'])) {
+            $flash->error(__('No role specified.', 'cftp_admin'));
+            ps_redirect('roles.php');
+        }
+
+        $role_id = (int)$_POST['role_id'];
+        $role = new \ProjectSend\Classes\Roles($role_id);
+
+        if (!$role->exists()) {
+            $flash->error(__('Role not found.', 'cftp_admin'));
+            ps_redirect('roles.php');
+        }
+
+        if ($role->is_system_role) {
+            $flash->error(__('System roles cannot be deleted.', 'cftp_admin'));
+            ps_redirect('roles.php');
+        }
+
+        if ($role->getUserCount() > 0) {
+            $flash->error(__('Cannot delete role with assigned users.', 'cftp_admin'));
+            ps_redirect('roles.php');
+        }
+
+        if ($role->delete()) {
+            $flash->success(__('Role deleted successfully.', 'cftp_admin'));
+        } else {
+            $flash->error(__('Could not delete role.', 'cftp_admin'));
+        }
+
+        ps_redirect('roles.php');
     break;
 }
 

@@ -129,13 +129,79 @@ function redirect_if_role_not_allowed($allowed_levels = null) {
 		 * level is among those defined by the page.
 		 *
 		 * $allowed_levels in defined on each page before the inclusion of header.php
+         *
+         * UPDATED: Now supports both old level system and new role-based system
         */
         if (user_is_logged_in()) {
             $user = new \ProjectSend\Classes\Users($_SESSION['user_id']);
-            $user_data = $user->getProperties();
 
-            if (isset($user_data['role']) && in_array($user_data['role'], $allowed_levels)) {
-                $permission = true;
+            // NEW: Check using role names (preferred method)
+            $role_data = $user->getRoleData();
+            if ($role_data) {
+                $role_name = $role_data['name'];
+
+                // Map old levels to role names for backward compatibility
+                $allowed_roles = [];
+                foreach ($allowed_levels as $level) {
+                    switch ($level) {
+                        case 9:
+                            $allowed_roles[] = 'System Administrator';
+                            break;
+                        case 8:
+                            $allowed_roles[] = 'Account Manager';
+                            break;
+                        case 7:
+                            $allowed_roles[] = 'Uploader';
+                            break;
+                        case 0:
+                            $allowed_roles[] = 'Client';
+                            break;
+                        default:
+                            // Handle custom roles by loading from database
+                            try {
+                                $custom_role = \ProjectSend\Classes\Roles::getRoleByLevel($level);
+                                if ($custom_role) {
+                                    $allowed_roles[] = $custom_role['name'];
+                                }
+                            } catch (Exception $e) {
+                                // Continue without adding unknown role
+                            }
+                            break;
+                    }
+                }
+
+                if (in_array($role_name, $allowed_roles)) {
+                    $permission = true;
+                }
+            }
+
+            // FALLBACK: If role data not available, use old method
+            if (!$permission) {
+                $user_data = $user->getProperties();
+                if (isset($user_data['role_id'])) {
+                    // Convert role_id to role name for compatibility with numeric level checks
+                    try {
+                        $role = new \ProjectSend\Classes\Roles($user_data['role_id']);
+                        if ($role->exists()) {
+                            // Map role names to allowed levels (backwards compatibility)
+                            $role_level_map = [
+                                'System Administrator' => 9,
+                                'Account Manager' => 8,
+                                'Uploader' => 7,
+                                'Client' => 0
+                            ];
+
+                            if (isset($role_level_map[$role->name])) {
+                                $role_level = $role_level_map[$role->name];
+                                if (in_array($role_level, $allowed_levels)) {
+                                    $permission = true;
+                                }
+                            }
+                        }
+                    } catch (Exception $e) {
+                        // Continue with legacy check
+                    }
+                }
             }
         }
 		/**
@@ -150,6 +216,143 @@ function redirect_if_role_not_allowed($allowed_levels = null) {
     }
 }
 
+/**
+ * Helper functions for common access patterns - easier migration from $allowed_levels
+ */
+
+/**
+ * Check if current user can access admin-only areas
+ */
+function redirect_if_not_admin() {
+    redirect_if_role_not_allowed([9, 8]); // System Administrator, Account Manager
+}
+
+/**
+ * Check if current user can access super-admin-only areas
+ */
+function redirect_if_not_super_admin() {
+    redirect_if_role_not_allowed([9]); // System Administrator only
+}
+
+/**
+ * Check if current user can access system user areas (non-clients)
+ */
+function redirect_if_not_system_user() {
+    redirect_if_role_not_allowed([9, 8, 7]); // System Administrator, Account Manager, Uploader
+}
+
+/**
+ * Allow access to all logged-in users (including clients)
+ */
+function redirect_if_not_logged_in_user() {
+    redirect_if_role_not_allowed([9, 8, 7, 0]);
+}
+
+/**
+ * Check if current user can access client-only areas
+ */
+function redirect_if_not_client() {
+    redirect_if_role_not_allowed([0]);
+}
+
+/**
+ * Enhanced access control that supports both roles and permissions
+ * @param array $allowed_levels Legacy role levels (for backward compatibility)
+ * @param array $required_permissions Array of permission names required
+ * @param string $access_type Type of access required: 'any' (default) or 'all'
+ */
+function check_access_enhanced($allowed_levels = null, $required_permissions = null, $access_type = 'any') {
+    // First check role-based access if provided
+    if (!empty($allowed_levels)) {
+        try {
+            redirect_if_role_not_allowed($allowed_levels);
+            return; // If we get here, role access was granted
+        } catch (Exception $e) {
+            // Role access denied, continue to permission check
+        }
+    }
+
+    // Check permission-based access if provided
+    if (!empty($required_permissions) && user_is_logged_in()) {
+        $permissions = new \ProjectSend\Classes\Permissions($_SESSION['user_id']);
+
+        if ($access_type === 'all') {
+            // User must have ALL specified permissions
+            foreach ($required_permissions as $permission) {
+                if (!$permissions->can($permission)) {
+                    exit_with_error_code(403);
+                }
+            }
+        } else {
+            // User must have ANY of the specified permissions (default)
+            $has_permission = false;
+            foreach ($required_permissions as $permission) {
+                if ($permissions->can($permission)) {
+                    $has_permission = true;
+                    break;
+                }
+            }
+            if (!$has_permission) {
+                exit_with_error_code(403);
+            }
+        }
+        return; // Permission access granted
+    }
+
+    // If neither role nor permission access was granted
+    if (!empty($allowed_levels) || !empty($required_permissions)) {
+        exit_with_error_code(403);
+    }
+}
+
+/**
+ * Check permissions before page access - supports both permissions and roles
+ * @param array $required_permissions Array of permission names required
+ * @param array $allowed_roles Fallback array of role levels (for backward compatibility)
+ */
+function redirect_if_permission_not_allowed($required_permissions = null, $allowed_roles = null) {
+    $permission = false;
+
+    // If permissions are specified, check them first
+    if (!empty($required_permissions) && user_is_logged_in()) {
+        foreach ($required_permissions as $perm) {
+            if (current_user_can($perm)) {
+                $permission = true;
+                break;
+            }
+        }
+    }
+
+    // Fallback to role-based check if permission check failed and roles are specified
+    if (!$permission && !empty($allowed_roles)) {
+        redirect_if_role_not_allowed($allowed_roles);
+        return; // Will exit if fails
+    }
+
+    // If only roles specified (no permissions), use legacy function
+    if (empty($required_permissions) && !empty($allowed_roles)) {
+        redirect_if_role_not_allowed($allowed_roles);
+        return;
+    }
+
+    if (!$permission) {
+        exit_with_error_code(403);
+    }
+}
+
+/**
+ * Enhanced log_in_required function that supports permissions
+ * @param array $allowed_levels Legacy role levels
+ * @param array $required_permissions New permission-based checks
+ */
+function log_in_required_enhanced($allowed_levels = null, $required_permissions = null) {
+    // Check for an active session
+    redirect_if_not_logged_in();
+
+    // Check permissions or roles
+    redirect_if_permission_not_allowed($required_permissions, $allowed_levels);
+}
+
 // Requires password change?
 function password_change_required()
 {
@@ -162,7 +365,7 @@ function password_change_required()
     $session_user = new \ProjectSend\Classes\Users(CURRENT_USER_ID);
 
     if ($session_user->requiresPasswordChange()) {
-        $url = (CURRENT_USER_LEVEL == 0) ? 'clients-edit.php' : 'users-edit.php';
+        $url = current_role_in(['Client']) ? 'clients-edit.php' : 'users-edit.php';
         if (basename($_SERVER["SCRIPT_FILENAME"]) != $url) {
             $flash->error(__('Password change is required for your account', 'cftp_admin'));
 
@@ -184,7 +387,6 @@ function user_can_upload_any_file_type($user_id = null)
     }
 
     $user = new \ProjectSend\Classes\Users($user_id);
-    $properties = $user->getProperties();
 
     if (!empty(get_option('file_types_limit_to'))) {
         switch ( get_option('file_types_limit_to') ) {
@@ -195,13 +397,13 @@ function user_can_upload_any_file_type($user_id = null)
                 return false;
             break;
             case 'clients':
-                if ($properties['role'] == 0) {
+                if ($user->isClient()) {
                     return false;
                 }
             break;
         }
     }
-    unset($user); unset($properties);
+    unset($user);
     
     return true;
 }

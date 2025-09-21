@@ -2,9 +2,8 @@
 /**
  * Show the form to add a new system user.
  */
-$allowed_levels = array(9);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+redirect_if_not_super_admin(); // Only System Administrators can add users
 
 $active_nav = 'users';
 
@@ -33,7 +32,7 @@ if ($_POST) {
         'password' => $_POST['password'],
         'name' => $_POST['name'],
         'email' => $_POST['email'],
-        'role' => $_POST['level'],
+        'role' => $_POST['role_id'],
         'max_file_size' => (isset($_POST["max_file_size"])) ? $_POST['max_file_size'] : '',
         'notify_account' => (isset($_POST["notify_account"])) ? 1 : 0,
         'active' => (isset($_POST["active"])) ? 1 : 0,

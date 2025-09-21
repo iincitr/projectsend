@@ -2,9 +2,8 @@
 /**
  * Show the form to add a new client.
  */
-$allowed_levels = array(9, 8);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+check_access_enhanced(null, ['manage_clients']);
 
 $active_nav = 'clients';
 

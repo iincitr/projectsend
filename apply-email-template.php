@@ -3,9 +3,8 @@
  * Apply Email Template
  * Loads a template's header and footer into the system options
  */
-$allowed_levels = array(9);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+check_access_enhanced(null, ['edit_settings']);
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

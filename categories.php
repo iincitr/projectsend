@@ -3,9 +3,15 @@
  * Allows to hide, show or delete the files assigned to the
  * selected client.
  */
-$allowed_levels = array(9, 8, 7);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+redirect_if_not_logged_in();
+
+// Check for category management permissions
+if (!current_user_can('create_categories') &&
+    !current_user_can('edit_categories') &&
+    !current_user_can('delete_categories')) {
+    exit_with_error_code(403);
+}
 
 $active_nav = 'files';
 

@@ -4,9 +4,8 @@
  */
 define('IS_FILE_EDITOR', true);
 
-$allowed_levels = array(9, 8, 7, 0);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+check_access_enhanced(null, ['edit_files', 'view_files_list']);
 
 $active_nav = 'files';
 
@@ -121,7 +120,7 @@ if (isset($_POST['save'])) {
             $flash->error(__("One or more notifications couldn't be sent.", 'cftp_admin'));
         }
         if (!empty($notifications->getNotificationsInactiveAccounts())) {
-            if (CURRENT_USER_LEVEL == 0) {
+            if (current_role_in(['Client'])) {
                 /**
                  * Clients do not need to know about the status of the
                  * creator's account. Show the ok message instead.
@@ -153,7 +152,7 @@ if (isset($_POST['save'])) {
 
 // Message
 if (!empty($editable) && !isset($_GET['saved'])) {
-    if (CURRENT_USER_LEVEL != 0) {
+    if (!current_role_in(['Client'])) {
         $flash->info(__('You can skip assigning if you want. The files are retained and you may add them to clients or groups later.', 'cftp_admin'));
     }
 }
@@ -210,7 +209,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                 ),
                 array(
                     'content' => __('Public', 'cftp_admin'),
-                    'condition' => (CURRENT_USER_LEVEL != 0 || current_user_can_upload_public()),
+                    'condition' => (!current_role_in(['Client']) || current_user_can('upload_public')),
                     'hide' => 'phone',
                 ),
                 array(
@@ -236,7 +235,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                     </a>';
 
                     // Show the "My files" button only to clients
-                    if (CURRENT_USER_LEVEL == 0) {
+                    if (current_role_in(['Client'])) {
                         $col_actions .= ' <a href="'. CLIENT_VIEW_FILE_LIST_URL .'" class="btn-primary btn btn-sm">'.__('View my files', 'cftp_admin').'</a>';
                     }
 
@@ -253,7 +252,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                         ),
                         array(
                             'content' => $col_public,
-                            'condition' => (CURRENT_USER_LEVEL != 0 || current_user_can_upload_public()),
+                            'condition' => (!current_role_in(['Client']) || current_user_can('upload_public')),
                             'attributes' => array(
                                 'class' => array('col_visibility'),
                             ),

@@ -1,6 +1,5 @@
 <?php
-    $allowed = array(9);
-    if (!in_array(CURRENT_USER_LEVEL,$allowed)) {
+    if (!current_role_in(['System Administrator'])) {
         exit;
     }
 
@@ -8,13 +7,13 @@
     $statement = $dbh->query("SELECT distinct id FROM " . TABLE_FILES );
     $total_files = $statement->rowCount();
 
-    $statement = $dbh->query("SELECT distinct id FROM " . TABLE_USERS . " WHERE level = '0'");
+    $statement = $dbh->query("SELECT distinct id FROM " . TABLE_USERS . " WHERE role_id = (SELECT id FROM " . TABLE_ROLES . " WHERE name = 'Client')");
     $total_clients = $statement->rowCount();
 
     $statement = $dbh->query("SELECT distinct id FROM " . TABLE_GROUPS);
     $total_groups = $statement->rowCount();
 
-    $statement = $dbh->query("SELECT distinct id FROM " . TABLE_USERS . " WHERE level != '0'");
+    $statement = $dbh->query("SELECT distinct id FROM " . TABLE_USERS . " WHERE role_id != (SELECT id FROM " . TABLE_ROLES . " WHERE name = 'Client')");
     $total_users = $statement->rowCount();
 
     $statement = $dbh->query("SELECT distinct id FROM " . TABLE_CATEGORIES);

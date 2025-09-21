@@ -55,7 +55,7 @@
 
                                         <?php
                                             // The following options are available to users or client if clients_can_set_expiration_date set
-                                            if (CURRENT_USER_LEVEL != 0 || get_option('clients_can_set_expiration_date') == '1' ) {
+                                            if (!current_role_in(['Client']) || get_option('clients_can_set_expiration_date') == '1' ) {
                                         ?>
                                                 <div class="col">
                                                     <div class="file_data">
@@ -79,7 +79,7 @@
 
                                                         <?php
                                                             // The following options are available to users only
-                                                            if (CURRENT_USER_LEVEL != 0 || current_user_can_upload_public()) {
+                                                            if (!current_role_in(['Client']) || current_user_can_upload_public()) {
                                                         ?>
                                                                 <div class="divider"></div>
 
@@ -126,7 +126,7 @@ EOL;
                                             }
 
                                             // Only show the CLIENTS select field if the current uploader is a system user, and not a client.
-                                            if (CURRENT_USER_LEVEL != 0) {
+                                            if (!current_role_in(['Client'])) {
                                         ?>
                                                 <div class="col assigns">
                                                     <div class="file_data">
@@ -181,7 +181,7 @@ EOL;
                                         ?>
                                         <div class="col">
                                             <?php
-                                                if (CURRENT_USER_LEVEL != 0 || get_option('clients_can_set_categories') == '1' ) {
+                                                if (!current_role_in(['Client']) || get_option('clients_can_set_categories') == '1' ) {
                                                     $generate_categories_options = generate_categories_options( $get_categories['arranged'], 0, $file->categories);
                                             ?>
                                                     <div class="categories">
@@ -206,7 +206,7 @@ EOL;
                                                 <label><?php _e('Store in this folder', 'cftp_admin');?>:</label>
                                                 <?php
                                                     $ignore = [];
-                                                    if (CURRENT_USER_LEVEL == 0) {
+                                                    if (current_role_in(['Client'])) {
                                                         $see_public_folders = get_option('clients_files_list_include_public');
                                                         $statement = $dbh->prepare("SELECT * FROM " . TABLE_FOLDERS);
                                                         $statement->execute();
@@ -226,7 +226,7 @@ EOL;
                                                     $folders = new \ProjectSend\Classes\Folders;
                                                     $folders_arranged = $folders->getAllArranged();
 
-                                                    if (CURRENT_USER_LEVEL == 0 && get_option('clients_files_list_include_public')) {
+                                                    if (current_role_in(['Client']) && get_option('clients_files_list_include_public')) {
                                                         $folders_arguments['public_or_client'] = true;
                                                     }
                                                 ?>
@@ -243,7 +243,7 @@ EOL;
                                         $copy_buttons = [];
                                         if (count($editable) > 1) {
                                             // Expiration
-                                            if (CURRENT_USER_LEVEL != 0 || get_option('clients_can_set_expiration_date') == '1' ) {
+                                            if (!current_role_in(['Client']) || get_option('clients_can_set_expiration_date') == '1' ) {
                                                 $copy_buttons['expiration'] = [
                                                     'label' => __('Expiration settings','cftp_admin'),
                                                     'class' => 'copy-expiration-settings',
@@ -254,7 +254,7 @@ EOL;
                                                 ];
                                             }
                                             // Public checkbox
-                                            if (CURRENT_USER_LEVEL != 0 || current_user_can_upload_public()) {
+                                            if (!current_role_in(['Client']) || current_user_can_upload_public()) {
                                                 $copy_buttons['public'] = [
                                                     'label' => __('Public settings','cftp_admin'),
                                                     'class' => 'copy-public-settings',
@@ -264,7 +264,7 @@ EOL;
                                                 ];
                                             }
 
-                                            if (CURRENT_USER_LEVEL != 0) {
+                                            if (!current_role_in(['Client'])) {
                                                 // Selected clients
                                                 $copy_buttons['clients'] = [
                                                     'label' => __('Selected clients','cftp_admin'),
@@ -295,7 +295,7 @@ EOL;
                                                 ];
                                             }
 
-                                            if (CURRENT_USER_LEVEL != 0 || get_option('clients_can_set_categories') == '1') {
+                                            if (!current_role_in(['Client']) || get_option('clients_can_set_categories') == '1') {
                                                 // Categories
                                                 $copy_buttons['categories'] = [
                                                     'label' => __('Selected categories','cftp_admin'),
@@ -307,7 +307,7 @@ EOL;
                                                 ];
                                             }
 
-                                            if (CURRENT_USER_LEVEL != 0) {
+                                            if (!current_role_in(['Client'])) {
                                                 // Folders
                                                 $copy_buttons['folder'] = [
                                                     'label' => __('Selected folder','cftp_admin'),

@@ -4,9 +4,8 @@
  * Allows to hide, show or delete the files assigned to the
  * selected client.
  */
-$allowed_levels = array(9, 8, 7, 0);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+check_access_enhanced(null, ['view_files_list']);
 
 $active_nav = 'files';
 
@@ -173,10 +172,9 @@ if ($query_table_files === true) {
     }
 
     /**
-     * If the user is an client_id, or a client is editing their files
-     * only show files uploaded by that account.
+     * If the user is an uploader or client, only show files uploaded by that account.
      */
-    if (CURRENT_USER_LEVEL == '7' || CURRENT_USER_LEVEL == '0') {
+    if (current_role_in(['Uploader', 'Client'])) {
         $conditions[] = "client_id = :client_id";
         $no_results_error = 'account_level';
 
@@ -255,7 +253,7 @@ while ($data_uploaders = $sql_uploaders->fetch()) {
 
 // Search + filters bar data
 $search_form_action = 'manage-downloads.php';
-if (CURRENT_USER_LEVEL != '0') {
+if (!current_role_in(['Client'])) {
     $filters_form = [
         'action' => $current_url,
         'ignore_form_parameters' => ['hidden', 'action', 'client_id'],
@@ -290,7 +288,7 @@ $bulk_actions_items = [
     'edit' => __('Edit', 'cftp_admin'),
 ];
 
-if (CURRENT_USER_LEVEL != '0' || (CURRENT_USER_LEVEL == '0' && get_option('clients_can_delete_own_files') == '1'))
+if (!current_role_in(['Client']) || (current_role_in(['Client']) && current_user_can('delete_files')))
     $bulk_actions_items['delete'] = __('Delete', 'cftp_admin');
 
 // Include layout files
@@ -327,10 +325,10 @@ include_once LAYOUT_DIR . DS . 'search-filters-bar.php';
                      */
                     $conditions = array(
                         'select_all' => true,
-                        'is_not_client' => (CURRENT_USER_LEVEL != '0') ? true : false,
-                        'can_set_public' => (CURRENT_USER_LEVEL != '0' || current_user_can_upload_public()) ? true : false,
-                        'can_set_expiration' => (CURRENT_USER_LEVEL != '0' || get_option('clients_can_set_expiration_date') == '1') ? true : false,
-                        'total_downloads' => (CURRENT_USER_LEVEL != '0' && !isset($search_on)) ? true : false,
+                        'is_not_client' => !current_role_in(['Client']),
+                        'can_set_public' => (!current_role_in(['Client']) || current_user_can_upload_public()),
+                        'can_set_expiration' => (!current_role_in(['Client']) || get_option('clients_can_set_expiration_date') == '1'),
+                        'total_downloads' => (!current_role_in(['Client']) && !isset($search_on)),
                         'is_search_on' => (isset($search_on)) ? true : false,
                     );
 

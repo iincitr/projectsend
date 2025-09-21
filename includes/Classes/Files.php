@@ -665,7 +665,7 @@ class Files
      */
 	private function changeHiddenStatus($status, $to_type, $to_id)
 	{
-        $this->check_level = array(9,8,7);
+        $this->check_level = ['System Administrator', 'Account Manager', 'Uploader'];
         
         if (empty($this->id)) {
             return false;
@@ -727,7 +727,7 @@ class Files
 
 	public function hideFromEveryone()
 	{
-        $this->check_level = array(9,8,7);
+        $this->check_level = ['System Administrator', 'Account Manager', 'Uploader'];
 
         if (empty($this->id)) {
             return false;
@@ -757,7 +757,7 @@ class Files
 
 	public function showToEveryone()
 	{
-        $this->check_level = array(9,8,7);
+        $this->check_level = ['System Administrator', 'Account Manager', 'Uploader'];
 
         if (empty($this->id)) {
             return false;
@@ -791,11 +791,7 @@ class Files
             return true;
         }
 
-        if (!defined('CURRENT_USER_LEVEL')) {
-            return false;
-        }
-
-        if (CURRENT_USER_LEVEL == '0') {
+        if (current_role_in(['Client'])) {
             if (get_option('clients_can_delete_own_files') == '1') {
                 if ($this->uploaded_by == CURRENT_USER_USERNAME) {
                     return true;
@@ -807,13 +803,13 @@ class Files
         }
         
         // Uploaders can only delete their own files
-        if ( CURRENT_USER_LEVEL == '7' ) {
+        if ( current_role_in(['Uploader']) ) {
             if ( $this->uploaded_by == CURRENT_USER_USERNAME ) {
                 return true;
             }
         }
 
-        if (current_role_in(array(9,8))) {
+        if (current_role_in(['System Administrator', 'Account Manager'])) {
             return true;
         }
 
@@ -984,7 +980,7 @@ class Files
         /**
          * If a client is editing a file, only a few properties can be changed
          */
-        if ( CURRENT_USER_LEVEL == 0 ) {
+        if ( current_role_in(['Client']) ) {
             if (get_option('clients_can_set_expiration_date') != '1') {
                 $this->expires = (int)$current["expires"];
                 $this->expiry_date = $current["expiry_date"];
@@ -1035,9 +1031,9 @@ class Files
             $assignments = $this->saveAssignments($assignments, $hidden);
 
             // Create notifications if uploaded by client, or if file is not set as hidden
-            if (CURRENT_USER_LEVEL == 0 || $hidden == 0) {
-                $notification_type = (CURRENT_USER_LEVEL == 0) ? 0 : 1;
-                $users = (CURRENT_USER_LEVEL == 0) ? [CURRENT_USER_ID] : $assignments['added']['clients'];
+            if (current_role_in(['Client']) || $hidden == 0) {
+                $notification_type = current_role_in(['Client']) ? 0 : 1;
+                $users = current_role_in(['Client']) ? [CURRENT_USER_ID] : $assignments['added']['clients'];
                 $this->createNotifications($users, $notification_type);
             }
 
@@ -1069,7 +1065,7 @@ class Files
     // Assign
     public function saveAssignments($new_values, $hidden = 0)
     {
-        $allowed = array(9,8,7);
+        $allowed = ['System Administrator', 'Account Manager', 'Uploader'];
         if (!current_role_in($allowed)) {
             return false;
         }
@@ -1084,7 +1080,7 @@ class Files
         if (empty($new_values['groups'])) { $new_values['groups'] = []; } 
 
         // Clean new ids based on user permissions
-        if (CURRENT_USER_LEVEL == 7) {
+        if (current_role_in(['Uploader'])) {
             $get_user = new \ProjectSend\Classes\Users(CURRENT_USER_ID);
             if (!empty($get_user->limit_upload_to)) {
                 // If client ID is not allowed, remove from array
@@ -1198,7 +1194,7 @@ class Files
 
     public function addAssignment($type = null, $to_id = 0, $hidden = 0)
     {
-        $allowed = array(9,8,7);
+        $allowed = ['System Administrator', 'Account Manager', 'Uploader'];
         if (!current_role_in($allowed)) {
             return false;
         }
@@ -1249,7 +1245,7 @@ class Files
 
     public function removeAssignment($from_type, $from_id)
 	{
-        $allowed = array(9,8,7);
+        $allowed = ['System Administrator', 'Account Manager', 'Uploader'];
         if (!current_role_in($allowed)) {
             return false;
         }
@@ -1301,7 +1297,7 @@ class Files
 
     public function saveCategories($categories = [])
     {
-        $allowed = array(9,8,7);
+        $allowed = ['System Administrator', 'Account Manager', 'Uploader'];
         if (get_option('clients_can_set_categories') == 1) {
             $allowed[] = 0;
         }
@@ -1413,7 +1409,7 @@ class Files
             return false;
         }
 
-        if (CURRENT_USER_LEVEL == 0) {
+        if (current_role_in(['Client'])) {
             if ($folder_id == null) {
                 if (!$this->currentUserCanEdit()) {
                     return false;

@@ -2,9 +2,8 @@
 /**
  * Show the list of current clients.
  */
-$allowed_levels = array(9, 8);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+check_access_enhanced(null, ['manage_clients']);
 
 $active_nav = 'clients';
 $this_page = 'clients-requests.php';
@@ -115,7 +114,7 @@ if (!empty($_POST)) {
 // Query the clients
 $params = [];
 
-$cq = "SELECT * FROM " . TABLE_USERS . " WHERE level='0' AND account_requested='1'";
+$cq = "SELECT * FROM " . TABLE_USERS . " WHERE role_id = (SELECT id FROM " . TABLE_ROLES . " WHERE name = 'Client') AND account_requested='1'";
 
 if (isset($_GET['denied']) && !empty($_GET['denied'])) {
     $cq .= " AND account_denied='1'";

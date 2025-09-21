@@ -158,6 +158,9 @@ define('TABLE_CUSTOM_DOWNLOADS', TABLES_PREFIX . 'custom_downloads');
 define('TABLE_USER_LIMIT_UPLOAD_TO', TABLES_PREFIX . 'user_limit_upload_to');
 define('TABLE_AUTHENTICATION_CODES', TABLES_PREFIX . 'authentication_codes');
 define('TABLE_REMEMBER_TOKENS', TABLES_PREFIX . 'remember_tokens');
+define('TABLE_ROLES', TABLES_PREFIX . 'roles');
+define('TABLE_PERMISSIONS', TABLES_PREFIX . 'permissions');
+define('TABLE_ROLE_PERMISSIONS', TABLES_PREFIX . 'role_permissions');
 
 $original_basic_tables = array(
     TABLE_FILES,

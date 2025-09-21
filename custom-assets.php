@@ -3,9 +3,8 @@
  * Custom HTML/CSS/JS assets administration.
  *
  */
-$allowed_levels = array(9);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+check_access_enhanced(null, ['edit_settings']);
 
 $active_nav = 'tools';
 

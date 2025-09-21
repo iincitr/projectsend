@@ -20,7 +20,13 @@ switch ($user_form_type) {
 		$form_action = 'users-edit.php?id='.$user_id;
 		$require_pass = false;
 		$extra_fields = true;
-        if ($user_arguments['role'] == '7') $limit_field_class = '';
+        if (isset($user_arguments['role_id'])) {
+            // Check if this is an Uploader role (historically level 7)
+            $user_role = new \ProjectSend\Classes\Roles($user_arguments['role_id']);
+            if ($user_role->exists() && $user_role->name === 'Uploader') {
+                $limit_field_class = '';
+            }
+        }
 		break;
 	case 'edit_user_self':
 		$submit_value = __('Update account','cftp_admin');
@@ -72,18 +78,30 @@ switch ($user_form_type) {
 				<div class="col-sm-8">
 					<select class="form-select" name="level" id="level" required>
                         <?php
-                            $roles = [
-                                '9' => USER_ROLE_LVL_9,
-                                '8' => USER_ROLE_LVL_8,
-                                '7' => USER_ROLE_LVL_7,
-                            ];
-                            foreach ( $roles as $role_level => $role_name ) {
+                            // Get available roles from database for system users (exclude client role)
+                            $roles_query = "SELECT role_level, name, description, is_system_role
+                                          FROM " . TABLE_ROLES . "
+                                          WHERE active = 1 AND name != 'Client'
+                                          ORDER BY role_level DESC";
+                            $roles_stmt = $dbh->prepare($roles_query);
+                            $roles_stmt->execute();
+
+                            while ($role = $roles_stmt->fetch(PDO::FETCH_ASSOC)) {
                         ?>
-						        <option value="<?php echo $role_level; ?>" <?php echo (isset($user_arguments['role']) && $user_arguments['role'] == $role_level) ? 'selected="selected"' : ''; ?>><?php echo $role_name; ?></option>
+						        <option value="<?php echo $role['id']; ?>"
+                                        <?php echo (isset($user_arguments['role_id']) && $user_arguments['role_id'] == $role['id']) ? 'selected="selected"' : ''; ?>>
+                                    <?php echo html_output($role['name']); ?>
+                                    <?php if ($role['is_system_role']): ?>
+                                        <span class="text-muted">(<?php _e('System Role', 'cftp_admin'); ?>)</span>
+                                    <?php endif; ?>
+                                </option>
                         <?php
                             }
                         ?>
 					</select>
+                    <small class="form-text text-muted">
+                        <?php _e('Select the role that determines what this user can do in the system', 'cftp_admin'); ?>
+                    </small>
 				</div>
 			</div>
 
@@ -103,7 +121,7 @@ switch ($user_form_type) {
                 <div class="col-sm-8">
                     <select class="form-select select2 none" multiple="multiple" id="limit_upload_to" name="limit_upload_to[]" data-placeholder="<?php _e('Select one or more options. Type to search.', 'cftp_admin');?>">
                         <?php
-                            $sql = $dbh->prepare("SELECT * FROM " . TABLE_USERS . " WHERE level = '0' ORDER BY name ASC");
+                            $sql = $dbh->prepare("SELECT * FROM " . TABLE_USERS . " WHERE role_id = (SELECT id FROM " . TABLE_ROLES . " WHERE name = 'Client') ORDER BY name ASC");
                             $sql->execute();
                             $sql->setFetchMode(PDO::FETCH_ASSOC);
                             while ( $row = $sql->fetch() ) {

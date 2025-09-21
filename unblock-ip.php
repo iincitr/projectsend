@@ -2,9 +2,8 @@
 /**
  * Unblock an IP from the failed logins table
  */
-$allowed_levels = array(9);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+check_access_enhanced(null, ['edit_settings']);
 
 $page_title = __('Unblock IP', 'cftp_admin');
 

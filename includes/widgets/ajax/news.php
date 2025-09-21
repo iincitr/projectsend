@@ -3,7 +3,7 @@ require_once '../../../bootstrap.php';
 
 header("Content-type: application/json");
 
-if (!defined('CURRENT_USER_LEVEL') or CURRENT_USER_LEVEL != 9) {
+if (!current_role_in(['System Administrator'])) {
     ps_redirect(BASE_URI);
 }
 

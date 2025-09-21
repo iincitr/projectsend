@@ -2,9 +2,8 @@
 /**
  * Show the form to edit an existing client.
  */
-$allowed_levels = array(9, 8, 0);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+check_access_enhanced(null, ['manage_clients', 'edit_own_client_profile']);
 
 $active_nav = 'clients';
 
@@ -35,7 +34,7 @@ $get_arguments['denied'] = 0;
 $found_requests = $get_groups->getMembershipRequests($get_arguments);
 
 // Form type
-if (CURRENT_USER_LEVEL != 0) {
+if (!current_role_in(['Client'])) {
     $clients_form_type = 'edit_client';
     $ignore_size = false;
 } else {
@@ -45,7 +44,7 @@ if (CURRENT_USER_LEVEL != 0) {
 }
 
 // Compare the client editing this account to the on the db.
-if (CURRENT_USER_LEVEL == 0) {
+if (current_role_in(['Client'])) {
     if (isset($client_arguments) && CURRENT_USER_USERNAME != $client_arguments['username']) {
         exit_with_error_code(403);
     }
@@ -56,7 +55,7 @@ if ($_POST) {
      * If the user is not an admin, check if the id of the client
      * that's being edited is the same as the current logged in one.
      */
-    if (CURRENT_USER_LEVEL == 0 || CURRENT_USER_LEVEL == 7) {
+    if (current_role_in(['Client', 'Uploader'])) {
         if ($client_id != CURRENT_USER_ID) {
             exit_with_error_code(403);
         }
@@ -89,7 +88,7 @@ if ($_POST) {
         $client_arguments['max_file_size'] = (isset($_POST["max_file_size"])) ? $_POST["max_file_size"] : null;
     }
 
-    if (CURRENT_USER_LEVEL != 0) {
+    if (!current_role_in(['Client'])) {
         $client_arguments['can_upload_public'] = (isset($_POST["can_upload_public"])) ? 1 : 0;
         $client_arguments['active'] = (isset($_POST["active"])) ? 1 : 0;
     }
@@ -113,7 +112,7 @@ if ($_POST) {
         'request_by' => CURRENT_USER_USERNAME,
     ];
 
-    if (in_array(CURRENT_USER_LEVEL, [8, 9])) {
+    if (current_role_in(['Account Manager', 'System Administrator'])) {
         $memberships->clientEditGroups($arguments);
     } else {
         $memberships->updateMembershipRequests($arguments);

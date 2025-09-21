@@ -67,16 +67,16 @@ class Folders
         $folders = [];
         
         // Get client access level if not provided
-        if (!isset($arguments['level']) && isset($arguments['user_id'])) {
-            $arguments['level'] = $this->getUserLevel($arguments['user_id']);
-            if ($arguments['level'] === 0 && !isset($arguments['client_id'])) {
+        if (!isset($arguments['role']) && isset($arguments['user_id'])) {
+            $arguments['role'] = $this->getUserRole($arguments['user_id']);
+            if ($arguments['role'] === 'Client' && !isset($arguments['client_id'])) {
                 $arguments['client_id'] = $arguments['user_id'];
             }
         }
     
         $query = "SELECT DISTINCT f.* FROM " . TABLE_FOLDERS . " f";
         $params = [];
-        if (isset($arguments['level']) && $arguments['level'] === 0 && isset($arguments['client_id'])) {
+        if (isset($arguments['role']) && $arguments['role'] === 'Client' && isset($arguments['client_id'])) {
             $query .= " WHERE (
             -- Folders created by the client
             f.user_id = :client_created
@@ -213,13 +213,15 @@ class Folders
     }
 
 
-    function getUserLevel($user_id)
+    function getUserRole($user_id)
     {
-        $query = "SELECT level FROM " . TABLE_USERS . " WHERE id = :user_id";
+        $query = "SELECT r.name FROM " . TABLE_USERS . " u
+                  JOIN " . TABLE_ROLES . " r ON u.role_id = r.id
+                  WHERE u.id = :user_id";
         $statement = $this->dbh->prepare($query);
         $statement->execute([':user_id' => $user_id]);
         $result = $statement->fetch(\PDO::FETCH_ASSOC);
-        return ($result) ? (int)$result['level'] : null;
+        return ($result) ? $result['name'] : null;
     }
 
     function getAllArranged($parent = null, $depth = 0, $include = [])

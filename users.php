@@ -2,9 +2,8 @@
 /**
  * Show the list of current users.
  */
-$allowed_levels = array(9);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+check_access_enhanced(null, ['edit_users']);
 
 $active_nav = 'users';
 
@@ -77,7 +76,7 @@ if (isset($_POST['action'])) {
 // Query the users
 $params = [];
 
-$cq = "SELECT id FROM " . TABLE_USERS . " WHERE level != '0'";
+$cq = "SELECT id FROM " . TABLE_USERS . " WHERE role_id != (SELECT id FROM " . TABLE_ROLES . " WHERE name = 'Client')";
 
 // Add the search terms
 if (isset($_GET['search']) && !empty($_GET['search'])) {
@@ -161,11 +160,9 @@ $filters_form = [
                 'value' => 'all',
                 'label' => __('All roles', 'cftp_admin')
             ],
-            'options' => [
-                '9' => USER_ROLE_LVL_9,
-                '8' => USER_ROLE_LVL_8,
-                '7' => USER_ROLE_LVL_7,
-            ],
+            'options' => array_column(array_map(function($role) {
+                return [$role['id'], $role['name']];
+            }, get_available_roles_for_assignment(false)), 1, 0), // Get roles from database (exclude clients)
         ],
         'active' => [
             'current' => (isset($_GET['active'])) ? $_GET['active'] : null,
@@ -272,18 +269,8 @@ include_once LAYOUT_DIR . DS . 'search-filters-bar.php';
 
                 $user = new \ProjectSend\Classes\Users($row["id"]);
 
-                // Role name
-                switch ($user->role) {
-                    case '9':
-                        $role_name = USER_ROLE_LVL_9;
-                        break;
-                    case '8':
-                        $role_name = USER_ROLE_LVL_8;
-                        break;
-                    case '7':
-                        $role_name = USER_ROLE_LVL_7;
-                        break;
-                }
+                // Get role name from database
+                $role_name = $user->getRoleName();
 
                 // Get active status
                 $badge_label = ($user->active == 0) ? __('Inactive', 'cftp_admin') : __('Active', 'cftp_admin');

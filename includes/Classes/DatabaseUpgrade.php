@@ -69,7 +69,7 @@ class DatabaseUpgrade
     public function upgradeDatabase($requires_system_user = false)
     {
         if ($requires_system_user) {
-            $allowed_update = array(9,8,7);
+            $allowed_update = ['System Administrator', 'Account Manager', 'Uploader'];
             if (!current_role_in($allowed_update)) {
                 return false;
             }

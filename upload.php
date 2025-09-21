@@ -14,11 +14,19 @@ $page_title = __('Upload files', 'cftp_admin');
 
 $page_id = 'upload_form';
 
-$allowed_levels = array(9, 8, 7);
-if (get_option('clients_can_upload') == 1) {
-    $allowed_levels[] = 0;
+// Check if user is logged in
+redirect_if_not_logged_in();
+
+// Check if user has upload permission
+if (!current_user_can('upload')) {
+    // Special case: clients might be allowed to upload via global setting
+    if (current_role_in(['Client']) && get_option('clients_can_upload') != 1) {
+        exit_with_error_code(403);
+    } else if (!current_role_in(['Client'])) {
+        // Non-client without upload permission
+        exit_with_error_code(403);
+    }
 }
-log_in_required($allowed_levels);
 
 if (LOADED_LANG != 'en') {
     $plupload_lang_file = 'vendor/moxiecode/plupload/js/i18n/' . LOADED_LANG . '.js';

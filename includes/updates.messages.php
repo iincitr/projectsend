@@ -9,7 +9,7 @@
     }
 
     // If any update was made to the database structure, show the message
-	if (get_option('show_upgrade_success_message') == 'true' && in_array(CURRENT_USER_LEVEL, [9, 8, 7])) {
+	if (get_option('show_upgrade_success_message') == 'true' && current_role_in(['System Administrator', 'Account Manager', 'Uploader'])) {
 ?>
         <div class="row">
             <div class="col-sm-12">
@@ -38,7 +38,7 @@
     }
 
     // Used when a new version is found, but not if the current installation has just been updated.
-    if ( CURRENT_USER_LEVEL != '0') {
+    if ( !current_role_in(['Client']) ) {
         if (!should_check_for_updates() && (basename($_SERVER["SCRIPT_FILENAME"], '.php') == 'dashboard')) {
             ?>
             <div class="alert alert-warning update_msg">

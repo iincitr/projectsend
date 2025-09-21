@@ -29,7 +29,8 @@ class Users
     public $password;
     public $password_raw;
     public $account_type;
-    public $role;
+    public $role_id;
+    public $role; // Backward compatibility property
     public $active;
     public $notify_account;
     public $max_file_size;
@@ -67,7 +68,9 @@ class Users
         $this->dbh = $dbh;
         $this->logger = new \ProjectSend\Classes\ActionsLog;
 
-        $this->role = 0; // by default, create "client" role
+        // Default to client role
+        $this->role_id = \ProjectSend\Classes\Roles::getClientRoleId();
+        $this->role = $this->role_id; // Backward compatibility
 
         $this->allowed_actions_roles = [9];
         $this->exists = false;
@@ -101,6 +104,44 @@ class Users
         return false;
     }
 
+    /**
+     * Get role data for this user
+     * @return array|null
+     */
+    public function getRoleData()
+    {
+        if (empty($this->role_id)) {
+            return null;
+        }
+
+        try {
+            $role = new \ProjectSend\Classes\Roles($this->role_id);
+            if ($role->exists()) {
+                return [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'description' => $role->description,
+                    'is_system_role' => $role->is_system_role,
+                    'active' => $role->active
+                ];
+            }
+        } catch (Exception $e) {
+            error_log("ProjectSend: Error getting role data for user {$this->id}: " . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * Get role name for this user
+     * @return string
+     */
+    public function getRoleName()
+    {
+        $role_data = $this->getRoleData();
+        return $role_data ? $role_data['name'] : __('Unknown Role', 'cftp_admin');
+    }
+
     public function userExists()
     {
         return $this->exists;
@@ -122,18 +163,15 @@ class Users
     private function setActionsPermissions()
     {
         /* Allowed roles for:
-            Delete users: [9]
-            Delete clients: [8, 9]
+            Delete users: System Admin only
+            Delete clients: Admin and System Admin
         */
-        switch ($this->role) {
-            case 7:
-            case 8:
-            case 9:
-                $this->allowed_actions_roles = [9];
-                break;
-            case 0;
-                $this->allowed_actions_roles = [8, 9];
-                break;
+        if ($this->isClient()) {
+            // Clients can be managed by Account Managers and System Admins
+            $this->allowed_actions_roles = ['Account Manager', 'System Administrator'];
+        } else {
+            // System users can only be managed by System Admins
+            $this->allowed_actions_roles = ['System Administrator'];
         }
     }
 
@@ -146,7 +184,8 @@ class Users
         $this->email = (!empty($arguments['email'])) ? encode_html($arguments['email']) : null;
         $this->username = (!empty($arguments['username'])) ? encode_html($arguments['username']) : null;
         $this->password = (!empty($arguments['password'])) ? $arguments['password'] : null;
-        $this->role = (!empty($arguments['role'])) ? (int)$arguments['role'] : 0;
+        $this->role_id = (!empty($arguments['role_id'])) ? (int)$arguments['role_id'] : (!empty($arguments['role']) ? (int)$arguments['role'] : null);
+        $this->role = $this->role_id; // Backward compatibility
         $this->active = (!empty($arguments['active'])) ? (int)$arguments['active'] : 0;
         $this->notify_account = (!empty($arguments['notify_account'])) ? (int)$arguments['notify_account'] : 0;
         $this->max_file_size = (!empty($arguments['max_file_size'])) ? (int)$arguments['max_file_size'] : 0;
@@ -190,8 +229,9 @@ class Users
             $this->username = html_output($row['user']);
             $this->password = html_output($row['password']);
             $this->password_raw = $row['password'];
-            $this->role = html_output(strval($row['level']));
-            $this->account_type = ($this->role == 0) ? 'client' : 'user';
+            $this->role_id = (int)$row['role_id'];
+            $this->role = $this->role_id; // Backward compatibility
+            $this->account_type = $this->isClient() ? 'client' : 'user';
             $this->active = html_output($row['active']);
             $this->max_file_size = html_output($row['max_file_size']);
             $this->created_date = html_output($row['timestamp']);
@@ -259,7 +299,7 @@ class Users
             'email' => $this->email,
             'username' => $this->username,
             'password' => $this->password,
-            'role' => (int)$this->role,
+            'role_id' => (int)$this->role_id,
             'active' => $this->active,
             'max_file_size' => $this->max_file_size,
             'can_upload_public' => $this->can_upload_public,
@@ -308,11 +348,16 @@ class Users
 
     public function isClient()
     {
-        if (!empty($this->role) && $this->role != 0) {
-            return false;
+        if (empty($this->role_id)) {
+            return true; // Default to client if no role
         }
 
-        return true;
+        try {
+            $role = new \ProjectSend\Classes\Roles($this->role_id);
+            return $role->isClientRole();
+        } catch (Exception $e) {
+            return true; // Default to client on error
+        }
     }
 
     /**
@@ -333,7 +378,7 @@ class Users
                 'required' => ['error' => $json_strings['validation']['no_email']],
                 'email' => ['error' => $json_strings['validation']['invalid_email']],
             ],
-            $this->role => [
+            $this->role_id => [
                 'required' => ['error' => $json_strings['validation']['no_role']],
             ],
             $this->max_file_size => [
@@ -428,16 +473,16 @@ class Users
             /** Insert the client information into the database */
             $statement = $this->dbh->prepare(
                 "INSERT INTO " . TABLE_USERS . " (
-                    name, user, password, level, address, phone, email, notify, contact, created_by, active, account_requested, max_file_size, can_upload_public
+                    name, user, password, role_id, address, phone, email, notify, contact, created_by, active, account_requested, max_file_size, can_upload_public
                 )
                 VALUES (
-                    :name, :username, :password, :role, :address, :phone, :email, :notify_upload, :contact, :created_by, :active, :request, :max_file_size, :can_upload_public
+                    :name, :username, :password, :role_id, :address, :phone, :email, :notify_upload, :contact, :created_by, :active, :request, :max_file_size, :can_upload_public
                 )"
             );
             $statement->bindParam(':name', $this->name);
             $statement->bindParam(':username', $this->username);
             $statement->bindParam(':password', $password_hashed);
-            $statement->bindParam(':role', $this->role, PDO::PARAM_INT);
+            $statement->bindParam(':role_id', $this->role_id, PDO::PARAM_INT);
             $statement->bindParam(':address', $this->address);
             $statement->bindParam(':phone', $this->phone);
             $statement->bindParam(':email', $this->email);
@@ -462,16 +507,7 @@ class Users
                 // Uploader role: limit who user can upload to
                 $this->limitUploadToSave($this->limit_upload_to);
 
-                switch ($this->role) {
-                    case 0:
-                        $email_type = "new_client";
-                        break;
-                    case 7:
-                    case 8:
-                    case 9:
-                        $email_type = "new_user";
-                        break;
-                }
+                $email_type = $this->isClient() ? "new_client" : "new_user";
 
                 /** Send account data by email */
                 $notify_user = new \ProjectSend\Classes\Emails;
@@ -561,7 +597,7 @@ class Users
 
         // Some fields should not be allowed to be written if the current user is not a client,
         // as they are meant to be null for system users
-        if ($this->role != 0) {
+        if (!$this->isClient()) {
             $this->address = null;
             $this->phone = null;
             $this->contact = null;
@@ -570,7 +606,7 @@ class Users
         /** SQL query */
         $query = "UPDATE " . TABLE_USERS . " SET
                                     name = :name,
-                                    level = :role,
+                                    role_id = :role_id,
                                     address = :address,
                                     phone = :phone,
                                     email = :email,
@@ -589,7 +625,7 @@ class Users
 
         $statement = $this->dbh->prepare($query);
         $statement->bindParam(':name', $this->name);
-        $statement->bindParam(':role', $this->role, PDO::PARAM_INT);
+        $statement->bindParam(':role_id', $this->role_id, PDO::PARAM_INT);
         $statement->bindParam(':address', $this->address);
         $statement->bindParam(':phone', $this->phone);
         $statement->bindParam(':email', $this->email);
@@ -617,16 +653,7 @@ class Users
 
             $state['query'] = 1;
 
-            switch ($this->role) {
-                case 0:
-                    $log_action_number = 14;
-                    break;
-                case 7:
-                case 8:
-                case 9:
-                    $log_action_number = 13;
-                    break;
-            }
+            $log_action_number = $this->isClient() ? 14 : 13;
 
             /** Record the action log */
             $this->logger->addEntry([
@@ -657,16 +684,7 @@ class Users
                 $sql->bindParam(':id', $this->id, PDO::PARAM_INT);
                 $sql->execute();
 
-                switch ($this->role) {
-                    case 0:
-                        $log_action_number = 17;
-                        break;
-                    case 7:
-                    case 8:
-                    case 9:
-                        $log_action_number = 16;
-                        break;
-                }
+                $log_action_number = $this->isClient() ? 17 : 16;
 
                 /** Record the action log */
                 $this->logger->addEntry([
@@ -698,10 +716,10 @@ class Users
 
         switch ($change_to) {
             case 0:
-                $log_action_number = ($this->role == 0) ? 20 : 28;
+                $log_action_number = $this->isClient() ? 20 : 28;
                 break;
             case 1:
-                $log_action_number = ($this->role == 0) ? 19 : 27;
+                $log_action_number = $this->isClient() ? 19 : 27;
                 break;
             default:
                 return false;
@@ -837,7 +855,8 @@ class Users
 
     private function limitUploadToSave($clients_ids = [])
     {
-        if (!defined('CURRENT_USER_LEVEL') or CURRENT_USER_LEVEL == 7) {
+        // Check if current user can manage upload restrictions
+        if (!current_user_can('edit_users')) {
             return;
         }
 
@@ -886,9 +905,15 @@ class Users
 
     public function shouldLimitUploadTo()
     {
-        if (!$this->isClient() && $this->role == '7') {
-            return true;
+        if (!$this->isClient()) {
+            try {
+                $role = new \ProjectSend\Classes\Roles($this->role_id);
+                return $role->name === 'Uploader';
+            } catch (Exception $e) {
+                return false;
+            }
         }
+        return false;
     }
 
     public function validatePassword($password = null)
@@ -972,7 +997,7 @@ class Users
             'password' => $password,
             'name' => $name,
             'email' => $email,
-            'role' => $default_role, // Set role property (maps to level column in DB)
+            'role_id' => $default_role, // Set role_id property
             'address' => $this->extractLdapAttribute($ldap_attributes, ['postalAddress', 'streetAddress']),
             'phone' => $this->extractLdapAttribute($ldap_attributes, ['telephoneNumber', 'mobile']),
             'contact' => null,

@@ -42,7 +42,7 @@
                     <?php
                         }
                     ?>
-                    <?php if ( user_is_logged_in() && defined('CURRENT_USER_LEVEL') && CURRENT_USER_LEVEL != 0) { ?>
+                    <?php if ( user_is_logged_in() && !current_role_in(['Client'])) { ?>
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <a class="dropdown-item" href="<?php echo TRANSLATIONS_URL; ?>" target="_blank">

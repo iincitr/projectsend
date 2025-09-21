@@ -31,7 +31,7 @@ class Categories
         $this->dbh = $dbh;
         $this->logger = new \ProjectSend\Classes\ActionsLog;
 
-        $this->allowed_actions_roles = [9, 8, 7];
+        $this->allowed_actions_roles = ['System Administrator', 'Account Manager', 'Uploader'];
 
         if (!empty($category_id)) {
             $this->get($category_id);

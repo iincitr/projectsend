@@ -2,9 +2,8 @@
 /**
  * Show the list of current clients.
  */
-$allowed_levels = array(9, 8);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+check_access_enhanced(null, ['manage_clients']);
 
 $active_nav = 'clients';
 
@@ -59,7 +58,7 @@ if (isset($_POST['action'])) {
 // Query the clients
 $params = [];
 
-$cq = "SELECT id FROM " . TABLE_USERS . " WHERE level='0' AND account_requested='0'";
+$cq = "SELECT id FROM " . TABLE_USERS . " WHERE role_id = (SELECT id FROM " . TABLE_ROLES . " WHERE name = 'Client') AND account_requested='0'";
 
 // Add the search terms
 if (isset($_GET['search']) && !empty($_GET['search'])) {

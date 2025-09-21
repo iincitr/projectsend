@@ -144,7 +144,7 @@ class Folder
     public function userCanEdit($user_id)
     {
         $user = new \ProjectSend\Classes\Users($user_id);
-        if (in_array($user->role, [9,8,7])) {
+        if (in_array($user->role, ['System Administrator', 'Account Manager', 'Uploader'])) {
             return true;
         }
 
@@ -174,7 +174,7 @@ class Folder
     public function userCanDelete($user_id)
     {
         $user = new \ProjectSend\Classes\Users($user_id);
-        if (in_array($user->role, [9,8,7])) {
+        if (in_array($user->role, ['System Administrator', 'Account Manager', 'Uploader'])) {
             return true;
         }
 
@@ -302,7 +302,7 @@ class Folder
 
     public function currentUserCanAssignToFolder()
     {
-        if (in_array(CURRENT_USER_LEVEL, [9, 8, 7])) {
+        if (current_role_in(['System Administrator', 'Account Manager', 'Uploader'])) {
             return true;
         }
 

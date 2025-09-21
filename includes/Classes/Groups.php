@@ -38,7 +38,7 @@ class Groups
         $this->dbh = $dbh;
         $this->logger = new \ProjectSend\Classes\ActionsLog;
 
-        $this->allowed_actions_roles = [9, 8];
+        $this->allowed_actions_roles = ['System Administrator', 'Account Manager'];
 
         if (!empty($group_id)) {
             $this->get($group_id);

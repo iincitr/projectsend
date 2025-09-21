@@ -24,7 +24,7 @@ class Download
 
     public function download($file_id)
     {
-        if (!$file_id || !defined('CURRENT_USER_LEVEL') || !user_can_download_file(CURRENT_USER_ID, $file_id)) {
+        if (!$file_id || !user_can_download_file(CURRENT_USER_ID, $file_id)) {
             exit_with_error_code(403);
         }
 
@@ -40,7 +40,7 @@ class Download
      */
     public function returnFilesIds($file_ids)
     {
-		$check_level = array(9,8,7,0);
+		$check_level = ['System Administrator', 'Account Manager', 'Uploader', 'Client'];
 		if (isset($file_ids)) {
 			// do a permissions check for logged in user
 			if (current_role_in($check_level)) {
@@ -142,16 +142,10 @@ class Download
         $file = new \ProjectSend\Classes\Files($file_id);
         $file_location = $file->full_path;
 
-        switch (CURRENT_USER_LEVEL) {
-            case 0:
-                $log_action_number = 8;
-            break;
-            default:
-            case 9:
-            case 8:
-            case 7:
-                $log_action_number = 7;
-            break;
+        if (current_role_in(['Client'])) {
+            $log_action_number = 8;
+        } else {
+            $log_action_number = 7;
         }
 
         if (file_exists($file_location)) {

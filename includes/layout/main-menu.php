@@ -11,10 +11,10 @@ $items = [];
 /**
  * Items for system users
  */
-if (current_role_in(array(9, 8, 7))) {
+if (current_role_in(['System Administrator', 'Account Manager', 'Uploader'])) {
     $items['dashboard'] = array(
         'nav' => 'dashboard',
-        'level' => array(9, 8, 7),
+        'roles' => ['System Administrator', 'Account Manager', 'Uploader'],
         'main' => array(
             'label' => __('Dashboard', 'cftp_admin'),
             'icon' => 'tachometer',
@@ -26,7 +26,7 @@ if (current_role_in(array(9, 8, 7))) {
 
     $items['files'] = array(
         'nav' => 'files',
-        'level' => array(9, 8, 7),
+        'roles' => ['System Administrator', 'Account Manager', 'Uploader'],
         'main' => array(
             'label' => __('Files', 'cftp_admin'),
             'icon' => 'file',
@@ -63,7 +63,7 @@ if (current_role_in(array(9, 8, 7))) {
 
     $items['clients'] = array(
         'nav' => 'clients',
-        'level' => array(9, 8),
+        'permission' => 'manage_clients',
         'main' => array(
             'label' => __('Clients', 'cftp_admin'),
             'icon' => 'address-card',
@@ -92,7 +92,7 @@ if (current_role_in(array(9, 8, 7))) {
 
     $items['groups'] = array(
         'nav' => 'groups',
-        'level' => array(9, 8),
+        'permission' => 'manage_groups',
         'main' => array(
             'label' => __('Clients groups', 'cftp_admin'),
             'icon' => 'th-large',
@@ -120,7 +120,7 @@ if (current_role_in(array(9, 8, 7))) {
 
     $items['users'] = array(
         'nav' => 'users',
-        'level' => array(9),
+        'permission' => 'manage_users',
         'main' => array(
             'label' => __('System Users', 'cftp_admin'),
             'icon' => 'users',
@@ -134,6 +134,14 @@ if (current_role_in(array(9, 8, 7))) {
                 'label' => __('Manage system users', 'cftp_admin'),
                 'link' => 'users.php',
                 //'badge' => COUNT_USERS_INACTIVE,
+            ),
+            array(
+                'divider' => true,
+            ),
+            array(
+                'label' => __('User Roles', 'cftp_admin'),
+                'link' => 'roles.php',
+                'permission' => 'edit_settings',
             ),
         ),
     );
@@ -162,7 +170,7 @@ if (current_role_in(array(9, 8, 7))) {
 
     $items['themes'] = array(
         'nav' => 'themes',
-        'level' => array(9),
+        'permission' => 'edit_settings',
         'main' => array(
             'label' => __('Themes', 'cftp_admin'),
             'icon' => 'desktop',
@@ -172,7 +180,7 @@ if (current_role_in(array(9, 8, 7))) {
 
     $items['emails'] = array(
         'nav' => 'emails',
-        'level' => array(9),
+        'permission' => 'edit_settings',
         'main' => array(
             'label' => __('System e-mails', 'cftp_admin'),
             'icon' => 'envelope',
@@ -234,7 +242,7 @@ if (current_role_in(array(9, 8, 7))) {
 
         $items['options'] = array(
         'nav' => 'options',
-        'level' => array(9),
+        'permission' => 'edit_settings',
         'main' => array(
             'label' => __('Options', 'cftp_admin'),
             'icon' => 'cog',
@@ -283,7 +291,7 @@ if (current_role_in(array(9, 8, 7))) {
 
     $items['tools'] = array(
         'nav' => 'tools',
-        'level' => array(9),
+        'permission' => 'edit_settings',
         'main' => array(
             'label' => __('Tools', 'cftp_admin'),
             'icon' => 'wrench',
@@ -322,7 +330,7 @@ else {
     if (get_option('clients_can_upload') == 1) {
         $items['upload'] = array(
             'nav' => 'upload',
-            'level' => array(9, 8, 7, 0),
+            'permission' => 'upload_files',
             'main' => array(
                 'label' => __('Upload', 'cftp_admin'),
                 'link' => 'upload.php',
@@ -334,7 +342,7 @@ else {
     if (count_user_uploads(CURRENT_USER_ID) > 0 || get_option('clients_can_upload') == 1) {
         $items['manage_files'] = array(
             'nav' => 'manage',
-            'level' => array(9, 8, 7, 0),
+            'permission' => 'manage_files',
             'main' => array(
                 'label' => __('Manage files', 'cftp_admin'),
                 'link' => 'manage-files.php',
@@ -345,7 +353,7 @@ else {
 
     $items['view_files'] = array(
         'nav' => 'template',
-        'level' => array(9, 8, 7, 0),
+        'roles' => ['System Administrator', 'Account Manager', 'Uploader', 'Client'],
         'main' => array(
             'label' => __('View my files', 'cftp_admin'),
             'link' => CLIENT_VIEW_FILE_LIST_URL_PATH,
@@ -366,7 +374,16 @@ foreach ($items as $item) {
         continue;
     }
 
-    if (current_role_in($item['level'])) {
+    // Check permissions first, then fall back to role-based check
+    $has_access = false;
+    if (!empty($item['permission'])) {
+        $has_access = current_user_can($item['permission']);
+    }
+    if (!$has_access && !empty($item['roles'])) {
+        $has_access = current_role_in($item['roles']);
+    }
+
+    if ($has_access) {
         $current = (!empty($active_nav) && $active_nav == $item['nav']) ? 'current_nav' : '';
         $badge = (!empty($item['main']['badge'])) ? ' <span class="badge rounded-pill text-bg-dark">' . $item['main']['badge'] . '</span>' : '';
         $icon = (!empty($item['main']['icon'])) ? '<i class="fa fa-' . $item['main']['icon'] . ' fa-fw" aria-hidden="true"></i>' : '';
@@ -389,20 +406,30 @@ foreach ($items as $item) {
                 if (!empty($subitem['divider'])) {
                     $menu_output .= "\t\t<li class='divider'></li>\n";
                 } else {
-                    $sub_active = ($subitem['link'] == $current_filename['path']) ? 'current_page' : '';
-
-                    if (isset($_GET['section'])) {
-                        $parse = parse_url($subitem['link'], PHP_URL_QUERY);
-                        if (!empty($parse)) {
-                            parse_str($parse, $subitem_query);
-                            if (isset($subitem_query['section'])) {
-                                if ($subitem_query['section'] == $_GET['section']) { $sub_active = 'current_page'; }
-                            }
-                        }
+                    // Check submenu item permissions
+                    $sub_has_access = true; // Default to show if no restrictions
+                    if (!empty($subitem['permission'])) {
+                        $sub_has_access = current_user_can($subitem['permission']);
+                    } elseif (!empty($subitem['roles'])) {
+                        $sub_has_access = current_role_in($subitem['roles']);
                     }
 
-                    $format = "\t\t<li class='%s'>\n\t\t\t<a href='%s'>%s<span class='submenu_label'>%s%s</span></a>\n\t\t</li>\n";
-                    $menu_output .= sprintf($format, $sub_active, BASE_URI . $subitem['link'], $icon, $subitem['label'], $badge);
+                    if ($sub_has_access) {
+                        $sub_active = ($subitem['link'] == $current_filename['path']) ? 'current_page' : '';
+
+                        if (isset($_GET['section'])) {
+                            $parse = parse_url($subitem['link'], PHP_URL_QUERY);
+                            if (!empty($parse)) {
+                                parse_str($parse, $subitem_query);
+                                if (isset($subitem_query['section'])) {
+                                    if ($subitem_query['section'] == $_GET['section']) { $sub_active = 'current_page'; }
+                                }
+                            }
+                        }
+
+                        $format = "\t\t<li class='%s'>\n\t\t\t<a href='%s'>%s<span class='submenu_label'>%s%s</span></a>\n\t\t</li>\n";
+                        $menu_output .= sprintf($format, $sub_active, BASE_URI . $subitem['link'], $icon, $subitem['label'], $badge);
+                    }
                 }
             }
             $menu_output .= "\t</ul>\n</li>\n";
