@@ -48,21 +48,42 @@ if (isset($_POST['action'])) {
                 }
             break;
             case 'delete':
+                $deleted_count = 0;
+                $no_permission_count = 0;
+                $errors = [];
+
                 foreach ($selected_users as $work_user) {
                     // A user should not be able to delete himself
                     if ($work_user != CURRENT_USER_ID) {
                         $this_user = new \ProjectSend\Classes\Users($work_user);
                         if ($this_user->userExists()) {
-                            $delete_user = $this_user->delete();
-                            $affected_users++;
+                            $result = $this_user->delete();
+
+                            if ($result['status'] === 'success') {
+                                $deleted_count++;
+                            } else {
+                                if (strpos($result['message'], 'permission') !== false) {
+                                    $no_permission_count++;
+                                } else {
+                                    $errors[] = $result['message'];
+                                }
+                            }
                         }
                     } else {
                         $flash->error(__('You cannot delete your own account.', 'cftp_admin'));
                     }
                 }
 
-                if ($affected_users > 0) {
-                    $flash->success(__('The selected users were deleted.', 'cftp_admin'));
+                if ($deleted_count > 0) {
+                    $flash->success(sprintf(__('%d users were deleted.', 'cftp_admin'), $deleted_count));
+                }
+                if ($no_permission_count > 0) {
+                    $flash->warning(sprintf(__('You do not have permission to delete %d users.', 'cftp_admin'), $no_permission_count));
+                }
+                if (!empty($errors)) {
+                    foreach ($errors as $error) {
+                        $flash->error($error);
+                    }
                 }
             break;
         }
@@ -142,12 +163,15 @@ if (!$count) {
 }
 
 // Header buttons
-$header_action_buttons = [
-    [
-        'url' => 'users-add.php',
-        'label' => __('Create new', 'cftp_admin'),
-    ],
-];
+$header_action_buttons = [];
+if (current_user_can('create_users')) {
+    $header_action_buttons = [
+        [
+            'url' => 'users-add.php',
+            'label' => __('Create new', 'cftp_admin'),
+        ],
+    ];
+}
 
 // Search + filters bar data
 $search_form_action = 'users.php';
@@ -179,14 +203,18 @@ $filters_form = [
 ];
 
 
-// Results count and form actions 
+// Results count and form actions
 $elements_found_count = $count_for_pagination;
 $bulk_actions_items = [
     'none' => __('Select action', 'cftp_admin'),
-    'activate' => __('Activate', 'cftp_admin'),
-    'deactivate' => __('Deactivate', 'cftp_admin'),
-    'delete' => __('Delete', 'cftp_admin'),
 ];
+if (current_user_can('edit_users')) {
+    $bulk_actions_items['activate'] = __('Activate', 'cftp_admin');
+    $bulk_actions_items['deactivate'] = __('Deactivate', 'cftp_admin');
+}
+if (current_user_can('delete_users')) {
+    $bulk_actions_items['delete'] = __('Delete', 'cftp_admin');
+}
 
 // Include layout files
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';
@@ -311,7 +339,7 @@ include_once LAYOUT_DIR . DS . 'search-filters-bar.php';
                     ),
                     array(
                         'actions' => true,
-                        'content' =>  '<a href="users-edit.php?id=' . $user->id . '" class="btn btn-primary btn-sm"><i class="fa fa-pencil"></i><span class="button_label">' . __('Edit', 'cftp_admin') . '</span></a>' . "\n"
+                        'content' =>  (current_user_can('edit_users') ? '<a href="users-edit.php?id=' . $user->id . '" class="btn btn-primary btn-sm"><i class="fa fa-pencil"></i><span class="button_label">' . __('Edit', 'cftp_admin') . '</span></a>' : '') . "\n"
                     ),
                 );
 

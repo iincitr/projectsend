@@ -171,7 +171,8 @@ class Cron
                 $file = new \ProjectSend\Classes\Files($file_id);
                 if ($file->isExpired()) {
                     $results['elements']['found']['items'][] = $file_name;
-                    if ($file->deleteFiles()) {
+                    $result = $file->deleteFiles();
+                    if ($result['status'] === 'success') {
                         $results['elements']['success']['items'][] = $file_name;
                     } else {
                         $results['elements']['failed']['items'][] = $file_name;

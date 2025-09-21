@@ -285,10 +285,11 @@ switch ($_GET['do']) {
             ps_redirect('roles.php');
         }
 
-        if ($role->delete()) {
-            $flash->success(__('Role deleted successfully.', 'cftp_admin'));
+        $result = $role->delete();
+        if ($result['status'] === 'success') {
+            $flash->success($result['message']);
         } else {
-            $flash->error(__('Could not delete role.', 'cftp_admin'));
+            $flash->error($result['message']);
         }
 
         ps_redirect('roles.php');

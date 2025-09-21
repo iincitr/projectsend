@@ -22,6 +22,14 @@ class GroupsMemberships
 
     function groupAddMembers($arguments)
     {
+        // Check permissions
+        if (!\current_user_can('manage_groups')) {
+            return [
+                'status' => 'error',
+                'message' => __('You do not have permission to manage group memberships.', 'cftp_admin')
+            ];
+        }
+
         $client_ids	= is_array( $arguments['client_id'] ) ? $arguments['client_id'] : array( $arguments['client_id'] );
         $group_id = $arguments['group_id'];
         $added_by = $arguments['added_by'];
@@ -54,6 +62,14 @@ class GroupsMemberships
 
     function groupRemoveMembers($arguments)
     {
+        // Check permissions
+        if (!\current_user_can('manage_groups')) {
+            return [
+                'status' => 'error',
+                'message' => __('You do not have permission to manage group memberships.', 'cftp_admin')
+            ];
+        }
+
         $client_ids	= is_array( $arguments['client_id'] ) ? $arguments['client_id'] : array( $arguments['client_id'] );
         $group_id = $arguments['group_id'];
 

@@ -212,13 +212,19 @@ class CustomAsset
 	 */
 	public function create()
 	{
-        $state = array(
-            'query' => 0,
-        );
+        // Check permissions
+        if (!\current_user_can('create_assets')) {
+            return [
+                'status' => 'error',
+                'message' => __('You do not have permission to create assets.', 'cftp_admin')
+            ];
+        }
 
         if (!$this->validate()) {
-            $state = [];
-            return $state;
+            return [
+                'status' => 'error',
+                'message' => __('Validation errors occurred.', 'cftp_admin')
+            ];
         }
 
         $this->sql_query = $this->dbh->prepare("INSERT INTO " . TABLE_CUSTOM_ASSETS . " (title, content, language, location, position, enabled, created_by)"
@@ -234,15 +240,21 @@ class CustomAsset
         $this->sql_query->execute();
 
         $this->id = $this->dbh->lastInsertId();
-        $state['id'] = $this->id;
 
         if ($this->sql_query) {
-            $state['query'] = 1;
-
             $record = $this->logAction(50);
+
+            return [
+                'status' => 'success',
+                'id' => $this->id,
+                'message' => __('Asset created successfully.', 'cftp_admin')
+            ];
         }
 
-		return $state;
+		return [
+            'status' => 'error',
+            'message' => __('Failed to create asset.', 'cftp_admin')
+        ];
 	}
 
 	/**

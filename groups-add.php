@@ -31,11 +31,11 @@ if ($_POST) {
     $group->set($group_arguments);
     $create = $group->create();
 
-    if (!empty($create['id'])) {
-        $flash->success(__('Group created successfully'));
+    if ($create['status'] === 'success') {
+        $flash->success($create['message']);
         $redirect_to = BASE_URI . 'groups-edit.php?id=' . $create['id'];
     } else {
-        $flash->error(__('There was an error saving to the database'));
+        $flash->error($create['message']);
         $redirect_to = BASE_URI . 'groups-add.php';
     }
 

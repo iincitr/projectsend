@@ -208,13 +208,19 @@ class Groups
 	 */
 	public function create()
 	{
-		$state = array(
-            'query' => 0,
-        );
-        
+        // Check permissions
+        if (!\current_user_can('create_groups')) {
+            return [
+                'status' => 'error',
+                'message' => __('You do not have permission to create groups.', 'cftp_admin')
+            ];
+        }
+
         if (!$this->validate()) {
-            $state = [];
-            return $state;
+            return [
+                'status' => 'error',
+                'message' => __('Validation errors occurred.', 'cftp_admin')
+            ];
         }
 
         /** Who is creating the client? */
@@ -249,8 +255,6 @@ class Groups
         }
 
         if ($sql_query) {
-            $state['query'] = 1;
-
             /** Record the action log */
             $this->logger->addEntry([
                 'action' => 23,
@@ -258,9 +262,18 @@ class Groups
                 'affected_account' => $this->id,
                 'affected_account_name' => $this->name,
             ]);
+
+            return [
+                'status' => 'success',
+                'id' => $this->id,
+                'message' => __('Group created successfully.', 'cftp_admin')
+            ];
         }
-		
-		return $state;
+
+		return [
+            'status' => 'error',
+            'message' => __('Failed to create group.', 'cftp_admin')
+        ];
 	}
 
     /**

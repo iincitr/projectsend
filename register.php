@@ -42,7 +42,7 @@ if ($_POST) {
     ]);
 
     $create = $new_client->create();
-    if (!empty($create['id'])) {
+    if ($create['status'] === 'success') {
         $new_client->triggerAfterSelfRegister([
             'groups' => (isset($_POST["groups_request"])) ? $_POST["groups_request"] : null,
         ]);
@@ -69,7 +69,7 @@ if ($_POST) {
             $redirect_to = 'my_files/index.php';
         }
     } else {
-        $flash->error(__('There was an error saving to the database'));
+        $flash->error($create['message']);
         $redirect_to = BASE_URI . 'register.php';
     }
 

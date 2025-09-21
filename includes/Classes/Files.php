@@ -854,7 +854,10 @@ class Files
     function deleteFiles()
 	{
         if (!$this->currentUserCanDeleteFile()) {
-            return false;
+            return [
+                'status' => 'error',
+                'message' => __('You do not have permission to delete this file.', 'cftp_admin')
+            ];
         }
 
         /*
@@ -891,12 +894,21 @@ class Files
                 }    
             }
 
-            return true;
+            return [
+                'status' => 'success',
+                'message' => __('File deleted successfully.', 'cftp_admin')
+            ];
         } catch (\Exception $e) {
-            return false;
+            return [
+                'status' => 'error',
+                'message' => __('Failed to delete file.', 'cftp_admin')
+            ];
         }
 
-        return false;
+        return [
+            'status' => 'error',
+            'message' => __('Failed to delete file.', 'cftp_admin')
+        ];
     }
     
     public function setDefaults()
@@ -917,6 +929,14 @@ class Files
 	 */
 	public function addToDatabase()
 	{
+        // Check permissions
+        if (!\current_user_can('upload_files')) {
+            return [
+                'status' => 'error',
+                'message' => __('You do not have permission to upload files.', 'cftp_admin')
+            ];
+        }
+
 		$this->uploader = CURRENT_USER_USERNAME;
 		$this->uploader_id = CURRENT_USER_ID;
 		$this->uploader_type = CURRENT_USER_TYPE;

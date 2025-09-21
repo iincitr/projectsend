@@ -168,7 +168,8 @@ if (isset($_POST['action'])) {
                 foreach ($selected_files as $index => $file_id) {
                     if (!empty($file_id)) {
                         $file = new \ProjectSend\Classes\Files($file_id);
-                        if ($file->deleteFiles()) {
+                        $result = $file->deleteFiles();
+                        if ($result['status'] === 'success') {
                             $delete_results['success']++;
                         } else {
                             $delete_results['errors']++;

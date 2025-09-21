@@ -44,10 +44,12 @@ if (isset($_POST['action'])) {
                         $file = new \ProjectSend\Classes\Files;
                         $file->moveToUploadDirectory($filename_path);
                         $file->setDefaults();
-                        $file->addToDatabase();
-            
-                        // Add it to the array of editable files
-                        $added[] = $file->getId();
+                        $result = $file->addToDatabase();
+
+                        // Add it to the array of editable files if successful
+                        if ($result['status'] === 'success') {
+                            $added[] = $file->getId();
+                        }
                     }
                 }
             

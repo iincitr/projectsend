@@ -3,7 +3,7 @@
  * Show the form to add a new system user.
  */
 require_once 'bootstrap.php';
-redirect_if_not_super_admin(); // Only System Administrators can add users
+check_access_enhanced(null, ['create_users']);
 
 $active_nav = 'users';
 
@@ -47,7 +47,7 @@ if ($_POST) {
     $new_user->set($user_arguments);
     $create = $new_user->create();
 
-    if (!empty($create['id'])) {
+    if ($create['status'] === 'success') {
         $logger = new \ProjectSend\Classes\ActionsLog;
         $record = $logger->addEntry([
             'action' => 2,
@@ -57,10 +57,10 @@ if ($_POST) {
             'affected_account_name' => $new_user->name
         ]);
 
-        $flash->success(__('User created successfully'));
+        $flash->success($create['message']);
         $redirect_to = BASE_URI . 'users-edit.php?id=' . $create['id'];
     } else {
-        $flash->error($new_user->getValidationErrors());
+        $flash->error($create['message']);
         $redirect_to = BASE_URI . 'users-add.php';
     }
 

@@ -89,12 +89,37 @@ if (!empty($_POST)) {
                 $flash->success(__('The selected actions were applied.', 'cftp_admin'));
                 break;
             case 'delete':
+                $deleted_count = 0;
+                $no_permission_count = 0;
+                $errors = [];
+
                 foreach ($selected_clients as $client) {
                     $this_client = new \ProjectSend\Classes\Users();
                     $this_client->setId($client['id']);
-                    $delete_client = $this_client->delete();
+                    $result = $this_client->delete();
+
+                    if ($result['status'] === 'success') {
+                        $deleted_count++;
+                    } else {
+                        if (strpos($result['message'], 'permission') !== false) {
+                            $no_permission_count++;
+                        } else {
+                            $errors[] = $result['message'];
+                        }
+                    }
                 }
-                $flash->success(__('The selected clients were deleted.', 'cftp_admin'));
+
+                if ($deleted_count > 0) {
+                    $flash->success(sprintf(__('%d clients were deleted.', 'cftp_admin'), $deleted_count));
+                }
+                if ($no_permission_count > 0) {
+                    $flash->warning(sprintf(__('You do not have permission to delete %d clients.', 'cftp_admin'), $no_permission_count));
+                }
+                if (!empty($errors)) {
+                    foreach ($errors as $error) {
+                        $flash->error($error);
+                    }
+                }
                 break;
             default:
                 break;
@@ -178,12 +203,15 @@ if (!$count) {
 }
 
 // Header buttons
-$header_action_buttons = [
-    [
-        'url' => 'clients-add.php',
-        'label' => __('Create client', 'cftp_admin'),
-    ],
-];
+$header_action_buttons = [];
+if (current_user_can('manage_clients')) {
+    $header_action_buttons = [
+        [
+            'url' => 'clients-add.php',
+            'label' => __('Create client', 'cftp_admin'),
+        ],
+    ];
+}
 
 // Search + filters bar data
 $search_form_action = $this_page;

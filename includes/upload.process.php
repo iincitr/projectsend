@@ -160,18 +160,29 @@ if (!$chunks || $chunk == $chunks - 1) {
     $file = new \ProjectSend\Classes\Files;
     $file->moveToUploadDirectory($filePath);
     $file->setDefaults();
-    $file->addToDatabase();
+    $result = $file->addToDatabase();
 
-    // Return JSON-RPC response
-    $response = [
-        'OK' => 1,
-        'info' => [
-            'id' => $file->getId(),
-            'NewFileName' => $fileName
-        ]
-    ];
-    
-    echo json_encode($response);
-    http_response_code(200);
+    if ($result['status'] === 'success') {
+        // Return JSON-RPC response
+        $response = [
+            'OK' => 1,
+            'info' => [
+                'id' => $file->getId(),
+                'NewFileName' => $fileName
+            ]
+        ];
+
+        echo json_encode($response);
+        http_response_code(200);
+    } else {
+        // Return error response
+        $response = [
+            'OK' => 0,
+            'error' => $result['message']
+        ];
+
+        echo json_encode($response);
+        http_response_code(400);
+    }
     exit;
 }

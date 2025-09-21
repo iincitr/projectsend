@@ -170,12 +170,15 @@ if (!$count) {
 }
 
 // Header buttons
-$header_action_buttons = [
-    [
-        'url' => 'groups-add.php',
-        'label' => __('Create new', 'cftp_admin'),
-    ],
-];
+$header_action_buttons = [];
+if (current_user_can('create_groups')) {
+    $header_action_buttons = [
+        [
+            'url' => 'groups-add.php',
+            'label' => __('Create new', 'cftp_admin'),
+        ],
+    ];
+}
 
 // Search + filters bar data
 $search_form_action = 'groups.php';
@@ -196,12 +199,14 @@ $filters_form = [
     ]
 ];
 
-// Results count and form actions 
+// Results count and form actions
 $elements_found_count = $count_for_pagination;
 $bulk_actions_items = [
     'none' => __('Select action', 'cftp_admin'),
-    'delete' => __('Delete', 'cftp_admin'),
 ];
+if (current_user_can('delete_groups') || current_user_can('create_groups')) {
+    $bulk_actions_items['delete'] = __('Delete', 'cftp_admin');
+}
 
 // Include layout files
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';

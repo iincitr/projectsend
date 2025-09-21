@@ -501,13 +501,28 @@ class Users
      */
     public function create()
     {
-        $state = array(
-            'query' => 0,
-        );
+        // Check permissions based on account type
+        if ($this->isClient()) {
+            if (!\current_user_can('create_clients')) {
+                return [
+                    'status' => 'error',
+                    'message' => __('You do not have permission to create clients.', 'cftp_admin')
+                ];
+            }
+        } else {
+            if (!\current_user_can('create_users')) {
+                return [
+                    'status' => 'error',
+                    'message' => __('You do not have permission to create users.', 'cftp_admin')
+                ];
+            }
+        }
 
         if (!$this->validate()) {
-            $state = [];
-            return $state;
+            return [
+                'status' => 'error',
+                'message' => __('Validation errors occurred.', 'cftp_admin')
+            ];
         }
 
         $password_hashed = $this->hashPassword($this->password);
@@ -543,8 +558,6 @@ class Users
 
             if ($statement) {
                 $this->id = $this->dbh->lastInsertId();
-                $state['id'] = $this->id;
-                $state['query'] = 1;
 
                 if ($this->require_password_change == true) {
                     save_user_meta($this->id, 'require_password_change', 'true');
@@ -556,6 +569,7 @@ class Users
                 $email_type = $this->isClient() ? "new_client" : "new_user";
 
                 /** Send account data by email */
+                $email_status = 2; // Default: not sent
                 $notify_user = new \ProjectSend\Classes\Emails;
                 if ($this->notify_account == 1) {
                     if ($notify_user->send([
@@ -564,17 +578,25 @@ class Users
                         'username'    => $this->username,
                         'password'    => $this->password
                     ])) {
-                        $state['email'] = 1;
+                        $email_status = 1; // Success
                     } else {
-                        $state['email'] = 0;
+                        $email_status = 0; // Failed
                     }
-                } else {
-                    $state['email'] = 2;
                 }
+
+                return [
+                    'status' => 'success',
+                    'id' => $this->id,
+                    'email' => $email_status,
+                    'message' => $this->isClient() ? __('Client created successfully.', 'cftp_admin') : __('User created successfully.', 'cftp_admin')
+                ];
             }
         }
 
-        return $state;
+        return [
+            'status' => 'error',
+            'message' => __('Failed to create user.', 'cftp_admin')
+        ];
     }
 
     public function triggerAfterSelfRegister($arguments = null)
@@ -765,31 +787,69 @@ class Users
      */
     public function delete()
     {
-        if ($this->id == CURRENT_USER_ID) {
-            return false;
+        if (empty($this->id)) {
+            return [
+                'status' => 'error',
+                'message' => __('User ID is required for deletion.', 'cftp_admin')
+            ];
         }
 
-        if (isset($this->id)) {
-            /** Do a permissions check */
-            if (isset($this->allowed_actions_roles) && current_role_in($this->allowed_actions_roles)) {
-                $sql = $this->dbh->prepare('DELETE FROM ' . TABLE_USERS . ' WHERE id=:id');
-                $sql->bindParam(':id', $this->id, PDO::PARAM_INT);
-                $sql->execute();
+        // Prevent self-deletion
+        if ($this->id == defined('CURRENT_USER_ID') ? \CURRENT_USER_ID : null) {
+            return [
+                'status' => 'error',
+                'message' => __('You cannot delete your own account.', 'cftp_admin')
+            ];
+        }
 
-                $log_action_number = $this->isClient() ? 17 : 16;
+        // Check permissions based on account type
+        $current_username = defined('CURRENT_USER_USERNAME') ? \CURRENT_USER_USERNAME : null;
+        $can_delete = false;
 
-                /** Record the action log */
-                $this->logger->addEntry([
-                    'action' => $log_action_number,
-                    'owner_id' => CURRENT_USER_ID,
-                    'affected_account_name' => $this->name,
-                ]);
-
-                return true;
+        if ($this->isClient()) {
+            // For clients: Users with delete_clients permission can delete all clients
+            if (\current_user_can('delete_clients')) {
+                $can_delete = true;
+            }
+            // Users with create_clients permission can delete their own created clients
+            elseif (\current_user_can('create_clients') && $this->created_by == $current_username) {
+                $can_delete = true;
+            }
+        } else {
+            // For system users: Users with delete_users permission can delete all users
+            if (\current_user_can('delete_users')) {
+                $can_delete = true;
+            }
+            // Users with create_users permission can delete their own created users
+            elseif (\current_user_can('create_users') && $this->created_by == $current_username) {
+                $can_delete = true;
             }
         }
 
-        return false;
+        if (!$can_delete) {
+            return [
+                'status' => 'error',
+                'message' => __('You do not have permission to delete this user.', 'cftp_admin')
+            ];
+        }
+
+        $sql = $this->dbh->prepare('DELETE FROM ' . TABLE_USERS . ' WHERE id=:id');
+        $sql->bindParam(':id', $this->id, PDO::PARAM_INT);
+        $sql->execute();
+
+        $log_action_number = $this->isClient() ? 17 : 16;
+
+        /** Record the action log */
+        $this->logger->addEntry([
+            'action' => $log_action_number,
+            'owner_id' => defined('CURRENT_USER_ID') ? \CURRENT_USER_ID : 1,
+            'affected_account_name' => $this->name,
+        ]);
+
+        return [
+            'status' => 'success',
+            'message' => $this->isClient() ? __('Client deleted successfully.', 'cftp_admin') : __('User deleted successfully.', 'cftp_admin')
+        ];
     }
 
     /**

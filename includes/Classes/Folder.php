@@ -288,7 +288,8 @@ class Folder
             // Find and delete files, only if the folder was actually deleted before
             foreach ($files_in_folder as $file_id) {
                 $file = new \ProjectSend\Classes\Files($file_id);
-                if ($file->deleteFiles()) {
+                $result = $file->deleteFiles();
+                if ($result['status'] === 'success') {
                     $deleted['files'][] = $file->id;
                 }
             }
