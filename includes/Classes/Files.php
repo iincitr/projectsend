@@ -1028,14 +1028,17 @@ class Files
         $this->folder_id = (isset($data["folder_id"]) && !(empty($data["folder_id"]))) ? $data["folder_id"] : null;
     
         /**
-         * If a client is editing a file, only a few properties can be changed
+         * Restrict file properties based on user permissions
          */
-        if ( current_role_in(['Client']) ) {
-            if (get_option('clients_can_set_expiration_date') != '1') {
-                $this->expires = (int)$current["expires"];
-                $this->expiry_date = $current["expiry_date"];
-            }
-            $this->is_public = current_user_can_upload_public() ? $data['public'] : $current["public"];
+        // Check expiration permissions
+        if (!current_user_can('set_file_expiration_date')) {
+            $this->expires = (int)$current["expires"];
+            $this->expiry_date = $current["expiry_date"];
+        }
+
+        // Check public download permissions
+        if (!current_user_can('upload_public')) {
+            $this->is_public = $current["public"];
         }
 
         if (empty($this->name)) {
@@ -1167,8 +1170,13 @@ class Files
 
         $hidden = (int)$hidden;
 
-        if (empty($new_values['clients'])) { $new_values['clients'] = []; } 
-        if (empty($new_values['groups'])) { $new_values['groups'] = []; } 
+        if (empty($new_values['clients'])) { $new_values['clients'] = []; }
+        if (empty($new_values['groups'])) { $new_values['groups'] = []; }
+
+        // If user doesn't have permission to manage groups, preserve existing group assignments
+        if (!current_user_can('manage_groups')) {
+            $new_values['groups'] = $this->assignments_groups;
+        } 
 
         // Clean new ids based on user permissions for limited users
         $get_user = new \ProjectSend\Classes\Users(CURRENT_USER_ID);

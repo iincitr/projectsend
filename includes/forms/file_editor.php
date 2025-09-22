@@ -54,8 +54,8 @@
                                         </div>
 
                                         <?php
-                                            // The following options are available to users or client if clients_can_set_expiration_date set
-                                            if (!current_role_in(['Client']) || get_option('clients_can_set_expiration_date') == '1' ) {
+                                            // Expiration settings are available to users with set_file_expiration_date permission
+                                            if (current_user_can('set_file_expiration_date')) {
                                         ?>
                                                 <div class="col">
                                                     <div class="file_data">
@@ -78,8 +78,8 @@
                                                         </div>
 
                                                         <?php
-                                                            // The following options are available to users only
-                                                            if (!current_role_in(['Client']) || current_user_can_upload_public()) {
+                                                            // Public downloading options are available to users with upload_public permission
+                                                            if (current_user_can('upload_public')) {
                                                         ?>
                                                                 <div class="divider"></div>
 
@@ -148,6 +148,7 @@ EOL;
                                                             <button type="button" class="btn btn-sm btn-primary remove-all" data-target="clients_<?php echo $file->id; ?>"><?php _e('Remove all','cftp_admin'); ?></button>
                                                         </div>
 
+                                                        <?php if (current_user_can('manage_groups')) { ?>
                                                         <div class="divider"></div>
 
                                                         <label><?php _e('Groups', 'cftp_admin');?></label>
@@ -166,6 +167,7 @@ EOL;
                                                             <button type="button" class="btn btn-sm btn-primary add-all" data-target="groups_<?php echo $file->id; ?>"><?php _e('Add all','cftp_admin'); ?></button>
                                                             <button type="button" class="btn btn-sm btn-primary remove-all" data-target="groups_<?php echo $file->id; ?>"><?php _e('Remove all','cftp_admin'); ?></button>
                                                         </div>
+                                                        <?php } ?>
 
                                                         <div class="divider"></div>
 
@@ -181,7 +183,8 @@ EOL;
                                         ?>
                                         <div class="col">
                                             <?php
-                                                if (!current_role_in(['Client']) || get_option('clients_can_set_categories') == '1' ) {
+                                                // Categories assignment is available to users with set_file_categories permission
+                                                if (current_user_can('set_file_categories')) {
                                                     $generate_categories_options = generate_categories_options( $get_categories['arranged'], 0, $file->categories);
                                             ?>
                                                     <div class="categories">
@@ -243,7 +246,7 @@ EOL;
                                         $copy_buttons = [];
                                         if (count($editable) > 1) {
                                             // Expiration
-                                            if (!current_role_in(['Client']) || get_option('clients_can_set_expiration_date') == '1' ) {
+                                            if (current_user_can('set_file_expiration_date')) {
                                                 $copy_buttons['expiration'] = [
                                                     'label' => __('Expiration settings','cftp_admin'),
                                                     'class' => 'copy-expiration-settings',
@@ -254,7 +257,7 @@ EOL;
                                                 ];
                                             }
                                             // Public checkbox
-                                            if (!current_role_in(['Client']) || current_user_can_upload_public()) {
+                                            if (current_user_can('upload_public')) {
                                                 $copy_buttons['public'] = [
                                                     'label' => __('Public settings','cftp_admin'),
                                                     'class' => 'copy-public-settings',
@@ -276,14 +279,16 @@ EOL;
                                                 ];
 
                                                 // Selected groups
-                                                $copy_buttons['groups'] = [
-                                                    'label' => __('Selected groups','cftp_admin'),
-                                                    'class' => 'copy-all',
-                                                    'data' => [
-                                                        'type' => 'groups',
-                                                        'target' => 'groups_'.$file->id,
-                                                    ],
-                                                ];
+                                                if (current_user_can('manage_groups')) {
+                                                    $copy_buttons['groups'] = [
+                                                        'label' => __('Selected groups','cftp_admin'),
+                                                        'class' => 'copy-all',
+                                                        'data' => [
+                                                            'type' => 'groups',
+                                                            'target' => 'groups_'.$file->id,
+                                                        ],
+                                                    ];
+                                                }
 
                                                 // Hidden status
                                                 $copy_buttons['hidden'] = [
@@ -295,7 +300,7 @@ EOL;
                                                 ];
                                             }
 
-                                            if (!current_role_in(['Client']) || get_option('clients_can_set_categories') == '1') {
+                                            if (current_user_can('set_file_categories')) {
                                                 // Categories
                                                 $copy_buttons['categories'] = [
                                                     'label' => __('Selected categories','cftp_admin'),
