@@ -247,16 +247,34 @@ class Permissions {
      * Get all permissions from database
      * @return array
      */
-    public static function getAllPermissionsFromDatabase()
+    public static function getAllPermissionsFromDatabase($exclude_always_granted = true)
     {
         if (!table_exists(TABLE_PERMISSIONS)) {
-            return self::getCorePermissionsDefinition(); // Fallback during initial setup
+            $permissions = self::getCorePermissionsDefinition(); // Fallback during initial setup
+
+            // Exclude always-granted permissions if requested
+            if ($exclude_always_granted) {
+                unset($permissions['edit_self_account']);
+                unset($permissions['edit_files']);
+            }
+
+            return $permissions;
         }
 
         global $dbh;
 
         $sql = "SELECT permission_key, name, description, category FROM " . TABLE_PERMISSIONS . "
-                WHERE active = 1 ORDER BY category, name";
+                WHERE active = 1";
+
+        // Exclude permissions that are always granted to all users
+        // These don't need to be managed through the permissions interface
+        if ($exclude_always_granted) {
+            $always_granted = ['edit_self_account', 'edit_files'];
+            $exclude_list = "'" . implode("','", $always_granted) . "'";
+            $sql .= " AND permission_key NOT IN ($exclude_list)";
+        }
+
+        $sql .= " ORDER BY category, name";
         $statement = $dbh->prepare($sql);
         $statement->execute();
 
@@ -465,8 +483,8 @@ class Permissions {
 
     private function setDefaultPermissions()
     {
-        // Get all permissions from database
-        $permissions = self::getAllPermissionsFromDatabase();
+        // Get all permissions from database (including always-granted ones for internal use)
+        $permissions = self::getAllPermissionsFromDatabase(false);
         foreach ($permissions as $permission => $data) {
             $this->permissions[$permission] = false;
         }
@@ -506,8 +524,11 @@ class Permissions {
 
     public function can($permission)
     {
-        // Edit self account is a fundamental user right - always granted
-        if ($permission === 'edit_self_account') {
+        // These permissions are fundamental user rights - always granted
+        // - edit_self_account: Everyone should be able to edit their own account
+        // - edit_files: Everyone should be able to edit their own uploaded files
+        $always_available = ['edit_self_account', 'edit_files'];
+        if (in_array($permission, $always_available)) {
             return true;
         }
 
@@ -563,7 +584,7 @@ class Permissions {
      */
     private function setAllPermissions()
     {
-        $all_permissions = self::getAllPermissionsFromDatabase();
+        $all_permissions = self::getAllPermissionsFromDatabase(false);
         foreach ($all_permissions as $permission => $data) {
             $this->permissions[$permission] = true;
         }
@@ -591,7 +612,7 @@ class Permissions {
             $db_permissions = $statement->fetchAll(\PDO::FETCH_COLUMN);
 
             // Set all permissions to false first
-            $all_permissions = self::getAllPermissionsFromDatabase();
+            $all_permissions = self::getAllPermissionsFromDatabase(false);
             foreach ($all_permissions as $permission => $data) {
                 $this->permissions[$permission] = false;
             }
