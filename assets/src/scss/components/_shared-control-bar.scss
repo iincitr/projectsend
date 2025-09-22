@@ -153,6 +153,12 @@
 [data-theme="dark"] {
     .shared-control-bar {
         .control-bar-left {
+            .select-all-btn {
+                &.active {
+                    color: #fff !important;
+                }
+            }
+
             .sort-dropdown {
                 .dropdown-menu {
                     background: var(--bg-card);

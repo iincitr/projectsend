@@ -770,4 +770,30 @@ a {
             color: #ffffff;
         }
     }
+
+    // Form control focus states - ensure light border in dark mode
+    .form-control:focus,
+    .form-select:focus,
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus,
+    input[type="number"]:focus,
+    input[type="tel"]:focus,
+    input[type="url"]:focus,
+    input[type="search"]:focus,
+    input[type="date"]:focus,
+    input[type="time"]:focus,
+    input[type="datetime-local"]:focus,
+    select:focus,
+    textarea:focus {
+        border-color: #c084fc !important; // Light purple for better contrast in dark mode
+        box-shadow: 0 0 0 0.2rem rgba(192, 132, 252, 0.25) !important;
+    }
+
+    // Select2 focus states - ensure light border in dark mode
+    .select2-container--bootstrap-5.select2-container--focus .select2-selection,
+    .select2-container--bootstrap-5.select2-container--open .select2-selection {
+        border-color: #c084fc !important; // Light purple for better contrast in dark mode
+        box-shadow: 0 0 0 0.2rem rgba(192, 132, 252, 0.25) !important;
+    }
 }
