@@ -184,9 +184,17 @@ form .alert {
 
 // Forms
 
+// Style for required field indicators
+.required-indicator {
+    color: var(--color-error, #dc3545);
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-left: 3px;
+}
+
+// Remove old background image approach
 .required {
-    background:url(#{$img_path}/req-text.png) no-repeat right -2px;
-    padding-right: 50px;
+    // No background image needed anymore
 }
 
 .btn_generate_password {
