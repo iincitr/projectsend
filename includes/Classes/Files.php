@@ -125,8 +125,8 @@ class Files
             return true;
         }
 
-        // User can edit their own files if they have upload_files permission
-        if (\current_user_can('upload_files') && $this->user_id == $user_id) {
+        // User can edit their own files if they have upload permission
+        if (\current_user_can('upload') && $this->user_id == $user_id) {
             return true;
         }
 
@@ -930,7 +930,7 @@ class Files
 	public function addToDatabase()
 	{
         // Check permissions
-        if (!\current_user_can('upload_files')) {
+        if (!\current_user_can('upload')) {
             return [
                 'status' => 'error',
                 'message' => __('You do not have permission to upload files.', 'cftp_admin')
@@ -1128,7 +1128,7 @@ class Files
         // Check permissions
         $current_user_id = defined('CURRENT_USER_ID') ? \CURRENT_USER_ID : null;
         $can_edit = \current_user_can('edit_files') ||
-                   (\current_user_can('upload_files') && $current_user_id && $this->user_id == $current_user_id) ||
+                   (\current_user_can('upload') && $current_user_id && $this->user_id == $current_user_id) ||
                    user_can_edit_file($current_user_id, $this->id);
 
         if (!$can_edit) {

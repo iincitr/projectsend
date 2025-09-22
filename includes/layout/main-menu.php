@@ -345,7 +345,7 @@ else {
     if (get_option('clients_can_upload') == 1) {
         $items['upload'] = array(
             'nav' => 'upload',
-            'permission' => 'upload_files',
+            'permission' => 'upload',
             'main' => array(
                 'label' => __('Upload', 'cftp_admin'),
                 'link' => 'upload.php',
