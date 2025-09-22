@@ -100,7 +100,17 @@ switch ($_GET['do']) {
             exit_with_error_code(403);
         }
         save_option('show_upgrade_success_message', 'false');
-        ps_redirect(BASE_URI.'dashboard.php');
+
+        // Redirect back to the original page if provided, otherwise dashboard
+        $return_to = isset($_GET['return_to']) ? $_GET['return_to'] : BASE_URI.'dashboard.php';
+
+        // Validate the return URL to prevent open redirects
+        $parsed_url = parse_url($return_to);
+        if ($parsed_url && (empty($parsed_url['host']) || $parsed_url['host'] === $_SERVER['HTTP_HOST'])) {
+            ps_redirect($return_to);
+        } else {
+            ps_redirect(BASE_URI.'dashboard.php');
+        }
         break;
     case 'return_files_ids':
         redirect_if_not_logged_in();
