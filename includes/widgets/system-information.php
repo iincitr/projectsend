@@ -7,7 +7,7 @@
         exit;
     }
 ?>
-<div class="widget widget_system_info">
+<div class="widget widget_system_info" id="widget_system_info">
 	<h4><?php _e('System information','cftp_admin'); ?></h4>
 	<div class="widget_int">
 		<h3><?php _e('Software','cftp_admin'); ?></h3>
@@ -29,7 +29,12 @@
 			<dd class="col-6"><?php echo MAX_FILESIZE; ?> mb.</dd>
 
 			<dt class="col-6 text-end"><?php _e('Template','cftp_admin'); ?></dt>
-			<dd class="col-6"><?php echo ucfirst(get_option('selected_clients_template')); ?> <a href="<?php echo BASE_URI; ?>themes.php">[<?php _e('Change','cftp_admin'); ?>]</a></dd>
+			<dd class="col-6">
+				<?php echo ucfirst(get_option('selected_clients_template')); ?>
+				<?php if (current_user_can('change_template')) { ?>
+					<a href="<?php echo BASE_URI; ?>themes.php">[<?php _e('Change','cftp_admin'); ?>]</a>
+				<?php } ?>
+			</dd>
 		</dl>
 
 		<h3><?php _e('System','cftp_admin'); ?></h3>
