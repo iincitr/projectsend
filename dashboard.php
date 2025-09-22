@@ -50,6 +50,23 @@ if (current_user_can('view_dashboard_counters')) {
             <?php include_once WIDGETS_FOLDER . 'actions-log.php'; ?>
         </div>
     <?php } ?>
+
+
+    <?php if (current_user_can('view_storage_analytics')) { ?>
+        <div class="widget-container" data-widget="storage-analytics">
+            <?php include_once WIDGETS_FOLDER . 'storage-analytics.php'; ?>
+        </div>
+    <?php } ?>
+
+
+    <?php if (current_user_can('view_download_analytics')) { ?>
+        <div class="widget-container" data-widget="download-analytics">
+            <?php include_once WIDGETS_FOLDER . 'download-analytics.php'; ?>
+        </div>
+    <?php } ?>
+
+
+
 </div>
 <?php
 include_once ADMIN_VIEWS_DIR . DS . 'footer.php';

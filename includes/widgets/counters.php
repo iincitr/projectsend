@@ -21,6 +21,29 @@
 
     $statement = $dbh->query("SELECT distinct id FROM " . TABLE_DOWNLOADS);
     $total_downloads = $statement->rowCount();
+
+    // Get total storage used
+    $storage_sql = "SELECT SUM(size) as total_storage FROM " . TABLE_FILES;
+    $storage_statement = $dbh->prepare($storage_sql);
+    $storage_statement->execute();
+    $total_storage_bytes = $storage_statement->fetchColumn();
+
+    // Helper function to format file sizes
+    if (!function_exists('formatFileSize')) {
+        function formatFileSize($bytes) {
+            if ($bytes >= 1073741824) {
+                return number_format($bytes / 1073741824, 2) . ' GB';
+            } elseif ($bytes >= 1048576) {
+                return number_format($bytes / 1048576, 2) . ' MB';
+            } elseif ($bytes >= 1024) {
+                return number_format($bytes / 1024, 2) . ' KB';
+            } else {
+                return $bytes . ' B';
+            }
+        }
+    }
+
+    $total_storage_formatted = formatFileSize($total_storage_bytes ?: 0);
 ?>
     <div class="row">
         <div class="col-12">
@@ -50,6 +73,11 @@
                         <h6><?php echo $total_users; ?></h6>
                         <h5><?php _e('System Users','cftp_admin'); ?></h5>
                         <i class="fa fa-users"></i>
+                    </li>
+                    <li>
+                        <h6><?php echo $total_storage_formatted; ?></h6>
+                        <h5><?php _e('Total Storage','cftp_admin'); ?></h5>
+                        <i class="fa fa-hdd-o"></i>
                     </li>
                 </ul>
             </div>

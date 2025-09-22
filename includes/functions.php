@@ -1494,7 +1494,7 @@ function format_file_size($file)
 {
     if ($file < 1024) {
         /** No digits so put a ? much better than just seeing Byte */
-        $formatted = (ctype_digit($file)) ? $file . ' Byte' :  ' ? ';
+        $formatted = (ctype_digit((string)$file)) ? $file . ' Byte' :  ' ? ';
     } elseif ($file < 1048576) {
         $formatted = round($file / 1024, 2) . ' KB';
     } elseif ($file < 1073741824) {

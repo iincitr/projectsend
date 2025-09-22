@@ -101,7 +101,125 @@ body.dashboard {
                 display: none;
             }
         }
-    
+
+        // Widget table styling
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+            font-size: 0.9rem;
+
+            th, td {
+                padding: 8px 10px;
+                text-align: left;
+                border-bottom: 1px solid var(--border-light);
+                vertical-align: middle;
+            }
+
+            th {
+                background-color: var(--bg-hover);
+                font-weight: 600;
+                color: var(--text-secondary);
+                font-size: 0.85rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                border-bottom: 2px solid var(--border-medium);
+            }
+
+            tbody tr {
+                transition: background-color 0.2s ease;
+
+                &:hover {
+                    background-color: var(--bg-hover);
+                }
+
+                &:last-child td {
+                    border-bottom: none;
+                }
+            }
+
+            td {
+                .badge {
+                    font-size: 0.75rem;
+                    padding: 3px 6px;
+                }
+
+                small {
+                    color: var(--text-muted);
+                    font-size: 0.8rem;
+                }
+
+                .btn {
+                    font-size: 0.8rem;
+                    padding: 4px 8px;
+                }
+            }
+        }
+
+        // List styling within widgets (except news widget)
+        ul.list-unstyled {
+            li {
+                padding: 6px 0;
+                border-bottom: 1px solid var(--border-light);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+
+                &:last-child {
+                    border-bottom: none;
+                }
+
+                i {
+                    margin-right: 8px;
+                    width: 16px;
+                    text-align: center;
+                }
+
+                strong {
+                    color: var(--text-primary);
+                }
+            }
+        }
+
+        // Exception for news widget - no flex on ul/li
+        &#widget_projectsend_news {
+            ul {
+                li {
+                    display: block;
+                    align-items: initial;
+                    justify-content: initial;
+                }
+            }
+        }
+
+        // Progress bars in widgets
+        .progress {
+            height: 8px;
+            border-radius: 4px;
+            background-color: var(--bg-hover);
+            overflow: hidden;
+
+            .progress-bar {
+                border-radius: 4px;
+                transition: width 0.3s ease;
+            }
+        }
+
+        // Charts and activity bars
+        .upload-activity-chart,
+        .hourly-activity-chart {
+            .bg-info,
+            .bg-primary,
+            .bg-warning {
+                border-radius: 2px;
+                transition: opacity 0.2s ease;
+
+                &:hover {
+                    opacity: 0.8;
+                }
+            }
+        }
+
     }
     
     // Counters
@@ -135,6 +253,7 @@ body.dashboard {
                 &:nth-child(3) { background: #6b6eff; }
                 &:nth-child(4) { background: #e74123; }
                 &:nth-child(5) { background: #03c3ec; }
+                &:nth-child(6) { background: #9c27b0; }
     
                 h6 {
                     font-weight: bold;
@@ -384,6 +503,13 @@ body.dashboard {
         position: relative;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
 
+        // Default size: 2 columns for most widgets
+        grid-column: span 2;
+
+        @media (max-width: 1200px) {
+            grid-column: span 1;
+        }
+
         &.dragging {
             transform: rotate(2deg);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
@@ -414,13 +540,10 @@ body.dashboard {
     }
 }
 
-// Special handling for statistics widget (larger)
-.widget-container[data-widget="statistics"] {
-    grid-column: span 2;
-
-    @media (max-width: 1200px) {
-        grid-column: span 1;
-    }
+// Special handling for news and actions log widgets (1 column)
+.widget-container[data-widget="news"],
+.widget-container[data-widget="actions-log"] {
+    grid-column: span 1;
 }
 
 // Special handling for actions log widget (taller)

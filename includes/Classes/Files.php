@@ -208,6 +208,12 @@ class Files
             $this->disk_folder_year = html_output($row['disk_folder_year']);
             $this->disk_folder_month = html_output($row['disk_folder_month']);
             if (is_numeric($this->disk_folder_month) && $this->disk_folder_month < 10) $this->disk_folder_month = '0' . $this->disk_folder_month;
+
+            // Load size from database if available
+            if (isset($row['size']) && is_numeric($row['size']) && $row['size'] > 0) {
+                $this->size = $row['size'];
+                $this->size_formatted = format_file_size($this->size);
+            }
         }
 
         $this->full_path = $this->getFilePath();
@@ -537,7 +543,8 @@ class Files
      */
     public function getSize()
     {
-        if ($this->filename_on_disk)
+        // Only calculate size from file system if not already loaded from database
+        if (empty($this->size) && $this->filename_on_disk)
         {
             if ( file_exists( $this->full_path ) ) {
                 $this->size = get_real_size($this->full_path);
