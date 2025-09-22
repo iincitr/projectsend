@@ -5,6 +5,12 @@
 require_once 'bootstrap.php';
 redirect_if_not_logged_in();
 
+// Ensure user is properly logged in and constants are defined
+if (!defined('CURRENT_USER_ID') || !CURRENT_USER_ID) {
+    ps_redirect(BASE_URI . 'index.php');
+    exit;
+}
+
 // Users can always edit their own account
 // Otherwise need edit_users permission
 $user_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;

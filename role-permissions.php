@@ -166,6 +166,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 
                             <div class="row">
                                 <?php foreach ($permissions as $permission_key => $permission_data): ?>
+                                    <?php if ($permission_key === 'edit_self_account') continue; // Skip - always granted ?>
                                     <div class="col-md-6 col-lg-4 mb-2">
                                         <div class="form-check">
                                             <input type="checkbox"

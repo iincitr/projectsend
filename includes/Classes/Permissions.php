@@ -506,6 +506,11 @@ class Permissions {
 
     public function can($permission)
     {
+        // Edit self account is a fundamental user right - always granted
+        if ($permission === 'edit_self_account') {
+            return true;
+        }
+
         // Return false if permission doesn't exist
         if (!isset($this->permissions[$permission])) {
             return false;
