@@ -204,16 +204,22 @@
                 // Drag over
                 widget.addEventListener('dragover', function(e) {
                     e.preventDefault();
+                    e.stopPropagation();
                     e.dataTransfer.dropEffect = 'move';
 
+                    // Only show drag-over state if this isn't the dragged widget
                     if (!$(this).hasClass('dragging')) {
+                        $('.widget-container').removeClass('drag-over'); // Remove from all others
                         $(this).addClass('drag-over');
                     }
                 });
 
                 // Drag leave
                 widget.addEventListener('dragleave', function(e) {
-                    $(this).removeClass('drag-over');
+                    // Only remove drag-over if we're actually leaving the widget
+                    if (!this.contains(e.relatedTarget)) {
+                        $(this).removeClass('drag-over');
+                    }
                 });
 
                 // Drop
@@ -223,15 +229,8 @@
 
                     const draggedWidget = $('.widget-container.dragging')[0];
                     if (draggedWidget && draggedWidget !== this) {
-                        // Insert the dragged widget before or after this widget
-                        const rect = this.getBoundingClientRect();
-                        const midY = rect.top + rect.height / 2;
-
-                        if (e.clientY < midY) {
-                            this.parentNode.insertBefore(draggedWidget, this);
-                        } else {
-                            this.parentNode.insertBefore(draggedWidget, this.nextSibling);
-                        }
+                        // Always insert the dragged widget before the drop target
+                        this.parentNode.insertBefore(draggedWidget, this);
 
                         // Save new order
                         saveWidgetOrder();
@@ -242,15 +241,20 @@
             // Container drop handling
             container.addEventListener('dragover', function(e) {
                 e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
             });
 
             container.addEventListener('drop', function(e) {
                 e.preventDefault();
-                // If dropped on empty space, append to end
-                const draggedWidget = $('.widget-container.dragging')[0];
-                if (draggedWidget) {
-                    this.appendChild(draggedWidget);
-                    saveWidgetOrder();
+
+                // Only handle if dropped on the container itself (not on a widget)
+                if (e.target === this) {
+                    const draggedWidget = $('.widget-container.dragging')[0];
+                    if (draggedWidget) {
+                        // Append to end if dropped on empty space
+                        this.appendChild(draggedWidget);
+                        saveWidgetOrder();
+                    }
                 }
             });
         }
