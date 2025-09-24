@@ -827,8 +827,9 @@ class Files
             return true;
         }
 
+        // Clients with delete_files permission can delete their own files
         if (current_role_in(['Client'])) {
-            if (get_option('clients_can_delete_own_files') == '1') {
+            if (current_user_can('delete_files')) {
                 if ($this->uploaded_by == CURRENT_USER_USERNAME) {
                     return true;
                 }

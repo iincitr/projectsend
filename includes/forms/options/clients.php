@@ -73,49 +73,36 @@ $form_sections = [
         'title' => __('Files', 'cftp_admin'),
         'fields' => [
             [
-                'type' => 'checkbox',
-                'name' => 'clients_can_upload',
-                'label' => __('Clients can upload files', 'cftp_admin')
-            ],
-            [
-                'type' => 'checkbox',
-                'name' => 'clients_can_delete_own_files',
-                'label' => __('Clients can delete their own uploaded files', 'cftp_admin')
-            ],
-            [
-                'type' => 'checkbox',
-                'name' => 'clients_can_set_expiration_date',
-                'label' => __('Clients can set expiration Date', 'cftp_admin')
-            ],
-            [
-                'type' => 'checkbox',
-                'name' => 'clients_can_set_categories',
-                'label' => __('Clients can asssign categories to files', 'cftp_admin'),
-                'note' => __("IMPORTANT: This will make all categories visible to all users.", 'cftp_admin')
-            ],
-            [
-                'type' => 'select',
-                'name' => 'clients_can_set_public',
-                'label' => __('Clients can set own files as public:', 'cftp_admin'),
-                'options' => [
-                    'none' => __("None", 'cftp_admin'),
-                    'allowed' => __("Allowed ones", 'cftp_admin'),
-                    'all' => __("All clients", 'cftp_admin')
-                ],
-                'required' => true,
-                'note' => __("If selecting 'allowed ones': please edit each allowed client and set the corresponding permissions.", 'cftp_admin')
-            ],
-            [
-                'type' => 'checkbox',
-                'name' => 'clients_new_default_can_set_public',
-                'label' => __('New self registered clients can upload public files by default.', 'cftp_admin'),
-                'note' => __("Specific option when selecting 'allowed ones' in the previous option.", 'cftp_admin')
-            ],
-            [
-                'type' => 'checkbox',
-                'name' => 'clients_can_upload_to_public_folders',
-                'label' => __('Allow clients to assign files to public folders', 'cftp_admin'),
-                'note' => __("Any file assigned to a public folder automatically becomes public too.", 'cftp_admin') . '<br>' . __('Important: inherits permission from the setting "Clients can set own files as public".', 'cftp_admin')
+                'type' => 'custom',
+                'name' => 'client_permissions_notice',
+                'render_callback' => function($field) {
+                    ?>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="alert alert-info d-flex align-items-start">
+                                <div class="me-3">
+                                    <i class="fa fa-info-circle fa-2x text-info"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="alert-heading mb-2"><?php _e('Client Permissions Moved', 'cftp_admin'); ?></h6>
+                                    <p class="mb-2">
+                                        <?php _e('File-related permissions for clients are now managed through the role-based permission system for better organization and control.', 'cftp_admin'); ?>
+                                    </p>
+                                    <a href="role-permissions.php?role=<?php
+                                        global $dbh;
+                                        $query = "SELECT id FROM " . TABLE_ROLES . " WHERE name = 'Client'";
+                                        $statement = $dbh->prepare($query);
+                                        $statement->execute();
+                                        echo $statement->fetchColumn();
+                                    ?>" class="btn btn-info btn-sm">
+                                        <i class="fa fa-cog"></i> <?php _e('Configure Client Permissions', 'cftp_admin'); ?>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php
+                }
             ],
             [
                 'type' => 'select',

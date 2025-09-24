@@ -342,7 +342,7 @@ if (!current_role_in(['Client'])) {
 
 // Items for clients
 else {
-    if (get_option('clients_can_upload') == 1) {
+    if (current_user_can('upload')) {
         $items['upload'] = array(
             'nav' => 'upload',
             'permission' => 'upload',
@@ -354,7 +354,7 @@ else {
         );
     }
 
-    if (count_user_uploads(CURRENT_USER_ID) > 0 || get_option('clients_can_upload') == 1) {
+    if (count_user_uploads(CURRENT_USER_ID) > 0 || current_user_can('upload')) {
         $items['manage_files'] = array(
             'nav' => 'manage',
             'permission' => 'manage_files',

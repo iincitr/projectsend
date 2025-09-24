@@ -700,8 +700,8 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                         'select_all' => true,
                         'is_not_client' => !current_role_in(['Client']),
                         'can_set_public' => (!current_role_in(['Client']) || current_user_can_upload_public()),
-                        'can_set_expiration' => (!current_role_in(['Client']) || get_option('clients_can_set_expiration_date') == '1'),
-                        'can_set_categories' => (!current_role_in(['Client']) || get_option('clients_can_set_categories') == '1'),
+                        'can_set_expiration' => (!current_role_in(['Client']) || current_user_can('set_file_expiration_date')),
+                        'can_set_categories' => (!current_role_in(['Client']) || current_user_can('set_file_categories')),
                         'total_downloads' => (!current_role_in(['Client']) && !isset($search_on)),
                         'is_search_on' => (isset($search_on)) ? true : false,
                     );

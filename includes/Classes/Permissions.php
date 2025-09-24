@@ -496,28 +496,10 @@ class Permissions {
             return;
         }
 
+        // Client permissions are now handled through the role-based system
+        // The old option-based system has been migrated to role permissions
         if ($this->user->isClient()) {
-            if (get_option('clients_can_upload') == 1) {
-                $this->permissions['upload'] = true;
-                $this->permissions['edit_files'] = true;
-            }
-
-            if (get_option('clients_can_delete_own_files') == 1) {
-                $this->permissions['delete_files'] = true;
-            }
-
-            if (get_option('clients_can_set_expiration_date') == 1) {
-                $this->permissions['set_file_expiration_date'] = true;
-            }
-
-            if (get_option('clients_can_set_categories') == 1) {
-                $this->permissions['set_file_categories'] = true;
-            }
-
-            if (get_option('clients_can_upload_to_public_folders') == 1) {
-                $this->permissions['upload_to_public_folders'] = true;
-            }
-
+            // Special handling for upload_public which still uses the complex client_can_upload_public logic
             $this->permissions['upload_public'] = client_can_upload_public($this->user->id);
         }
     }
