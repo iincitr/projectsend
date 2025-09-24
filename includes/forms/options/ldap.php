@@ -205,7 +205,7 @@ $(document).ready(function() {
         resultDiv.html('').removeClass('alert-success alert-danger');
 
         $.ajax({
-            url: 'process.php?do=test_ldap_connection',
+            url: json_strings.uri.base + 'process.php?do=test_ldap_connection',
             type: 'POST',
             data: {
                 csrf_token: document.getElementById('csrf_token').value

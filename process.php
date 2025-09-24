@@ -270,6 +270,60 @@ switch ($_GET['do']) {
         }
     break;
 
+    case 'check_update_requirements':
+        // Check permissions
+        if (!current_user_can('manage_updates')) {
+            echo json_encode(['status' => 'error', 'message' => __('Permission denied', 'cftp_admin')]);
+            exit;
+        }
+
+        $updater = new \ProjectSend\Classes\AutoUpdate();
+        echo json_encode($updater->checkSystemRequirements());
+        break;
+
+    case 'perform_system_update':
+        // Check permissions
+        if (!current_user_can('manage_updates')) {
+            echo json_encode(['status' => 'error', 'message' => __('Permission denied', 'cftp_admin')]);
+            exit;
+        }
+
+        $step = $_POST['step'] ?? 'download';
+        $updater = new \ProjectSend\Classes\AutoUpdate();
+
+        switch($step) {
+            case 'download':
+                $url = $_POST['url'] ?? '';
+                if (empty($url)) {
+                    echo json_encode(['status' => 'error', 'message' => __('Download URL is required', 'cftp_admin')]);
+                    exit;
+                }
+                $result = $updater->downloadUpdate($url);
+                break;
+
+            case 'backup':
+                $result = $updater->createBackup();
+                break;
+
+            case 'extract':
+                $result = $updater->extractUpdate();
+                break;
+
+            case 'finalize':
+                $result = $updater->finalize();
+                break;
+
+            case 'rollback':
+                $result = $updater->rollback();
+                break;
+
+            default:
+                $result = ['status' => 'error', 'message' => __('Invalid update step', 'cftp_admin')];
+        }
+
+        echo json_encode($result);
+        break;
+
     case 'delete_role':
         // Only super admins can delete roles
         if (!current_user_is_super_admin()) {

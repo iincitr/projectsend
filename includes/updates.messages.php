@@ -37,8 +37,10 @@
 <?php
     }
 
-    // Used when a new version is found, but not if the current installation has just been updated.
-    if ( !current_role_in(['Client']) ) {
+    // Used when a new version is found, but only show to users who can manage updates
+    // Don't show on the updates page itself
+    $current_page = basename($_SERVER["SCRIPT_FILENAME"], '.php');
+    if ( !current_role_in(['Client']) && current_user_can('manage_updates') && $current_page !== 'updates' ) {
         if (!should_check_for_updates() && (basename($_SERVER["SCRIPT_FILENAME"], '.php') == 'dashboard')) {
             ?>
             <div class="alert alert-warning update_msg">
@@ -55,12 +57,14 @@
             if ($update_data->update_available == '1') {
 ?>
                 <div class="alert alert-warning update_msg">
-                    <div class="row">
+                    <div class="row align-items-center">
                         <div class="col-sm-8">
                             <strong><?php _e('Update available!', 'cftp_admin'); ?></strong> <?php echo sprintf( __('ProjectSend %s has been released', 'cftp_admin'), $update_data->latest_version); ?>
                         </div>
-                        <div class="col-sm-4 text-right">
-                            <a href="<?php echo $update_data->url; ?>" class="btn btn-pslight btn-sm" target="_blank"><?php _e('Download', 'cftp_admin');?></a> <a href="<?php echo $update_data->chlog; ?>" target="_blank" class="btn btn-pslight btn-sm"><?php _e('Changelog', 'cftp_admin');?></a>
+                        <div class="col-sm-4 text-right d-flex align-items-center justify-content-end gap-2">
+                            <a href="<?php echo BASE_URI; ?>updates.php" class="btn btn-primary btn-sm"><?php _e('Update Now', 'cftp_admin');?></a>
+                            <a href="<?php echo $update_data->url; ?>" class="btn btn-pslight btn-sm" target="_blank"><?php _e('Download', 'cftp_admin');?></a>
+                            <a href="<?php echo $update_data->chlog; ?>" target="_blank" class="btn btn-pslight btn-sm"><?php _e('Changelog', 'cftp_admin');?></a>
                         </div>
                     </div>
                 </div>

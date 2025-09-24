@@ -97,6 +97,9 @@
             case 'role_permissions':
                 admin.pages.rolePermissions();
                 break;
+            case 'updates':
+                admin.pages.updates();
+                break;
             default:
                 // do nothing
                 break;

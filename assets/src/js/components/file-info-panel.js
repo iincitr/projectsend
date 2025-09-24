@@ -120,7 +120,7 @@
         loadFileInfo(fileId) {
             // Use jQuery for AJAX to maintain compatibility
             $.ajax({
-                url: 'process.php',
+                url: json_strings.uri.base + 'process.php',
                 method: 'GET',
                 data: {
                     do: 'get_file_info',
