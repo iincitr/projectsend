@@ -56,7 +56,7 @@
             $update_data = json_decode($update_data);
             if ($update_data->update_available == '1') {
 ?>
-                <div class="alert alert-warning update_msg">
+                <div class="alert alert-warning update_msg mb-5">
                     <div class="row align-items-center">
                         <div class="col-sm-8">
                             <strong><?php _e('Update available!', 'cftp_admin'); ?></strong> <?php echo sprintf( __('ProjectSend %s has been released', 'cftp_admin'), $update_data->latest_version); ?>

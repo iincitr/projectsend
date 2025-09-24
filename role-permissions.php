@@ -96,7 +96,7 @@ $current_permissions = $role->permissions;
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 ?>
 
-<div class="row">
+<div class="row mb-4">
     <div class="col-12">
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-lg-6">
