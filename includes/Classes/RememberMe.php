@@ -94,7 +94,7 @@ class RememberMe
         $token_hash = hash('sha256', $token);
         
         $query = "SELECT rt.id, rt.user_id, rt.expires_at, rt.user_agent, rt.last_used,
-                         u.user, u.name, u.email, u.level, u.active
+                         u.user, u.name, u.email, u.role_id, u.active
                   FROM " . TABLE_REMEMBER_TOKENS . " rt
                   JOIN " . TABLE_USERS . " u ON rt.user_id = u.id
                   WHERE rt.token_hash = ? AND rt.expires_at > NOW()";
@@ -152,7 +152,7 @@ class RememberMe
             'username' => $result['user'],
             'name' => $result['name'],
             'email' => $result['email'],
-            'level' => $result['level']
+            'role_id' => $result['role_id']
         ];
     }
     

@@ -4,9 +4,10 @@
  * Allows to hide, show or delete the files assigned to the
  * selected client.
  */
-$allowed_levels = array(9, 8, 7, 0);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+// This page should be accessible to anyone who can view files
+redirect_if_not_logged_in();
+// Both clients and users can access their own files
 
 $active_nav = 'files';
 
@@ -30,8 +31,8 @@ if (isset($_GET['view']) && in_array($_GET['view'], ['table', 'cards'])) {
     $view_mode = $_COOKIE[$cookie_name];
 }
 
-if (defined('CURRENT_USER_LEVEL') && CURRENT_USER_LEVEL == 0) {
-    if (count_user_uploads(CURRENT_USER_ID) == 0 && get_option('clients_can_upload') != 1) {
+if (current_role_in(['Client'])) {
+    if (count_user_uploads(CURRENT_USER_ID) == 0 && !current_user_can('upload')) {
         exit_with_error_code(403);
     }
 }
@@ -167,7 +168,8 @@ if (isset($_POST['action'])) {
                 foreach ($selected_files as $index => $file_id) {
                     if (!empty($file_id)) {
                         $file = new \ProjectSend\Classes\Files($file_id);
-                        if ($file->deleteFiles()) {
+                        $result = $file->deleteFiles();
+                        if ($result['status'] === 'success') {
                             $delete_results['success']++;
                         } else {
                             $delete_results['errors']++;
@@ -204,8 +206,8 @@ $folders_arguments = [
 if (!empty($_GET['search'])) {
     $folders_arguments['search'] = $_GET['search'];
 }
-if (defined('CURRENT_USER_LEVEL') && CURRENT_USER_LEVEL == 0) {
-    if (client_can_upload_public(CURRENT_USER_ID)) {
+if (current_role_in(['Client'])) {
+    if (current_user_can('upload_public')) {
         $folders_arguments['public_or_client'] = true;
         $folders_arguments['client_id'] = CURRENT_USER_ID;
     } else {
@@ -303,6 +305,13 @@ if ($query_table_files === true) {
         $conditions[] = "folder_id IS NULL";
     }
 
+    // Filter by ownership if user doesn't have edit_others_files permission
+    if (!current_user_can('edit_others_files')) {
+        // Only show files uploaded by the current user
+        $conditions[] = "user_id = :owner_user_id";
+        $params[':owner_user_id'] = CURRENT_USER_ID;
+    }
+
     // Filter by assignations
     if (isset($_GET['assigned']) && !empty($_GET['assigned'])) {
         if (array_key_exists($_GET['assigned'], $filter_options_assigned)) {
@@ -326,7 +335,7 @@ if ($query_table_files === true) {
      * If the user is an uploader, or a client is editing their files
      * only show files uploaded by that account.
      */
-    if (defined('CURRENT_USER_LEVEL') && in_array(CURRENT_USER_LEVEL, [0, 7])) {
+    if (current_role_in(['Client', 'Uploader'])) {
         $conditions[] = "uploader = :uploader";
         $no_results_error = 'account_level';
 
@@ -448,7 +457,7 @@ if (current_user_can_upload()) {
 
 // Search + filters bar data
 $search_form_action = 'manage-files.php';
-if (defined('CURRENT_USER_LEVEL') && CURRENT_USER_LEVEL != '0') {
+if (!current_role_in(['Client'])) {
     $filters_form = [
         'action' => $current_url,
         'ignore_form_parameters' => ['hidden', 'action', 'uploader', 'assigned'],
@@ -486,22 +495,20 @@ $bulk_actions_items = [
     'none' => __('Select action', 'cftp_admin'),
     'edit' => __('Edit', 'cftp_admin'),
 ];
-if (defined('CURRENT_USER_LEVEL') && CURRENT_USER_LEVEL != '0') {
+if (!current_role_in(['Client'])) {
     $bulk_actions_items['zip'] = __('Download zipped', 'cftp_admin');
     if (!isset($search_on)) {
         $bulk_actions_items['hide_everyone'] = __('Set to hidden from everyone already assigned', 'cftp_admin');
         $bulk_actions_items['show_everyone'] = __('Set to visible to everyone already assigned', 'cftp_admin');
     }
 }
-if (defined('CURRENT_USER_LEVEL')) {
-    if (CURRENT_USER_LEVEL != '0' && isset($search_on)) {
-        $bulk_actions_items['hide'] = __('Set to hidden', 'cftp_admin');
-        $bulk_actions_items['show'] = __('Set to visible', 'cftp_admin');
-        $bulk_actions_items['unassign'] = __('Unassign', 'cftp_admin');
-    } else {
-        if (CURRENT_USER_LEVEL != '0' || (CURRENT_USER_LEVEL == '0' && get_option('clients_can_delete_own_files') == '1'))
-            $bulk_actions_items['delete'] = __('Delete', 'cftp_admin');
-    }
+if (!current_role_in(['Client']) && isset($search_on)) {
+    $bulk_actions_items['hide'] = __('Set to hidden', 'cftp_admin');
+    $bulk_actions_items['show'] = __('Set to visible', 'cftp_admin');
+    $bulk_actions_items['unassign'] = __('Unassign', 'cftp_admin');
+} else {
+    if (!current_role_in(['Client']) || (current_role_in(['Client']) && current_user_can('delete_files')))
+        $bulk_actions_items['delete'] = __('Delete', 'cftp_admin');
 }
 
 // Include layout files
@@ -691,11 +698,11 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                      */
                     $conditions = array(
                         'select_all' => true,
-                        'is_not_client' => (defined('CURRENT_USER_LEVEL') && CURRENT_USER_LEVEL != '0') ? true : false,
-                        'can_set_public' => (defined('CURRENT_USER_LEVEL') && (CURRENT_USER_LEVEL != '0' || current_user_can_upload_public())) ? true : false,
-                        'can_set_expiration' => (defined('CURRENT_USER_LEVEL') && (CURRENT_USER_LEVEL != '0' || get_option('clients_can_set_expiration_date') == '1')) ? true : false,
-                        'can_set_categories' => (defined('CURRENT_USER_LEVEL') && (CURRENT_USER_LEVEL != '0' || get_option('clients_can_set_categories') == '1')) ? true : false,
-                        'total_downloads' => (defined('CURRENT_USER_LEVEL') && CURRENT_USER_LEVEL != '0' && !isset($search_on)) ? true : false,
+                        'is_not_client' => !current_role_in(['Client']),
+                        'can_set_public' => (!current_role_in(['Client']) || current_user_can_upload_public()),
+                        'can_set_expiration' => (!current_role_in(['Client']) || current_user_can('set_file_expiration_date')),
+                        'can_set_categories' => (!current_role_in(['Client']) || current_user_can('set_file_categories')),
+                        'total_downloads' => (!current_role_in(['Client']) && !isset($search_on)),
                         'is_search_on' => (isset($search_on)) ? true : false,
                     );
 
@@ -915,7 +922,7 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
 
                         // Download count and link on the unfiltered files table no specific client or group selected)
                         if (!isset($search_on)) {
-                            if (defined('CURRENT_USER_LEVEL') && CURRENT_USER_LEVEL != '0') {
+                            if (!current_role_in(['Client'])) {
                                 if ($row["download_count"] > 0) {
                                     $btn_class = 'downloaders btn-primary';
                                 } else {

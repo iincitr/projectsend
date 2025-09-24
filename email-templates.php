@@ -3,9 +3,8 @@
  * Allows the administrator to customize the emails
  * sent by the system.
  */
-$allowed_levels = array(9);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+check_access_enhanced(null, ['edit_email_templates']);
 
 $section = (!empty($_GET['section'])) ? $_GET['section'] : $_POST['section'];
 

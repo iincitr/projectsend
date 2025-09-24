@@ -3,9 +3,8 @@
  * Allows the administrator to customize the emails
  * sent by the system.
  */
-$allowed_levels = array(9);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+check_access_enhanced(null, ['test_email']);
 
 $page_title = __('Test email configuration', 'cftp_admin');
 

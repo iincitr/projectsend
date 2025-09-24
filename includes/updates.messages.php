@@ -9,7 +9,7 @@
     }
 
     // If any update was made to the database structure, show the message
-	if (get_option('show_upgrade_success_message') == 'true' && in_array(CURRENT_USER_LEVEL, [9, 8, 7])) {
+	if (get_option('show_upgrade_success_message') == 'true' && current_role_in(['System Administrator', 'Account Manager', 'Uploader'])) {
 ?>
         <div class="row">
             <div class="col-sm-12">
@@ -29,7 +29,7 @@
                         <a class="btn btn-lg btn-primary" role="button" href="<?php echo OPENCOLLECTIVE_URL; ?>" target="_blank"><?php _e('One time or monthly (Open Collective)','cftp_admin'); ?></a>
                         <a class="btn btn-lg btn-warning" role="button" href="<?php echo REVIEWS_URL; ?>" target="_blank"><?php _e('Leave a review','cftp_admin'); ?></a>
                         <!-- <a class="btn btn-lg btn-primary" role="button" href="mailto:contact@projectsend.org" target="_blank"><?php _e('Send a message','cftp_admin'); ?></a> -->
-                        <a class="btn btn-md btn-default" role="button" href="<?php echo BASE_URI; ?>process.php?do=dismiss_upgraded_notice"><?php _e('Dismiss message','cftp_admin'); ?></a>
+                        <a class="btn btn-md btn-default" role="button" href="<?php echo BASE_URI; ?>process.php?do=dismiss_upgraded_notice&return_to=<?php echo urlencode($_SERVER['REQUEST_URI']); ?>"><?php _e('Dismiss message','cftp_admin'); ?></a>
                     </div>
                 </div>
             </div>
@@ -38,7 +38,7 @@
     }
 
     // Used when a new version is found, but not if the current installation has just been updated.
-    if ( CURRENT_USER_LEVEL != '0') {
+    if ( !current_role_in(['Client']) ) {
         if (!should_check_for_updates() && (basename($_SERVER["SCRIPT_FILENAME"], '.php') == 'dashboard')) {
             ?>
             <div class="alert alert-warning update_msg">

@@ -4,12 +4,11 @@ use ProjectSend\Classes\Download;
 use ProjectSend\Classes\ActionsLog;
 
 /** Process an action */
-$allowed_levels = array(9, 8, 7, 0);
 require_once 'bootstrap.php';
 
 // Allow get_public_file_info without login requirement
 if (!isset($_GET['do']) || $_GET['do'] !== 'get_public_file_info') {
-    log_in_required($allowed_levels);
+    redirect_if_not_logged_in();
 }
 
 global $auth;
@@ -97,9 +96,22 @@ switch ($_GET['do']) {
         break;
     case 'dismiss_upgraded_notice':
         redirect_if_not_logged_in();
-        redirect_if_role_not_allowed([9,8,7]);
+        if (!current_user_can('edit_settings')) {
+            exit_with_error_code(403);
+        }
         save_option('show_upgrade_success_message', 'false');
-        ps_redirect(BASE_URI.'dashboard.php');
+
+        // Redirect back to the original page if provided, otherwise dashboard
+        $return_to = isset($_GET['return_to']) ? $_GET['return_to'] : BASE_URI.'dashboard.php';
+
+        // Validate the return URL to prevent open redirects
+        $parsed_url = parse_url($return_to);
+        if ($parsed_url && (empty($parsed_url['host']) || $parsed_url['host'] === $_SERVER['HTTP_HOST'])) {
+            ps_redirect($return_to);
+        } else {
+            ps_redirect(BASE_URI.'dashboard.php');
+        }
+        break;
     case 'return_files_ids':
         redirect_if_not_logged_in();
         redirect_if_role_not_allowed($allowed_levels);
@@ -115,7 +127,8 @@ switch ($_GET['do']) {
 
     case 'get_file_info':
         redirect_if_not_logged_in();
-        redirect_if_role_not_allowed($allowed_levels);
+        // Skip role-based check, rely on permission-based check below
+        // This allows custom roles with appropriate permissions to access this endpoint
 
         header('Content-Type: application/json');
 
@@ -126,9 +139,13 @@ switch ($_GET['do']) {
 
         $file_id = (int)$_GET['file_id'];
 
-        // Check if user can download this file
-        if (!user_can_download_file(CURRENT_USER_ID, $file_id)) {
-            echo json_encode(['success' => false, 'error' => 'Access denied']);
+        // Check if user can access this file's information
+        // For file info, we use edit permissions only (not download permissions)
+        // This ensures users can only get detailed info about files they can edit
+        $can_access = user_can_edit_file(CURRENT_USER_ID, $file_id);
+
+        if (!$can_access) {
+            echo json_encode(['success' => false, 'error' => 'Access denied - you do not have permission to view this file information']);
             break;
         }
 
@@ -251,6 +268,46 @@ switch ($_GET['do']) {
         } catch (Exception $e) {
             echo json_encode(['success' => false, 'error' => 'Exception occurred: ' . $e->getMessage(), 'debug' => 'Exception in get_public_file_info']);
         }
+    break;
+
+    case 'delete_role':
+        // Only super admins can delete roles
+        if (!current_user_is_super_admin()) {
+            $flash->error(__('You do not have permission to delete roles.', 'cftp_admin'));
+            ps_redirect('roles.php');
+        }
+
+        if (empty($_POST['role_id'])) {
+            $flash->error(__('No role specified.', 'cftp_admin'));
+            ps_redirect('roles.php');
+        }
+
+        $role_id = (int)$_POST['role_id'];
+        $role = new \ProjectSend\Classes\Roles($role_id);
+
+        if (!$role->exists()) {
+            $flash->error(__('Role not found.', 'cftp_admin'));
+            ps_redirect('roles.php');
+        }
+
+        if ($role->is_system_role) {
+            $flash->error(__('System roles cannot be deleted.', 'cftp_admin'));
+            ps_redirect('roles.php');
+        }
+
+        if ($role->getUserCount() > 0) {
+            $flash->error(__('Cannot delete role with assigned users.', 'cftp_admin'));
+            ps_redirect('roles.php');
+        }
+
+        $result = $role->delete();
+        if ($result['status'] === 'success') {
+            $flash->success($result['message']);
+        } else {
+            $flash->error($result['message']);
+        }
+
+        ps_redirect('roles.php');
     break;
 }
 

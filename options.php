@@ -2,9 +2,8 @@
 /**
  * Options page and form.
  */
-$allowed_levels = array(9);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+check_access_enhanced(null, ['edit_settings']);
 
 $section = (!empty($_GET['section'])) ? $_GET['section'] : $_POST['section'];
 
@@ -29,13 +28,7 @@ switch ($section) {
         $checkboxes = array(
             'clients_can_register',
             'clients_auto_approve',
-            'clients_can_upload',
-            'clients_can_delete_own_files',
-            'clients_can_set_expiration_date',
-            'clients_can_set_categories',
-            'clients_new_default_can_set_public',
             'clients_files_list_include_public',
-            'clients_can_upload_to_public_folders',
         );
         break;
     case 'privacy':

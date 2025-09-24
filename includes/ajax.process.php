@@ -1,6 +1,5 @@
 <?php
 // Process ajax calls
-$allowed_levels = [9, 8, 7, 0];
 require_once '../bootstrap.php';
 
 global $auth;
@@ -10,10 +9,6 @@ extend_session();
 
 if (!user_is_logged_in()) {
     die_with_error_code(403);
-}
-
-if (!in_array(CURRENT_USER_LEVEL, $allowed_levels)) {
-    exit_with_error_code(403);
 }
 
 if (!isset($_GET['do'])) {

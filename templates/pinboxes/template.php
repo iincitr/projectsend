@@ -68,7 +68,7 @@ define('TEMPLATE_THUMBNAILS_HEIGHT', '400');
 				</li>
 				<?php
 					if ( !empty( $get_categories['categories'] ) ) {
-						$url_client_id	= ( !empty($_GET['client'] ) && CURRENT_USER_LEVEL != '0') ? $_GET['client'] : null;
+						$url_client_id	= ( !empty($_GET['client'] ) && !current_role_in(['Client'])) ? $_GET['client'] : null;
 						$link_template	= CLIENT_VIEW_FILE_LIST_URL;
 				?>
 						<li class="categories_trigger">

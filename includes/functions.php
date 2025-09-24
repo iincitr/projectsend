@@ -414,7 +414,7 @@ function get_client_by_id($client)
                 'phone' => html_output($row['phone']),
                 'email' => html_output($row['email']),
                 'notify_upload' => html_output($row['notify']),
-                'level' => html_output($row['level']),
+                'role_id' => html_output($row['role_id']),
                 'active' => html_output($row['active']),
                 'max_file_size' => html_output($row['max_file_size']),
                 'can_upload_public' => html_output($row['can_upload_public']),
@@ -541,7 +541,7 @@ function get_user_by_id($id)
 {
     global $dbh;
 
-    $statement = $dbh->prepare("SELECT * FROM " . TABLE_USERS . " WHERE id=:id");
+    $statement = $dbh->prepare("SELECT u.*, r.name as role_name FROM " . TABLE_USERS . " u LEFT JOIN " . TABLE_ROLES . " r ON u.role_id = r.id WHERE u.id=:id");
     $statement->bindParam(':id', $id, PDO::PARAM_INT);
     $statement->execute();
     $statement->setFetchMode(PDO::FETCH_ASSOC);
@@ -552,7 +552,8 @@ function get_user_by_id($id)
             'username' => html_output($row['user']),
             'name' => html_output($row['name']),
             'email' => html_output($row['email']),
-            'level' => html_output($row['level']),
+            'role_id' => html_output($row['role_id']),
+            'role_name' => html_output($row['role_name']),
             'active' => html_output($row['active']),
             'max_file_size' => html_output($row['max_file_size']),
             'created_date' => html_output($row['timestamp']),
@@ -601,7 +602,359 @@ function get_user_by_username($user)
 function current_user_can($permission, $params = [])
 {
     global $permissions;
+
+    // Check if permissions object exists
+    if (!isset($permissions) || !is_object($permissions)) {
+        return false;
+    }
+
     return $permissions->can($permission);
+}
+
+/**
+ * Get all available permissions from the system (database-driven)
+ * @return array
+ */
+function get_available_permissions()
+{
+    return \ProjectSend\Classes\Permissions::getAllPermissionsFromDatabase();
+}
+
+/**
+ * Get permissions for a specific role
+ * @param int $role
+ * @return array
+ */
+function get_permissions_for_role($role)
+{
+    return \ProjectSend\Classes\Permissions::getPermissionsForRole($role);
+}
+
+/**
+ * Get permission categories
+ * @return array
+ */
+function get_permission_categories()
+{
+    return \ProjectSend\Classes\Permissions::getPermissionCategories();
+}
+
+/**
+ * Get permissions grouped by category
+ * @return array
+ */
+function get_permissions_grouped_by_category()
+{
+    return \ProjectSend\Classes\Permissions::getPermissionsGroupedByCategory();
+}
+
+/**
+ * Check if a permission exists
+ * @param string $permission
+ * @return bool
+ */
+function permission_exists($permission)
+{
+    return \ProjectSend\Classes\Permissions::permissionExists($permission);
+}
+
+/**
+ * Ensure a specific permission exists, create if missing
+ * @param string $permission_key
+ * @param string $name
+ * @param string $description
+ * @param string $category
+ * @return bool
+ */
+function ensure_permission_exists($permission_key, $name, $description = '', $category = 'general')
+{
+    if (permission_exists($permission_key)) {
+        return true;
+    }
+
+    // Permission doesn't exist, create it
+    if (!table_exists(TABLE_PERMISSIONS)) {
+        return false;
+    }
+
+    global $dbh;
+
+    try {
+        $sql = "INSERT INTO " . TABLE_PERMISSIONS . "
+                (permission_key, name, description, category, is_system_permission, active)
+                VALUES (:permission_key, :name, :description, :category, 0, 1)";
+
+        $statement = $dbh->prepare($sql);
+        $result = $statement->execute([
+            'permission_key' => $permission_key,
+            'name' => $name,
+            'description' => $description,
+            'category' => $category
+        ]);
+
+        if ($result) {
+            error_log("ProjectSend: Auto-created permission: $permission_key");
+        }
+
+        return $result;
+    } catch (Exception $e) {
+        error_log("ProjectSend: Failed to auto-create permission $permission_key: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Get all system user role levels (non-client roles)
+ * Used for access control on pages that should be accessible to all system users
+ * @return array
+ */
+function get_all_system_user_roles()
+{
+    global $dbh;
+
+    // Default system roles
+    $roles = ['System Administrator', 'Account Manager', 'Uploader'];
+
+    if (table_exists(TABLE_ROLES)) {
+        // Get all active non-client roles from database
+        $sql = "SELECT name FROM " . TABLE_ROLES . "
+                WHERE active = 1 AND name != 'Client'
+                ORDER BY id ASC";
+
+        try {
+            $statement = $dbh->prepare($sql);
+            $statement->execute();
+
+            $roles = [];
+            while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+                $roles[] = $row['name'];
+            }
+        } catch (Exception $e) {
+            error_log("ProjectSend: Error getting system user roles: " . $e->getMessage());
+            // Fallback to default roles
+            $roles = ['System Administrator', 'Account Manager', 'Uploader'];
+        }
+    }
+
+    return $roles;
+}
+
+/**
+ * Get admin role levels (roles with user management permissions)
+ * These are roles that can create/edit/delete users and clients
+ * @return array
+ */
+function get_admin_roles()
+{
+    global $dbh;
+
+    // Default admin roles
+    $roles = ['System Administrator', 'Account Manager'];
+
+    if (table_exists(TABLE_ROLES) && table_exists(TABLE_ROLE_PERMISSIONS)) {
+        // Get all roles with user management permissions
+        $sql = "SELECT DISTINCT r.name
+                FROM " . TABLE_ROLES . " r
+                INNER JOIN " . TABLE_ROLE_PERMISSIONS . " rp ON r.id = rp.role_id
+                WHERE r.active = 1
+                AND r.name != 'Client'
+                AND rp.granted = 1
+                AND rp.permission IN ('create_clients', 'edit_clients', 'create_users', 'manage_clients', 'manage_users')
+                ORDER BY r.id ASC";
+
+        try {
+            $statement = $dbh->prepare($sql);
+            $statement->execute();
+
+            $roles = [];
+            while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+                $roles[] = $row['name'];
+            }
+        } catch (Exception $e) {
+            error_log("ProjectSend: Error getting admin roles: " . $e->getMessage());
+            // Fallback to default roles
+            $roles = ['System Administrator', 'Account Manager'];
+        }
+    }
+
+    return $roles;
+}
+
+/**
+ * Get role data for a specific user
+ * @param int $user_id
+ * @return array|null
+ */
+function get_user_role($user_id)
+{
+    $user = new \ProjectSend\Classes\Users($user_id);
+    return $user->exists ? $user->getRoleData() : null;
+}
+
+/**
+ * Get available roles that can be assigned to users
+ * @param bool $include_clients Include client role (level 0)
+ * @return array
+ */
+function get_available_roles_for_assignment($include_clients = false)
+{
+    global $dbh;
+
+    if (!table_exists(TABLE_ROLES)) {
+        // Fallback to hardcoded roles during migration
+        $roles = [
+            ['id' => 1, 'name' => __('System Administrator', 'cftp_admin'), 'is_system_role' => 1],
+            ['id' => 2, 'name' => __('Account Manager', 'cftp_admin'), 'is_system_role' => 1],
+            ['id' => 3, 'name' => __('Uploader', 'cftp_admin'), 'is_system_role' => 1],
+        ];
+
+        if ($include_clients) {
+            $roles[] = ['id' => 4, 'name' => __('Client', 'cftp_admin'), 'is_system_role' => 1];
+        }
+
+        return $roles;
+    }
+
+    $where_clause = $include_clients ? "" : "WHERE name != 'Client'";
+    $sql = "SELECT id, name, description, is_system_role, active
+            FROM " . TABLE_ROLES . "
+            $where_clause
+            ORDER BY id ASC";
+
+    $statement = $dbh->prepare($sql);
+    $statement->execute();
+
+    return $statement->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+/**
+ * Get user's permissions through their role
+ * @param int $user_id
+ * @return array
+ */
+function get_user_permissions_from_role($user_id)
+{
+    $user = new \ProjectSend\Classes\Users($user_id);
+    if (!$user->exists) {
+        return [];
+    }
+
+    return \ProjectSend\Classes\Permissions::getPermissionsForRole($user->role_id);
+}
+
+/**
+ * Get metadata for a specific permission
+ * @param string $permission
+ * @return array|null
+ */
+function get_permission_data($permission)
+{
+    return \ProjectSend\Classes\Permissions::getPermissionData($permission);
+}
+
+/**
+ * Get all roles from database
+ * @param bool $active_only
+ * @return array
+ */
+function get_all_roles($active_only = true)
+{
+    return \ProjectSend\Classes\Roles::getAllRoles($active_only);
+}
+
+/**
+ * Get role data by level
+ * @param int $role_level
+ * @return array|null
+ */
+function get_role_by_level($role_level)
+{
+    return \ProjectSend\Classes\Roles::getRoleByLevel($role_level);
+}
+
+/**
+ * Get role permissions from database
+ * @param int $role_level
+ * @return array
+ */
+function get_role_permissions($role_level)
+{
+    return \ProjectSend\Classes\Roles::getRolePermissions($role_level);
+}
+
+/**
+ * Check if custom roles are enabled
+ * @return bool
+ */
+function custom_roles_enabled()
+{
+    return get_option('enable_custom_roles', null, '1') == '1';
+}
+
+/**
+ * Get available role levels for new roles
+ * @return array
+ */
+function get_available_role_levels()
+{
+    return \ProjectSend\Classes\Roles::getAvailableRoleLevels();
+}
+
+/**
+ * Check if current user is client
+ * @return bool
+ */
+function current_user_is_client()
+{
+    if (!defined('CURRENT_USER_ID')) {
+        return false;
+    }
+
+    try {
+        $user = new \ProjectSend\Classes\Users(CURRENT_USER_ID);
+        return $user->isClient();
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+/**
+ * Check if current user is admin
+ * @return bool
+ */
+function current_user_is_admin()
+{
+    if (!defined('CURRENT_USER_ID')) {
+        return false;
+    }
+
+    try {
+        $user = new \ProjectSend\Classes\Users(CURRENT_USER_ID);
+        $role_data = $user->getRoleData();
+        return $role_data && in_array($role_data['name'], ['Account Manager', 'System Administrator']);
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+/**
+ * Check if current user is super admin
+ * @return bool
+ */
+function current_user_is_super_admin()
+{
+    if (!defined('CURRENT_USER_ID')) {
+        return false;
+    }
+
+    try {
+        $user = new \ProjectSend\Classes\Users(CURRENT_USER_ID);
+        $role_data = $user->getRoleData();
+        return $role_data && $role_data['name'] === 'System Administrator';
+    } catch (Exception $e) {
+        return false;
+    }
 }
 
 function client_can_upload_public($client_id)
@@ -634,50 +987,55 @@ function client_can_assign_to_public_folder($client_id)
 
 function current_user_can_upload()
 {
-    if (!defined('CURRENT_USER_LEVEL')) {
+    if (!defined('CURRENT_USER_ID')) {
         return false;
     }
 
-    switch (CURRENT_USER_LEVEL) {
-        case 9:
-        case 8:
-        case 7:
-            return true;
-            break;
-        case 0:
+    try {
+        $user = new \ProjectSend\Classes\Users(CURRENT_USER_ID);
+        if ($user->isClient()) {
             return (get_option('clients_can_upload') == '1');
-            break;
-        default:
-            break;
+        } else {
+            // System users can upload
+            return true;
+        }
+    } catch (Exception $e) {
+        return false;
     }
-
-    return false;
 }
 
 function current_user_can_upload_public()
 {
-    if (!defined('CURRENT_USER_LEVEL')) {
+    if (!defined('CURRENT_USER_ID')) {
         return false;
     }
 
-    switch (CURRENT_USER_LEVEL) {
-        case 9:
-        case 8:
-        case 7:
+    try {
+        $user = new \ProjectSend\Classes\Users(CURRENT_USER_ID);
+        if ($user->isClient()) {
+            return client_can_upload_public(CURRENT_USER_ID);
+        } else {
+            // System users can always upload public
             return true;
-            break;
-        case 0:
-            if (defined('CURRENT_USER_ID')) {
-                return client_can_upload_public(CURRENT_USER_ID);
-            }
-            return false;
-            break;
-        default:
-            break;
         }
-
-    return false;
+    } catch (Exception $e) {
+        return false;
+    }
 }
+
+/**
+ * Helper functions for role and permission checking
+ * Uses new role-name and permission-based system
+ */
+
+/**
+ * Check if the current user is a system user (any role except client)
+ */
+function current_user_is_system_user()
+{
+    return current_role_in(['System Administrator', 'Account Manager', 'Uploader']);
+}
+
 
 /**
  * Get all the file information knowing only the id
@@ -850,7 +1208,7 @@ function message_no_clients()
 {
     global $dbh;
     // Count the clients to show a warning message or the form
-    $statement = $dbh->query("SELECT id FROM " . TABLE_USERS . " WHERE level = '0'");
+    $statement = $dbh->query("SELECT id FROM " . TABLE_USERS . " WHERE role_id = (SELECT id FROM " . TABLE_ROLES . " WHERE name = 'Client')");
     $count_clients = $statement->rowCount();
     $statement = $dbh->query("SELECT id FROM " . TABLE_GROUPS);
     $count_groups = $statement->rowCount();
@@ -913,17 +1271,37 @@ function system_message($type, $message, $div_id = '')
 /**
  * Function used across the system to determine if the current logged in
  * account has permission to do something.
- *
+ * UPDATED: Now supports both role names AND legacy numeric levels.
  */
-function current_role_in($levels)
+function current_role_in($roles)
 {
-    if (!is_array($levels)) {
-        $levels = array($levels);
+    if (!defined('CURRENT_USER_ID')) {
+        return false;
     }
 
-    if (isset($_SESSION['role']) && (in_array($_SESSION['role'], $levels))) {
-        return true;
-    } else {
+    if (!is_array($roles)) {
+        $roles = array($roles);
+    }
+
+    try {
+        $user = new \ProjectSend\Classes\Users(CURRENT_USER_ID);
+        $role_data = $user->getRoleData();
+
+        if (!$role_data) {
+            return false;
+        }
+
+        $current_role_name = $role_data['name'];
+
+        // Check for role name matches only (no more numeric level support)
+        foreach ($roles as $role) {
+            if ($current_role_name === $role) {
+                return true;
+            }
+        }
+
+        return false;
+    } catch (Exception $e) {
         return false;
     }
 }
@@ -935,14 +1313,17 @@ function current_role_in($levels)
  *
  * @todo Validate the returned value against the one stored on the database
  */
-function get_current_user_level()
+function get_current_user_role()
 {
-    $level = 0;
-    if (isset($_SESSION['role'])) {
-        $level = $_SESSION['role'];
+    $role = 'Client';
+    if (isset($_SESSION['role_id'])) {
+        $role_data = \ProjectSend\Classes\Roles::getRoleById($_SESSION['role_id']);
+        if ($role_data) {
+            $role = $role_data['name'];
+        }
     }
 
-    return $level;
+    return $role;
 }
 
 /**
@@ -1113,7 +1494,7 @@ function format_file_size($file)
 {
     if ($file < 1024) {
         /** No digits so put a ? much better than just seeing Byte */
-        $formatted = (ctype_digit($file)) ? $file . ' Byte' :  ' ? ';
+        $formatted = (ctype_digit((string)$file)) ? $file . ' Byte' :  ' ? ';
     } elseif ($file < 1048576) {
         $formatted = round($file / 1024, 2) . ' KB';
     } elseif ($file < 1073741824) {
@@ -1576,8 +1957,8 @@ function add_body_class($custom = '')
     if (user_is_logged_in()) {
         $classes[] = 'logged-in';
 
-        if (defined('CURRENT_USER_LEVEL')) {
-            $logged_type = CURRENT_USER_LEVEL == '0' ? 'client' : 'admin';
+        if (defined('CURRENT_USER_ID')) {
+            $logged_type = current_user_is_client() ? 'client' : 'admin';
             $classes[] = 'logged-as-' . $logged_type;
         }
     }
@@ -1781,7 +2162,7 @@ function file_editor_get_all_clients()
     //$users = [];
     $clients = [];
 
-    $statement = $dbh->prepare("SELECT id, name, level FROM " . TABLE_USERS . " WHERE level='0' AND account_requested='0' ORDER BY name ASC");
+    $statement = $dbh->prepare("SELECT id, name, role_id FROM " . TABLE_USERS . " WHERE role_id = (SELECT id FROM " . TABLE_ROLES . " WHERE name = 'Client') AND account_requested='0' ORDER BY name ASC");
     $statement->execute();
     $statement->setFetchMode(PDO::FETCH_ASSOC);
     while ($row = $statement->fetch()) {
@@ -1801,7 +2182,7 @@ function file_editor_get_clients_by_ids($clients_ids = [])
 
     $clients = [];
     $clients_ids = implode(',', $clients_ids);
-    $statement = $dbh->prepare("SELECT id, name, level FROM " . TABLE_USERS . " WHERE level='0' AND account_requested='0' AND FIND_IN_SET(id, :clients_ids) ORDER BY name ASC");
+    $statement = $dbh->prepare("SELECT id, name, role_id FROM " . TABLE_USERS . " WHERE role_id = (SELECT id FROM " . TABLE_ROLES . " WHERE name = 'Client') AND account_requested='0' AND FIND_IN_SET(id, :clients_ids) ORDER BY name ASC");
     $statement->bindParam(':clients_ids', $clients_ids);
     $statement->execute();
     $statement->setFetchMode(PDO::FETCH_ASSOC);
@@ -1871,21 +2252,29 @@ function user_can_edit_file($user_id = null, $file_id = null)
     }
 
     $user = get_user_by_id($user_id);
+    $file = get_file_by_id($file_id);
 
-    if (in_array($user['level'], [9, 8])) {
+    if (!$user || !$file) {
+        return false;
+    }
+
+    // Get user's role permissions
+    $role_permissions = get_role_permissions($user['role_id']);
+
+    // Check if user has permission to edit others' files
+    if (in_array('edit_others_files', $role_permissions)) {
         return true;
-        // Special case for uploader?
-        // } elseif ($user['level'] == 7) {
-        //     return true;
-    } else {
-        $file = get_file_by_id($file_id);
+    }
 
+    // Check if user has permission to edit files and this is their own file
+    if (in_array('edit_files', $role_permissions)) {
         // Pre-update when column didn't exist
         if ($file['user_id'] == null) {
             if ($user['username'] == $file['uploaded_by']) {
                 return true;
             }
         }
+
         if ($user['id'] == $file['user_id']) {
             return true;
         }
@@ -1980,7 +2369,7 @@ function user_can_download_file($user_id = null, $file_id = null)
     }
 
 
-    if (defined('CURRENT_USER_LEVEL') && CURRENT_USER_LEVEL != 0) {
+    if (defined('CURRENT_USER_ID') && !current_user_is_client()) {
         return true;
     }
 
@@ -2022,7 +2411,7 @@ function count_groups_requests_for_existing_clients()
     $ignore_user_ids = [];
 
     // First, get accounts requests. This will give us the ids of the clients that we need to ignore later
-    $statement = $dbh->prepare("SELECT id FROM " . TABLE_USERS . " WHERE level='0' AND active='1' AND account_denied='0'");
+    $statement = $dbh->prepare("SELECT id FROM " . TABLE_USERS . " WHERE role_id = (SELECT id FROM " . TABLE_ROLES . " WHERE name = 'Client') AND active='1' AND account_denied='0'");
     $statement->execute();
     if ($statement->rowCount() > 0) {
         $statement->setFetchMode(PDO::FETCH_ASSOC);
@@ -2561,10 +2950,10 @@ function regenerate_single_thumbnail($file_id, $width, $height) {
  */
 function client_get_profile_link()
 {
-    if (!defined('CURRENT_USER_LEVEL') || !defined('CURRENT_USER_ID')) {
+    if (!defined('CURRENT_USER_ID')) {
         return BASE_URI;
     }
 
-    $my_account_link = (CURRENT_USER_LEVEL == 0) ? 'clients-edit.php' : 'users-edit.php';
+    $my_account_link = current_user_is_client() ? 'clients-edit.php' : 'users-edit.php';
     return BASE_URI . $my_account_link . '?id=' . CURRENT_USER_ID;
 }

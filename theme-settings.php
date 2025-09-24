@@ -3,9 +3,8 @@
  * Theme Settings Management Interface
  * Allows administrators to configure individual theme options
  */
-$allowed_levels = array(9);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+check_access_enhanced(null, ['change_template']);
 
 $page_title = __("Theme Settings", 'cftp_admin');
 $active_nav = 'themes';

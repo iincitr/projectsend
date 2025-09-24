@@ -29,7 +29,8 @@ class Users
     public $password;
     public $password_raw;
     public $account_type;
-    public $role;
+    public $role_id;
+    public $role; // Backward compatibility property
     public $active;
     public $notify_account;
     public $max_file_size;
@@ -67,7 +68,9 @@ class Users
         $this->dbh = $dbh;
         $this->logger = new \ProjectSend\Classes\ActionsLog;
 
-        $this->role = 0; // by default, create "client" role
+        // Default to client role
+        $this->role_id = \ProjectSend\Classes\Roles::getClientRoleId();
+        $this->role = $this->role_id; // Backward compatibility
 
         $this->allowed_actions_roles = [9];
         $this->exists = false;
@@ -101,6 +104,44 @@ class Users
         return false;
     }
 
+    /**
+     * Get role data for this user
+     * @return array|null
+     */
+    public function getRoleData()
+    {
+        if (empty($this->role_id)) {
+            return null;
+        }
+
+        try {
+            $role = new \ProjectSend\Classes\Roles($this->role_id);
+            if ($role->exists()) {
+                return [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'description' => $role->description,
+                    'is_system_role' => $role->is_system_role,
+                    'active' => $role->active
+                ];
+            }
+        } catch (Exception $e) {
+            error_log("ProjectSend: Error getting role data for user {$this->id}: " . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * Get role name for this user
+     * @return string
+     */
+    public function getRoleName()
+    {
+        $role_data = $this->getRoleData();
+        return $role_data ? $role_data['name'] : __('Unknown Role', 'cftp_admin');
+    }
+
     public function userExists()
     {
         return $this->exists;
@@ -122,18 +163,15 @@ class Users
     private function setActionsPermissions()
     {
         /* Allowed roles for:
-            Delete users: [9]
-            Delete clients: [8, 9]
+            Delete users: System Admin only
+            Delete clients: Admin and System Admin
         */
-        switch ($this->role) {
-            case 7:
-            case 8:
-            case 9:
-                $this->allowed_actions_roles = [9];
-                break;
-            case 0;
-                $this->allowed_actions_roles = [8, 9];
-                break;
+        if ($this->isClient()) {
+            // Clients can be managed by Account Managers and System Admins
+            $this->allowed_actions_roles = ['Account Manager', 'System Administrator'];
+        } else {
+            // System users can only be managed by System Admins
+            $this->allowed_actions_roles = ['System Administrator'];
         }
     }
 
@@ -146,7 +184,8 @@ class Users
         $this->email = (!empty($arguments['email'])) ? encode_html($arguments['email']) : null;
         $this->username = (!empty($arguments['username'])) ? encode_html($arguments['username']) : null;
         $this->password = (!empty($arguments['password'])) ? $arguments['password'] : null;
-        $this->role = (!empty($arguments['role'])) ? (int)$arguments['role'] : 0;
+        $this->role_id = (!empty($arguments['role_id'])) ? (int)$arguments['role_id'] : (!empty($arguments['role']) ? (int)$arguments['role'] : null);
+        $this->role = $this->role_id; // Backward compatibility
         $this->active = (!empty($arguments['active'])) ? (int)$arguments['active'] : 0;
         $this->notify_account = (!empty($arguments['notify_account'])) ? (int)$arguments['notify_account'] : 0;
         $this->max_file_size = (!empty($arguments['max_file_size'])) ? (int)$arguments['max_file_size'] : 0;
@@ -190,8 +229,9 @@ class Users
             $this->username = html_output($row['user']);
             $this->password = html_output($row['password']);
             $this->password_raw = $row['password'];
-            $this->role = html_output(strval($row['level']));
-            $this->account_type = ($this->role == 0) ? 'client' : 'user';
+            $this->role_id = (int)$row['role_id'];
+            $this->role = $this->role_id; // Backward compatibility
+            $this->account_type = $this->isClient() ? 'client' : 'user';
             $this->active = html_output($row['active']);
             $this->max_file_size = html_output($row['max_file_size']);
             $this->created_date = html_output($row['timestamp']);
@@ -259,7 +299,7 @@ class Users
             'email' => $this->email,
             'username' => $this->username,
             'password' => $this->password,
-            'role' => (int)$this->role,
+            'role_id' => (int)$this->role_id,
             'active' => $this->active,
             'max_file_size' => $this->max_file_size,
             'can_upload_public' => $this->can_upload_public,
@@ -308,11 +348,62 @@ class Users
 
     public function isClient()
     {
-        if (!empty($this->role) && $this->role != 0) {
-            return false;
+        if (empty($this->role_id)) {
+            return true; // Default to client if no role
         }
 
-        return true;
+        try {
+            $role = new \ProjectSend\Classes\Roles($this->role_id);
+            return $role->isClientRole();
+        } catch (Exception $e) {
+            return true; // Default to client on error
+        }
+    }
+
+    /**
+     * Check if a user can edit this user account
+     * @param int $user_id User ID to check (defaults to current user)
+     * @return bool
+     */
+    public function canUserEdit($user_id = null)
+    {
+        if ($user_id === null) {
+            if (defined('CURRENT_USER_ID')) {
+                $user_id = \CURRENT_USER_ID;
+            } else {
+                return false; // No user logged in
+            }
+        }
+
+        // Users can edit themselves
+        if ($this->id == $user_id) {
+            return true;
+        }
+
+        // Check based on account type
+        if ($this->isClient()) {
+            // For clients: Users with edit_clients permission can edit all clients
+            if (\current_user_can('edit_clients')) {
+                return true;
+            }
+
+            // Users with create_clients permission can edit their own created clients
+            if (\current_user_can('create_clients') && $this->created_by == \CURRENT_USER_USERNAME) {
+                return true;
+            }
+        } else {
+            // For system users: Users with edit_users permission can edit all users
+            if (\current_user_can('edit_users')) {
+                return true;
+            }
+
+            // Users with create_users permission can edit their own created users
+            if (\current_user_can('create_users') && $this->created_by == \CURRENT_USER_USERNAME) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -333,7 +424,7 @@ class Users
                 'required' => ['error' => $json_strings['validation']['no_email']],
                 'email' => ['error' => $json_strings['validation']['invalid_email']],
             ],
-            $this->role => [
+            $this->role_id => [
                 'required' => ['error' => $json_strings['validation']['no_role']],
             ],
             $this->max_file_size => [
@@ -410,13 +501,28 @@ class Users
      */
     public function create()
     {
-        $state = array(
-            'query' => 0,
-        );
+        // Check permissions based on account type
+        if ($this->isClient()) {
+            if (!\current_user_can('create_clients')) {
+                return [
+                    'status' => 'error',
+                    'message' => __('You do not have permission to create clients.', 'cftp_admin')
+                ];
+            }
+        } else {
+            if (!\current_user_can('create_users')) {
+                return [
+                    'status' => 'error',
+                    'message' => __('You do not have permission to create users.', 'cftp_admin')
+                ];
+            }
+        }
 
         if (!$this->validate()) {
-            $state = [];
-            return $state;
+            return [
+                'status' => 'error',
+                'message' => __('Validation errors occurred.', 'cftp_admin')
+            ];
         }
 
         $password_hashed = $this->hashPassword($this->password);
@@ -428,16 +534,16 @@ class Users
             /** Insert the client information into the database */
             $statement = $this->dbh->prepare(
                 "INSERT INTO " . TABLE_USERS . " (
-                    name, user, password, level, address, phone, email, notify, contact, created_by, active, account_requested, max_file_size, can_upload_public
+                    name, user, password, role_id, address, phone, email, notify, contact, created_by, active, account_requested, max_file_size, can_upload_public
                 )
                 VALUES (
-                    :name, :username, :password, :role, :address, :phone, :email, :notify_upload, :contact, :created_by, :active, :request, :max_file_size, :can_upload_public
+                    :name, :username, :password, :role_id, :address, :phone, :email, :notify_upload, :contact, :created_by, :active, :request, :max_file_size, :can_upload_public
                 )"
             );
             $statement->bindParam(':name', $this->name);
             $statement->bindParam(':username', $this->username);
             $statement->bindParam(':password', $password_hashed);
-            $statement->bindParam(':role', $this->role, PDO::PARAM_INT);
+            $statement->bindParam(':role_id', $this->role_id, PDO::PARAM_INT);
             $statement->bindParam(':address', $this->address);
             $statement->bindParam(':phone', $this->phone);
             $statement->bindParam(':email', $this->email);
@@ -452,8 +558,6 @@ class Users
 
             if ($statement) {
                 $this->id = $this->dbh->lastInsertId();
-                $state['id'] = $this->id;
-                $state['query'] = 1;
 
                 if ($this->require_password_change == true) {
                     save_user_meta($this->id, 'require_password_change', 'true');
@@ -462,18 +566,10 @@ class Users
                 // Uploader role: limit who user can upload to
                 $this->limitUploadToSave($this->limit_upload_to);
 
-                switch ($this->role) {
-                    case 0:
-                        $email_type = "new_client";
-                        break;
-                    case 7:
-                    case 8:
-                    case 9:
-                        $email_type = "new_user";
-                        break;
-                }
+                $email_type = $this->isClient() ? "new_client" : "new_user";
 
                 /** Send account data by email */
+                $email_status = 2; // Default: not sent
                 $notify_user = new \ProjectSend\Classes\Emails;
                 if ($this->notify_account == 1) {
                     if ($notify_user->send([
@@ -482,17 +578,25 @@ class Users
                         'username'    => $this->username,
                         'password'    => $this->password
                     ])) {
-                        $state['email'] = 1;
+                        $email_status = 1; // Success
                     } else {
-                        $state['email'] = 0;
+                        $email_status = 0; // Failed
                     }
-                } else {
-                    $state['email'] = 2;
                 }
+
+                return [
+                    'status' => 'success',
+                    'id' => $this->id,
+                    'email' => $email_status,
+                    'message' => $this->isClient() ? __('Client created successfully.', 'cftp_admin') : __('User created successfully.', 'cftp_admin')
+                ];
             }
         }
 
-        return $state;
+        return [
+            'status' => 'error',
+            'message' => __('Failed to create user.', 'cftp_admin')
+        ];
     }
 
     public function triggerAfterSelfRegister($arguments = null)
@@ -538,20 +642,60 @@ class Users
 
     /**
      * Edit an existing user.
+     * @return array Result with status and message
      */
     public function edit()
     {
         if (empty($this->id)) {
-            return false;
+            return [
+                'status' => 'error',
+                'message' => __('User ID is required for editing.', 'cftp_admin')
+            ];
         }
 
-        $state = array(
-            'query' => 0,
-        );
+        // Check permissions
+        $current_user_id = defined('CURRENT_USER_ID') ? \CURRENT_USER_ID : null;
+        $current_username = defined('CURRENT_USER_USERNAME') ? \CURRENT_USER_USERNAME : null;
+
+        $can_edit = false;
+
+        // Users can edit themselves
+        if ($this->id == $current_user_id) {
+            $can_edit = true;
+        }
+        // Check based on account type
+        elseif ($this->isClient()) {
+            // For clients: Users with edit_clients permission can edit all clients
+            if (\current_user_can('edit_clients')) {
+                $can_edit = true;
+            }
+            // Users with create_clients permission can edit their own created clients
+            elseif (\current_user_can('create_clients') && $this->created_by == $current_username) {
+                $can_edit = true;
+            }
+        } else {
+            // For system users: Users with edit_users permission can edit all users
+            if (\current_user_can('edit_users')) {
+                $can_edit = true;
+            }
+            // Users with create_users permission can edit their own created users
+            elseif (\current_user_can('create_users') && $this->created_by == $current_username) {
+                $can_edit = true;
+            }
+        }
+
+        if (!$can_edit) {
+            return [
+                'status' => 'error',
+                'message' => __('You do not have permission to edit this user.', 'cftp_admin')
+            ];
+        }
 
         if (!$this->validate()) {
-            $state = [];
-            return $state;
+            return [
+                'status' => 'error',
+                'message' => __('Validation errors occurred.', 'cftp_admin')
+            ];
         }
 
         $previous_data = get_user_by_id($this->id);
@@ -561,7 +705,7 @@ class Users
 
         // Some fields should not be allowed to be written if the current user is not a client,
         // as they are meant to be null for system users
-        if ($this->role != 0) {
+        if (!$this->isClient()) {
             $this->address = null;
             $this->phone = null;
             $this->contact = null;
@@ -570,7 +714,7 @@ class Users
         /** SQL query */
         $query = "UPDATE " . TABLE_USERS . " SET
                                     name = :name,
-                                    level = :role,
+                                    role_id = :role_id,
                                     address = :address,
                                     phone = :phone,
                                     email = :email,
@@ -589,7 +733,7 @@ class Users
 
         $statement = $this->dbh->prepare($query);
         $statement->bindParam(':name', $this->name);
-        $statement->bindParam(':role', $this->role, PDO::PARAM_INT);
+        $statement->bindParam(':role_id', $this->role_id, PDO::PARAM_INT);
         $statement->bindParam(':address', $this->address);
         $statement->bindParam(':phone', $this->phone);
         $statement->bindParam(':email', $this->email);
@@ -615,30 +759,27 @@ class Users
 
             $this->limitUploadToSave($this->limit_upload_to);
 
-            $state['query'] = 1;
-
-            switch ($this->role) {
-                case 0:
-                    $log_action_number = 14;
-                    break;
-                case 7:
-                case 8:
-                case 9:
-                    $log_action_number = 13;
-                    break;
-            }
+            $log_action_number = $this->isClient() ? 14 : 13;
 
             /** Record the action log */
             $this->logger->addEntry([
                 'action' => $log_action_number,
-                'owner_id' => CURRENT_USER_ID,
+                'owner_id' => defined('CURRENT_USER_ID') ? \CURRENT_USER_ID : 1,
                 'affected_account' => $this->id,
                 'affected_account_name' => $this->username,
                 'username_column' => true
             ]);
+
+            return [
+                'status' => 'success',
+                'message' => __('User updated successfully.', 'cftp_admin')
+            ];
         }
 
-        return $state;
+        return [
+            'status' => 'error',
+            'message' => __('Failed to update user.', 'cftp_admin')
+        ];
     }
 
     /**
@@ -646,40 +787,69 @@ class Users
      */
     public function delete()
     {
-        if ($this->id == CURRENT_USER_ID) {
-            return false;
+        if (empty($this->id)) {
+            return [
+                'status' => 'error',
+                'message' => __('User ID is required for deletion.', 'cftp_admin')
+            ];
         }
 
-        if (isset($this->id)) {
-            /** Do a permissions check */
-            if (isset($this->allowed_actions_roles) && current_role_in($this->allowed_actions_roles)) {
-                $sql = $this->dbh->prepare('DELETE FROM ' . TABLE_USERS . ' WHERE id=:id');
-                $sql->bindParam(':id', $this->id, PDO::PARAM_INT);
-                $sql->execute();
+        // Prevent self-deletion
+        if ($this->id == defined('CURRENT_USER_ID') ? \CURRENT_USER_ID : null) {
+            return [
+                'status' => 'error',
+                'message' => __('You cannot delete your own account.', 'cftp_admin')
+            ];
+        }
 
-                switch ($this->role) {
-                    case 0:
-                        $log_action_number = 17;
-                        break;
-                    case 7:
-                    case 8:
-                    case 9:
-                        $log_action_number = 16;
-                        break;
-                }
+        // Check permissions based on account type
+        $current_username = defined('CURRENT_USER_USERNAME') ? \CURRENT_USER_USERNAME : null;
+        $can_delete = false;
 
-                /** Record the action log */
-                $this->logger->addEntry([
-                    'action' => $log_action_number,
-                    'owner_id' => CURRENT_USER_ID,
-                    'affected_account_name' => $this->name,
-                ]);
-
-                return true;
+        if ($this->isClient()) {
+            // For clients: Users with delete_clients permission can delete all clients
+            if (\current_user_can('delete_clients')) {
+                $can_delete = true;
+            }
+            // Users with create_clients permission can delete their own created clients
+            elseif (\current_user_can('create_clients') && $this->created_by == $current_username) {
+                $can_delete = true;
+            }
+        } else {
+            // For system users: Users with delete_users permission can delete all users
+            if (\current_user_can('delete_users')) {
+                $can_delete = true;
+            }
+            // Users with create_users permission can delete their own created users
+            elseif (\current_user_can('create_users') && $this->created_by == $current_username) {
+                $can_delete = true;
             }
         }
 
-        return false;
+        if (!$can_delete) {
+            return [
+                'status' => 'error',
+                'message' => __('You do not have permission to delete this user.', 'cftp_admin')
+            ];
+        }
+
+        $sql = $this->dbh->prepare('DELETE FROM ' . TABLE_USERS . ' WHERE id=:id');
+        $sql->bindParam(':id', $this->id, PDO::PARAM_INT);
+        $sql->execute();
+
+        $log_action_number = $this->isClient() ? 17 : 16;
+
+        /** Record the action log */
+        $this->logger->addEntry([
+            'action' => $log_action_number,
+            'owner_id' => defined('CURRENT_USER_ID') ? \CURRENT_USER_ID : 1,
+            'affected_account_name' => $this->name,
+        ]);
+
+        return [
+            'status' => 'success',
+            'message' => $this->isClient() ? __('Client deleted successfully.', 'cftp_admin') : __('User deleted successfully.', 'cftp_admin')
+        ];
     }
 
     /**
@@ -698,10 +868,10 @@ class Users
 
         switch ($change_to) {
             case 0:
-                $log_action_number = ($this->role == 0) ? 20 : 28;
+                $log_action_number = $this->isClient() ? 20 : 28;
                 break;
             case 1:
-                $log_action_number = ($this->role == 0) ? 19 : 27;
+                $log_action_number = $this->isClient() ? 19 : 27;
                 break;
             default:
                 return false;
@@ -837,7 +1007,8 @@ class Users
 
     private function limitUploadToSave($clients_ids = [])
     {
-        if (!defined('CURRENT_USER_LEVEL') or CURRENT_USER_LEVEL == 7) {
+        // Check if current user can manage upload restrictions
+        if (!current_user_can('edit_users')) {
             return;
         }
 
@@ -886,9 +1057,15 @@ class Users
 
     public function shouldLimitUploadTo()
     {
-        if (!$this->isClient() && $this->role == '7') {
-            return true;
+        if (!$this->isClient()) {
+            try {
+                $role = new \ProjectSend\Classes\Roles($this->role_id);
+                return $role->name === 'Uploader';
+            } catch (Exception $e) {
+                return false;
+            }
         }
+        return false;
     }
 
     public function validatePassword($password = null)
@@ -972,7 +1149,7 @@ class Users
             'password' => $password,
             'name' => $name,
             'email' => $email,
-            'role' => $default_role, // Set role property (maps to level column in DB)
+            'role_id' => $default_role, // Set role_id property
             'address' => $this->extractLdapAttribute($ldap_attributes, ['postalAddress', 'streetAddress']),
             'phone' => $this->extractLdapAttribute($ldap_attributes, ['telephoneNumber', 'mobile']),
             'contact' => null,

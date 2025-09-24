@@ -2,9 +2,13 @@
 /**
  * Shows a table of details of a file download information
  */
-$allowed_levels = array(9, 8, 7);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+redirect_if_not_logged_in();
+
+// Check for view statistics permission
+if (!current_user_can('view_statistics')) {
+    exit_with_error_code(403);
+}
 
 $active_nav = 'files';
 

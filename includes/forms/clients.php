@@ -145,8 +145,7 @@ switch ($clients_form_type) {
         $arguments = [];
 
         /** Groups to search on based on the current user level */
-        $role = (defined('CURRENT_USER_LEVEL')) ? CURRENT_USER_LEVEL : null;
-        if (!empty($role) && in_array($role, [8, 9])) {
+        if (current_role_in(['Account Manager', 'System Administrator'])) {
             /** An admin or client manager is creating a client account */
         } else {
             /** Someone is registering an account for himself */
@@ -187,7 +186,7 @@ switch ($clients_form_type) {
                         ?>
                     </select>
                     <?php
-                    if (!empty($role) && in_array($role, [8, 9])) {
+                    if (current_role_in(['Account Manager', 'System Administrator'])) {
                     ?>
                         <div class="select_control_buttons">
                             <button type="button" class="btn btn-pslight add-all" data-target="groups-select"><?php _e('Add all', 'cftp_admin'); ?></button>

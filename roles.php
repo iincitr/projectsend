@@ -1,0 +1,201 @@
+<?php
+/**
+ * Show the list of user roles and their permissions
+ * Only accessible to Super Administrators (level 9)
+ */
+require_once 'bootstrap.php';
+check_access_enhanced(null, ['edit_settings']);
+
+$active_nav = 'users';
+$page_title = __('User Roles Management', 'cftp_admin');
+$page_id = 'roles';
+
+// Get all roles
+$roles = get_all_roles();
+
+// Results count and form actions
+$elements_found_count = count($roles);
+$bulk_actions_items = []; // No bulk actions for roles
+
+include_once ADMIN_VIEWS_DIR . DS . 'header.php';
+?>
+
+<div class="row">
+    <div class="col-12">
+        <?php include_once LAYOUT_DIR . DS . 'form-counts-actions.php'; ?>
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-lg-6">
+            </div>
+            <div class="col-xs-12 col-sm-12 col-lg-6 text-end">
+                <?php if (custom_roles_enabled()): ?>
+                    <a href="roles-add.php" class="btn btn-primary">
+                        <i class="fa fa-plus"></i> <?php _e('Add new role', 'cftp_admin'); ?>
+                    </a>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <?php if (!custom_roles_enabled()): ?>
+            <div class="alert alert-info">
+                <i class="fa fa-info-circle"></i>
+                <?php _e('Custom roles are currently disabled. Only the default system roles are available.', 'cftp_admin'); ?>
+                <a href="options.php?section=advanced" class="btn btn-sm btn-light ms-2">
+                    <?php _e('Enable Custom Roles', 'cftp_admin'); ?>
+                </a>
+            </div>
+        <?php endif; ?>
+
+        <?php if (empty($roles)): ?>
+            <p class="text-muted"><?php _e('No roles found.', 'cftp_admin'); ?></p>
+        <?php else: ?>
+            <?php
+            // Generate the table using the class.
+            $table = new \ProjectSend\Classes\Layout\Table([
+                'id' => 'roles_tbl',
+                'class' => 'footable table',
+                'origin' => basename(__FILE__),
+            ]);
+
+            $thead_columns = array(
+                array(
+                    'content' => __('Role Name', 'cftp_admin'),
+                ),
+                array(
+                    'content' => __('Description', 'cftp_admin'),
+                    'hide' => 'phone',
+                ),
+                array(
+                    'content' => __('Users', 'cftp_admin'),
+                ),
+                array(
+                    'content' => __('Permissions', 'cftp_admin'),
+                    'hide' => 'phone',
+                ),
+                array(
+                    'content' => __('Type', 'cftp_admin'),
+                    'hide' => 'phone',
+                ),
+                array(
+                    'content' => __('Status', 'cftp_admin'),
+                ),
+                array(
+                    'content' => __('Actions', 'cftp_admin'),
+                    'hide' => 'phone',
+                ),
+            );
+            $table->thead($thead_columns);
+
+            foreach ($roles as $role) {
+                $table->addRow();
+
+                $role_obj = new \ProjectSend\Classes\Roles($role['id']);
+                $user_count = $role_obj->getUserCount();
+                $permissions = get_role_permissions($role['id']);
+
+                // Determine role type badge
+                $role_badge = '';
+                $badge_class = 'secondary';
+                if ($role['name'] == 'System Administrator') {
+                    $role_badge = 'Super Admin';
+                    $badge_class = 'danger';
+                } elseif ($role['name'] == 'Account Manager') {
+                    $role_badge = 'Admin';
+                    $badge_class = 'warning';
+                } elseif ($role['name'] == 'Uploader') {
+                    $role_badge = 'User';
+                    $badge_class = 'info';
+                } elseif ($role['name'] == 'Client') {
+                    $role_badge = 'Client';
+                    $badge_class = 'secondary';
+                } else {
+                    $role_badge = 'Custom';
+                    $badge_class = 'secondary';
+                }
+
+                // Status badge
+                $status_badge_label = $role['active'] ? __('Active', 'cftp_admin') : __('Inactive', 'cftp_admin');
+                $status_badge_class = $role['active'] ? 'bg-success' : 'bg-secondary';
+
+                // Type badge
+                $type_badge = $role['is_system_role'] ? __('System', 'cftp_admin') : __('Custom', 'cftp_admin');
+                $type_badge_class = $role['is_system_role'] ? 'bg-primary' : 'bg-success';
+
+                // Build action buttons
+                $action_buttons = '';
+
+                // Permissions button - different styles based on editability
+                if ($role['permissions_editable']) {
+                    $action_buttons .= '<a href="role-permissions.php?role=' . $role['id'] . '" class="btn btn-primary btn-sm"><i class="fa fa-key"></i><span class="button_label">' . __('Permissions', 'cftp_admin') . '</span></a>' . "\n";
+                } else {
+                    $action_buttons .= '<a href="role-permissions.php?role=' . $role['id'] . '" class="btn btn-pslight btn-sm"><i class="fa fa-lock"></i><span class="button_label">' . __('View Permissions', 'cftp_admin') . '</span></a>' . "\n";
+                }
+
+                // View Users/Clients button
+                if ($user_count > 0) {
+                    if ($role['name'] === 'Client') {
+                        $action_buttons .= '<a href="clients.php" class="btn btn-primary btn-sm"><i class="fa fa-users"></i><span class="button_label">' . __('View', 'cftp_admin') . '</span></a>' . "\n";
+                    } else {
+                        $action_buttons .= '<a href="users.php?role=' . $role['id'] . '" class="btn btn-primary btn-sm"><i class="fa fa-users"></i><span class="button_label">' . __('View', 'cftp_admin') . '</span></a>' . "\n";
+                    }
+                }
+
+                // Edit/View button
+                if (!$role['is_system_role'] && custom_roles_enabled()) {
+                    $action_buttons .= '<a href="roles-edit.php?role=' . $role['id'] . '" class="btn btn-primary btn-sm"><i class="fa fa-pencil"></i><span class="button_label">' . __('Edit', 'cftp_admin') . '</span></a>' . "\n";
+                } else {
+                    $action_buttons .= '<a href="roles-edit.php?role=' . $role['id'] . '" class="btn btn-pslight btn-sm"><i class="fa fa-eye"></i><span class="button_label">' . __('View', 'cftp_admin') . '</span></a>' . "\n";
+                }
+
+                // Delete button
+                if (!$role['is_system_role'] && custom_roles_enabled() && $user_count == 0) {
+                    $action_buttons .= '<button type="button" class="btn btn-danger btn-sm delete-role" data-role="' . $role['id'] . '" data-name="' . html_output($role['name']) . '"><i class="fa fa-trash"></i><span class="button_label">' . __('Delete', 'cftp_admin') . '</span></button>' . "\n";
+                }
+
+                // Add the cells to the row
+                $tbody_cells = array(
+                    array(
+                        'content' => '<strong>' . html_output($role['name']) . '</strong> <span class="badge bg-' . $badge_class . ' ms-2">' . $role_badge . '</span>',
+                    ),
+                    array(
+                        'content' => '<small class="text-muted">' . html_output($role['description']) . '</small>',
+                    ),
+                    array(
+                        'content' => '<span class="badge bg-light text-dark">' . $user_count . '</span>',
+                    ),
+                    array(
+                        'content' => '<span class="badge bg-info">' . count($permissions) . '</span>',
+                    ),
+                    array(
+                        'content' => '<span class="badge ' . $type_badge_class . '">' . $type_badge . '</span>',
+                    ),
+                    array(
+                        'content' => '<span class="badge ' . $status_badge_class . '">' . $status_badge_label . '</span>',
+                    ),
+                    array(
+                        'actions' => true,
+                        'content' => $action_buttons,
+                    ),
+                );
+
+                foreach ($tbody_cells as $cell) {
+                    $table->addCell($cell);
+                }
+
+                $table->end_row();
+            }
+
+            echo $table->render();
+            ?>
+        <?php endif; ?>
+    </div>
+</div>
+
+
+
+<?php
+include_once ADMIN_VIEWS_DIR . DS . 'footer.php';
+?>

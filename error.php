@@ -3,7 +3,6 @@ use ProjectSend\Classes\Session;
 
 define('IS_ERROR_PAGE', true);
 
-$allowed_levels = array(9, 8, 7, 0);
 require_once 'bootstrap.php';
 
 $error_type = (!empty($_GET['e'])) ? $_GET['e'] : '401';

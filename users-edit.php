@@ -2,9 +2,31 @@
 /**
  * Show the form to edit a system user.
  */
-$allowed_levels = array(9, 8, 7);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+redirect_if_not_logged_in();
+
+// Ensure user is properly logged in and constants are defined
+if (!defined('CURRENT_USER_ID') || !CURRENT_USER_ID) {
+    ps_redirect(BASE_URI . 'index.php');
+    exit;
+}
+
+// Users can always edit their own account
+// Otherwise need edit_users permission
+$user_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$can_edit = false;
+
+if ($user_id == CURRENT_USER_ID) {
+    // Editing own account
+    $can_edit = current_user_can('edit_self_account');
+} else {
+    // Editing another user's account
+    $can_edit = current_user_can('edit_users');
+}
+
+if (!$can_edit) {
+    exit_with_error_code(403);
+}
 
 $active_nav = 'users';
 
@@ -23,7 +45,7 @@ $edit_user = new \ProjectSend\Classes\Users($user_id);
 $user_arguments = $edit_user->getProperties();
 
 // Form type
-if (CURRENT_USER_LEVEL == 7) {
+if (current_role_in(['Uploader'])) {
     $user_form_type = 'edit_user_self';
     $ignore_size = true;
 } else {
@@ -37,7 +59,7 @@ if (CURRENT_USER_LEVEL == 7) {
 }
 
 // Compare the user editing this account to the on the database.
-if (CURRENT_USER_LEVEL != 9) {
+if (!current_role_in(['System Administrator'])) {
     if (CURRENT_USER_USERNAME != $user_arguments['username']) {
         exit_with_error_code(403);
     }
@@ -48,7 +70,7 @@ if ($_POST) {
      * If the user is not an admin, check if the id of the user
      * that's being edited is the same as the current logged in one.
      */
-    if (CURRENT_USER_LEVEL != 9) {
+    if (!current_role_in(['System Administrator'])) {
         if ($user_id != CURRENT_USER_ID) {
             exit_with_error_code(403);
         }
@@ -66,7 +88,7 @@ if ($_POST) {
         'username' => $user_arguments['username'],
         'name' => $_POST['name'],
         'email' => $_POST['email'],
-        'role' => $user_arguments['role'],
+        'role_id' => $user_arguments['role_id'],
         'max_file_size' => $user_arguments['max_file_size'],
         'active' => $user_arguments['active'],
         'type' => 'edit_user',
@@ -85,7 +107,7 @@ if ($_POST) {
      * editing other's account (not own).
      */
     $can_edit_level_and_active = true;
-    if (CURRENT_USER_LEVEL == 7) {
+    if (current_role_in(['Uploader'])) {
         $can_edit_level_and_active = false;
     } else {
         if (CURRENT_USER_USERNAME == $user_arguments['username']) {
@@ -94,7 +116,7 @@ if ($_POST) {
     }
 
     if ($can_edit_level_and_active === true) {
-        $user_arguments['role'] = (isset($_POST['level'])) ? $_POST['level'] : $user_arguments['role'];
+        $user_arguments['role_id'] = (isset($_POST['role_id'])) ? $_POST['role_id'] : $user_arguments['role_id'];
         $user_arguments['active'] = (isset($_POST["active"])) ? 1 : 0;
     }
 
@@ -103,10 +125,10 @@ if ($_POST) {
     $edit_user->setType("existing_user");
     $edit_response = $edit_user->edit();
 
-    if ($edit_response['query'] == 1) {
-        $flash->success(__('User saved successfully'));
+    if ($edit_response['status'] === 'success') {
+        $flash->success($edit_response['message']);
     } else {
-        $flash->error(__('There was an error saving to the database'));
+        $flash->error($edit_response['message']);
     }
 
     ps_redirect(BASE_URI . 'users-edit.php?id=' . $user_id);

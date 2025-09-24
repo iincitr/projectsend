@@ -2,9 +2,8 @@
 /**
  * Show the form to add a new system user.
  */
-$allowed_levels = array(9);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+check_access_enhanced(null, ['create_users']);
 
 $active_nav = 'users';
 
@@ -33,7 +32,7 @@ if ($_POST) {
         'password' => $_POST['password'],
         'name' => $_POST['name'],
         'email' => $_POST['email'],
-        'role' => $_POST['level'],
+        'role' => $_POST['role_id'],
         'max_file_size' => (isset($_POST["max_file_size"])) ? $_POST['max_file_size'] : '',
         'notify_account' => (isset($_POST["notify_account"])) ? 1 : 0,
         'active' => (isset($_POST["active"])) ? 1 : 0,
@@ -48,7 +47,7 @@ if ($_POST) {
     $new_user->set($user_arguments);
     $create = $new_user->create();
 
-    if (!empty($create['id'])) {
+    if ($create['status'] === 'success') {
         $logger = new \ProjectSend\Classes\ActionsLog;
         $record = $logger->addEntry([
             'action' => 2,
@@ -58,10 +57,10 @@ if ($_POST) {
             'affected_account_name' => $new_user->name
         ]);
 
-        $flash->success(__('User created successfully'));
+        $flash->success($create['message']);
         $redirect_to = BASE_URI . 'users-edit.php?id=' . $create['id'];
     } else {
-        $flash->error($new_user->getValidationErrors());
+        $flash->error($create['message']);
         $redirect_to = BASE_URI . 'users-add.php';
     }
 

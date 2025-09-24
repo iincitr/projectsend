@@ -13,7 +13,6 @@
  * @license		http://www.gnu.org/licenses/gpl-2.0.html GNU GPL version 2
  * @package		ProjectSend
  */
-$allowed_levels = array(9, 8, 7, 0);
 require_once 'bootstrap.php';
 
 global $dbh;

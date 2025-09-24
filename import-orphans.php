@@ -7,9 +7,13 @@
  * settings.
  * Submits an array of file names.
  */
-$allowed_levels = array(9, 8, 7);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+redirect_if_not_logged_in();
+
+// Check for import orphans permission
+if (!current_user_can('import_orphans')) {
+    exit_with_error_code(403);
+}
 
 $active_nav = 'files';
 $this_page = 'import-orphans.php';
@@ -40,10 +44,12 @@ if (isset($_POST['action'])) {
                         $file = new \ProjectSend\Classes\Files;
                         $file->moveToUploadDirectory($filename_path);
                         $file->setDefaults();
-                        $file->addToDatabase();
-            
-                        // Add it to the array of editable files
-                        $added[] = $file->getId();
+                        $result = $file->addToDatabase();
+
+                        // Add it to the array of editable files if successful
+                        if ($result['status'] === 'success') {
+                            $added[] = $file->getId();
+                        }
                     }
                 }
             

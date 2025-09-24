@@ -2,9 +2,8 @@
 /**
  * Show the list of activities logged.
  */
-$allowed_levels = array(9);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+check_access_enhanced(null, ['view_actions_log']);
 
 $active_nav = 'tools';
 

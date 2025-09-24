@@ -7,10 +7,8 @@ global $dbh;
 
 /**
  * Since the header.php file is shared between the back-end and the
- * templates, it's necessary to define the allowed levels, or else
- * the files list will not be available.
+ * templates, it's necessary to check if the user can view files.
  */
-$allowed_levels = array(9, 8, 7, 0);
 
 if (!current_user_can_view_files_list()) {
     ps_redirect(BASE_URI);

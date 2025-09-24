@@ -2,9 +2,8 @@
 /**
  * Show the form to add a new client.
  */
-$allowed_levels = array(9, 8);
 require_once 'bootstrap.php';
-log_in_required($allowed_levels);
+check_access_enhanced(null, ['create_clients', 'manage_clients'], 'any');
 
 $active_nav = 'clients';
 
@@ -72,11 +71,11 @@ if ($_POST) {
         ]);
     }
 
-    if (!empty($create['id'])) {
-        $flash->success(__('Client created successfully'));
+    if ($create['status'] === 'success') {
+        $flash->success($create['message']);
         $redirect_to = BASE_URI . 'clients-edit.php?id=' . $create['id'];
     } else {
-        $flash->error($new_client->getValidationErrors());
+        $flash->error($create['message']);
         $redirect_to = BASE_URI . 'clients-add.php';
     }
 

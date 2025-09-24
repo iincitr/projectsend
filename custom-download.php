@@ -1,5 +1,4 @@
 <?php
-$allowed_levels = array(9, 8, 7, 0);
 require_once 'bootstrap.php';
 
 $link = htmlentities($_GET['link']);

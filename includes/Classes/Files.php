@@ -106,6 +106,35 @@ class Files
     }
 
     /**
+     * Check if a user can edit this file
+     * @param int $user_id User ID to check (defaults to current user)
+     * @return bool
+     */
+    public function canUserEdit($user_id = null)
+    {
+        if ($user_id === null) {
+            if (defined('CURRENT_USER_ID')) {
+                $user_id = \CURRENT_USER_ID;
+            } else {
+                return false; // No user logged in
+            }
+        }
+
+        // User can edit if they have the edit_files permission (can edit all files)
+        if (\current_user_can('edit_files')) {
+            return true;
+        }
+
+        // User can edit their own files if they have upload permission
+        if (\current_user_can('upload') && $this->user_id == $user_id) {
+            return true;
+        }
+
+        // Use the existing permission check function
+        return user_can_edit_file($user_id, $this->id);
+    }
+
+    /**
      * Set the properties when saving to the database (data comnes from the form)
      */
     public function set($arguments = [])
@@ -179,6 +208,12 @@ class Files
             $this->disk_folder_year = html_output($row['disk_folder_year']);
             $this->disk_folder_month = html_output($row['disk_folder_month']);
             if (is_numeric($this->disk_folder_month) && $this->disk_folder_month < 10) $this->disk_folder_month = '0' . $this->disk_folder_month;
+
+            // Load size from database if available
+            if (isset($row['size']) && is_numeric($row['size']) && $row['size'] > 0) {
+                $this->size = $row['size'];
+                $this->size_formatted = format_file_size($this->size);
+            }
         }
 
         $this->full_path = $this->getFilePath();
@@ -508,7 +543,8 @@ class Files
      */
     public function getSize()
     {
-        if ($this->filename_on_disk)
+        // Only calculate size from file system if not already loaded from database
+        if (empty($this->size) && $this->filename_on_disk)
         {
             if ( file_exists( $this->full_path ) ) {
                 $this->size = get_real_size($this->full_path);
@@ -665,7 +701,7 @@ class Files
      */
 	private function changeHiddenStatus($status, $to_type, $to_id)
 	{
-        $this->check_level = array(9,8,7);
+        $this->check_level = ['System Administrator', 'Account Manager', 'Uploader'];
         
         if (empty($this->id)) {
             return false;
@@ -727,7 +763,7 @@ class Files
 
 	public function hideFromEveryone()
 	{
-        $this->check_level = array(9,8,7);
+        $this->check_level = ['System Administrator', 'Account Manager', 'Uploader'];
 
         if (empty($this->id)) {
             return false;
@@ -757,7 +793,7 @@ class Files
 
 	public function showToEveryone()
 	{
-        $this->check_level = array(9,8,7);
+        $this->check_level = ['System Administrator', 'Account Manager', 'Uploader'];
 
         if (empty($this->id)) {
             return false;
@@ -791,12 +827,9 @@ class Files
             return true;
         }
 
-        if (!defined('CURRENT_USER_LEVEL')) {
-            return false;
-        }
-
-        if (CURRENT_USER_LEVEL == '0') {
-            if (get_option('clients_can_delete_own_files') == '1') {
+        // Clients with delete_files permission can delete their own files
+        if (current_role_in(['Client'])) {
+            if (current_user_can('delete_files')) {
                 if ($this->uploaded_by == CURRENT_USER_USERNAME) {
                     return true;
                 }
@@ -806,14 +839,15 @@ class Files
             }
         }
         
-        // Uploaders can only delete their own files
-        if ( CURRENT_USER_LEVEL == '7' ) {
+        // Users with delete_files permission can delete their own files
+        if ( current_user_can('delete_files') ) {
             if ( $this->uploaded_by == CURRENT_USER_USERNAME ) {
                 return true;
             }
         }
 
-        if (current_role_in(array(9,8))) {
+        // Users with delete_others_files permission can delete any files
+        if (current_user_can('delete_others_files')) {
             return true;
         }
 
@@ -828,7 +862,10 @@ class Files
     function deleteFiles()
 	{
         if (!$this->currentUserCanDeleteFile()) {
-            return false;
+            return [
+                'status' => 'error',
+                'message' => __('You do not have permission to delete this file.', 'cftp_admin')
+            ];
         }
 
         /*
@@ -865,12 +902,21 @@ class Files
                 }    
             }
 
-            return true;
+            return [
+                'status' => 'success',
+                'message' => __('File deleted successfully.', 'cftp_admin')
+            ];
         } catch (\Exception $e) {
-            return false;
+            return [
+                'status' => 'error',
+                'message' => __('Failed to delete file.', 'cftp_admin')
+            ];
         }
 
-        return false;
+        return [
+            'status' => 'error',
+            'message' => __('Failed to delete file.', 'cftp_admin')
+        ];
     }
     
     public function setDefaults()
@@ -891,6 +937,14 @@ class Files
 	 */
 	public function addToDatabase()
 	{
+        // Check permissions
+        if (!\current_user_can('upload')) {
+            return [
+                'status' => 'error',
+                'message' => __('You do not have permission to upload files.', 'cftp_admin')
+            ];
+        }
+
 		$this->uploader = CURRENT_USER_USERNAME;
 		$this->uploader_id = CURRENT_USER_ID;
 		$this->uploader_type = CURRENT_USER_TYPE;
@@ -982,14 +1036,17 @@ class Files
         $this->folder_id = (isset($data["folder_id"]) && !(empty($data["folder_id"]))) ? $data["folder_id"] : null;
     
         /**
-         * If a client is editing a file, only a few properties can be changed
+         * Restrict file properties based on user permissions
          */
-        if ( CURRENT_USER_LEVEL == 0 ) {
-            if (get_option('clients_can_set_expiration_date') != '1') {
-                $this->expires = (int)$current["expires"];
-                $this->expiry_date = $current["expiry_date"];
-            }
-            $this->is_public = current_user_can_upload_public() ? $data['public'] : $current["public"];
+        // Check expiration permissions
+        if (!current_user_can('set_file_expiration_date')) {
+            $this->expires = (int)$current["expires"];
+            $this->expiry_date = $current["expiry_date"];
+        }
+
+        // Check public download permissions
+        if (!current_user_can('upload_public')) {
+            $this->is_public = $current["public"];
         }
 
         if (empty($this->name)) {
@@ -1035,9 +1092,9 @@ class Files
             $assignments = $this->saveAssignments($assignments, $hidden);
 
             // Create notifications if uploaded by client, or if file is not set as hidden
-            if (CURRENT_USER_LEVEL == 0 || $hidden == 0) {
-                $notification_type = (CURRENT_USER_LEVEL == 0) ? 0 : 1;
-                $users = (CURRENT_USER_LEVEL == 0) ? [CURRENT_USER_ID] : $assignments['added']['clients'];
+            if (current_role_in(['Client']) || $hidden == 0) {
+                $notification_type = current_role_in(['Client']) ? 0 : 1;
+                $users = current_role_in(['Client']) ? [CURRENT_USER_ID] : $assignments['added']['clients'];
                 $this->createNotifications($users, $notification_type);
             }
 
@@ -1066,11 +1123,52 @@ class Files
 		return false;
 	}
 
+    /**
+     * Edit an existing file.
+     * @return array Result with status and message
+     */
+    public function edit($data)
+    {
+        if (empty($this->id)) {
+            return [
+                'status' => 'error',
+                'message' => __('File ID is required for editing.', 'cftp_admin')
+            ];
+        }
+
+        // Check permissions
+        $current_user_id = defined('CURRENT_USER_ID') ? \CURRENT_USER_ID : null;
+        $can_edit = \current_user_can('edit_files') ||
+                   (\current_user_can('upload') && $current_user_id && $this->user_id == $current_user_id) ||
+                   user_can_edit_file($current_user_id, $this->id);
+
+        if (!$can_edit) {
+            return [
+                'status' => 'error',
+                'message' => __('You do not have permission to edit this file.', 'cftp_admin')
+            ];
+        }
+
+        // Use the existing save method
+        $result = $this->save($data);
+
+        if ($result) {
+            return [
+                'status' => 'success',
+                'message' => __('File updated successfully.', 'cftp_admin')
+            ];
+        }
+
+        return [
+            'status' => 'error',
+            'message' => __('Failed to update file.', 'cftp_admin')
+        ];
+    }
+
     // Assign
     public function saveAssignments($new_values, $hidden = 0)
     {
-        $allowed = array(9,8,7);
-        if (!current_role_in($allowed)) {
+        if (!current_user_can('edit_files')) {
             return false;
         }
 
@@ -1080,13 +1178,17 @@ class Files
 
         $hidden = (int)$hidden;
 
-        if (empty($new_values['clients'])) { $new_values['clients'] = []; } 
-        if (empty($new_values['groups'])) { $new_values['groups'] = []; } 
+        if (empty($new_values['clients'])) { $new_values['clients'] = []; }
+        if (empty($new_values['groups'])) { $new_values['groups'] = []; }
 
-        // Clean new ids based on user permissions
-        if (CURRENT_USER_LEVEL == 7) {
-            $get_user = new \ProjectSend\Classes\Users(CURRENT_USER_ID);
-            if (!empty($get_user->limit_upload_to)) {
+        // If user doesn't have permission to manage groups, preserve existing group assignments
+        if (!current_user_can('manage_groups')) {
+            $new_values['groups'] = $this->assignments_groups;
+        } 
+
+        // Clean new ids based on user permissions for limited users
+        $get_user = new \ProjectSend\Classes\Users(CURRENT_USER_ID);
+        if (!empty($get_user->limit_upload_to)) {
                 // If client ID is not allowed, remove from array
                 foreach ($new_values['clients'] as $key => $client_id) {
                     if (!in_array($client_id, $get_user->limit_upload_to)) {
@@ -1101,7 +1203,6 @@ class Files
                     }
                 }
             }
-        }
 
         // Get current assignments from database to compare with new values
         $current = [
@@ -1198,8 +1299,7 @@ class Files
 
     public function addAssignment($type = null, $to_id = 0, $hidden = 0)
     {
-        $allowed = array(9,8,7);
-        if (!current_role_in($allowed)) {
+        if (!current_user_can('edit_files')) {
             return false;
         }
         
@@ -1249,8 +1349,7 @@ class Files
 
     public function removeAssignment($from_type, $from_id)
 	{
-        $allowed = array(9,8,7);
-        if (!current_role_in($allowed)) {
+        if (!current_user_can('edit_files')) {
             return false;
         }
         
@@ -1301,11 +1400,7 @@ class Files
 
     public function saveCategories($categories = [])
     {
-        $allowed = array(9,8,7);
-        if (get_option('clients_can_set_categories') == 1) {
-            $allowed[] = 0;
-        }
-        if (!current_role_in($allowed)) {
+        if (!current_user_can('set_file_categories')) {
             return false;
         }
         
@@ -1413,7 +1508,7 @@ class Files
             return false;
         }
 
-        if (CURRENT_USER_LEVEL == 0) {
+        if (current_role_in(['Client'])) {
             if ($folder_id == null) {
                 if (!$this->currentUserCanEdit()) {
                     return false;

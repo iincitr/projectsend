@@ -34,7 +34,7 @@ $db_upgrade->upgradeDatabase(false);
  * Call the database update file to see if any change is needed,
  * but only if logged in as a system user.
  */
-$core_update_allowed = array(9,8,7);
+$core_update_allowed = ['System Administrator', 'Account Manager', 'Uploader'];
 if (current_role_in($core_update_allowed)) {
     require_once INCLUDES_DIR . DS . 'core.update.php';
 }
