@@ -216,8 +216,12 @@ switch ($clients_form_type) {
                 <label for="can_upload_public">
                     <input type="checkbox" name="can_upload_public" id="can_upload_public" <?php echo (isset($client_arguments['can_upload_public']) && $client_arguments['can_upload_public'] == 1) ? 'checked="checked"' : ''; ?>> <?php _e('Can set own files as public', 'cftp_admin'); ?>
                 </label>
-                <?php if (get_option('clients_can_set_public') != 'allowed') { ?>
-                    <p class="field_note form-text"><?php _e("This has no effect according to your current settings.", 'cftp_admin'); ?> <a href="options.php?section=clients" target="blank"><?php _e("Go to settings", 'cftp_admin'); ?></a></p>
+                <?php
+                // Check if client role has upload_public permission
+                $client_role = new \ProjectSend\Classes\Roles(\ProjectSend\Classes\Roles::getClientRoleId());
+                if (!$client_role->hasPermission('upload_public')) {
+                ?>
+                    <p class="field_note form-text"><?php _e("This has no effect according to your current settings.", 'cftp_admin'); ?> <a href="role-permissions.php?role=<?php echo \ProjectSend\Classes\Roles::getClientRoleId(); ?>" target="blank"><?php _e("Go to settings", 'cftp_admin'); ?></a></p>
                 <?php } ?>
             </div>
         </div>

@@ -71,7 +71,7 @@ if ($_POST) {
     $client_arguments = array(
         'id' => $client_id,
         'username' => $_POST['username'],
-        'role' => 0,
+        'role_id' => \ProjectSend\Classes\Roles::getClientRoleId(), // Always set client role for client editing
         'name' => $_POST['name'],
         'email' => $_POST['email'],
         'address' => (isset($_POST["address"])) ? $_POST['address'] : null,
@@ -125,7 +125,12 @@ if ($_POST) {
             $flash->success($edit_response['message']);
         }
     } else {
-        $flash->error($edit_response['message']);
+        // Store detailed validation errors in session if available
+        if (!empty($edit_response['errors'])) {
+            $_SESSION['client_edit_errors'] = $edit_response['errors'];
+        } else {
+            $flash->error($edit_response['message']);
+        }
     }
 
     ps_redirect(BASE_URI . 'clients-edit.php?id=' . $client_id);
@@ -145,8 +150,14 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
         <div class="white-box">
             <div class="white-box-interior">
                 <?php
-                // If the form was submitted with errors, show them here.
-                echo $edit_client->getValidationErrors();
+                // Display validation errors from session if available (after failed submission)
+                if (isset($_SESSION['client_edit_errors'])) {
+                    echo $_SESSION['client_edit_errors'];
+                    unset($_SESSION['client_edit_errors']);
+                } else {
+                    // Show any errors from current object (for backward compatibility)
+                    echo $edit_client->getValidationErrors();
+                }
 
                 include_once FORMS_DIR . DS . 'clients.php';
                 ?>
