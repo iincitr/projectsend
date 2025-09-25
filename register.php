@@ -70,6 +70,18 @@ if ($_POST) {
         }
     } else {
         $flash->error($create['message']);
+        // Store form data in session to preserve it after redirect (except password)
+        $_SESSION['registration_form_data'] = [
+            'username' => $_POST['username'],
+            'name' => $_POST['name'],
+            'email' => $_POST['email'],
+            'address' => (isset($_POST["address"])) ? $_POST['address'] : '',
+            'phone' => (isset($_POST["phone"])) ? $_POST['phone'] : '',
+            'contact' => (isset($_POST["contact"])) ? $_POST['contact'] : '',
+            'notify_upload' => (isset($_POST["notify_upload"])) ? 1 : 0,
+            'notify_account' => (isset($_POST["notify_account"])) ? 1 : 0,
+            'groups_request' => (isset($_POST["groups_request"])) ? $_POST["groups_request"] : null,
+        ];
         $redirect_to = BASE_URI . 'register.php';
     }
 
@@ -95,6 +107,19 @@ if ($_POST) {
                 if (!isset($_GET['success'])) {
                     // If the form was submitted with errors, show them here.
                     echo $new_client->getValidationErrors();
+
+                    // Retrieve form data from session if available (after failed submission)
+                    if (isset($_SESSION['registration_form_data'])) {
+                        $client_arguments = $_SESSION['registration_form_data'];
+                        // Set selected groups for the form
+                        if (isset($client_arguments['groups_request'])) {
+                            $selected_groups = $client_arguments['groups_request'];
+                        }
+                        // Clear the session data after using it
+                        unset($_SESSION['registration_form_data']);
+                    } else {
+                        $client_arguments = [];
+                    }
 
                     $clients_form_type = 'new_client_self';
                     include_once FORMS_DIR . DS . 'clients.php';
