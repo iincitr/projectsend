@@ -14,7 +14,7 @@
 
         &.requirement-pass {
             color: var(--color-success);
-            background-color: var(--color-success-light);
+            background-color: var(--bg-success-light);
 
             &:before {
                 content: "\f00c"; // checkmark
@@ -25,8 +25,8 @@
         }
 
         &.requirement-fail {
-            color: var(--color-error);
-            background-color: var(--color-error-light);
+            color: var(--color-danger);
+            background-color: var(--bg-danger-light);
 
             &:before {
                 content: "\f00d"; // X mark
@@ -46,7 +46,7 @@
     .step-indicator {
         padding: 15px;
         text-align: center;
-        color: #6c757d;
+        color: var(--text-muted);
         transition: all 0.3s ease;
 
         i {
@@ -64,7 +64,7 @@
         }
 
         &.step-active {
-            color: #007bff;
+            color: var(--color-primary);
 
             i {
                 opacity: 1;
@@ -73,7 +73,7 @@
         }
 
         &.step-complete {
-            color: #28a745;
+            color: var(--color-success);
 
             i {
                 opacity: 1;
@@ -81,7 +81,7 @@
         }
 
         &.step-error {
-            color: #dc3545;
+            color: var(--color-danger);
 
             i {
                 opacity: 1;
@@ -105,7 +105,7 @@
 #update-progress {
     .progress {
         height: 30px;
-        background-color: var(--border-light);
+        background-color: var(--bg-secondary);
         border-radius: 5px;
         overflow: hidden;
 
@@ -135,7 +135,7 @@
 }
 
 .version-info {
-    background-color: var(--bg-hover);
+    background-color: var(--bg-light);
     padding: 20px;
     border-radius: 5px;
 
@@ -144,7 +144,6 @@
 
         dt {
             font-weight: 600;
-            color: var(--text-primary);
         }
 
         dd {
@@ -160,7 +159,7 @@
     h5 {
         margin-top: 1.5rem;
         margin-bottom: 1rem;
-        color: var(--text-primary);
+        color: var(--text-secondary);
     }
 
     .badge {
@@ -169,36 +168,3 @@
         padding: 4px 8px;
     }
 }
-
-// Hash info section styling (for SHA256 hash display)
-.hash-info {
-    background-color: var(--bg-hover);
-    padding: 15px;
-    border-radius: 5px;
-    border-left: 4px solid var(--color-info);
-
-    dl {
-        margin-bottom: 0;
-
-        dt {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        dd {
-            color: var(--text-secondary);
-
-            code {
-                background-color: var(--bg-card);
-                color: var(--text-muted);
-                border: 1px solid var(--border-light);
-                padding: 4px 8px;
-                border-radius: 3px;
-                font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-                word-break: break-all;
-            }
-        }
-    }
-}
-
-// Error handling is now done via redirect with flash messages

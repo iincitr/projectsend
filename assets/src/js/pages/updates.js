@@ -9,18 +9,15 @@
                 console.log('Base URI:', json_strings.uri.base);
             }
             var requirementsCheck = document.getElementById('requirements-check');
-            var startUpdateButton = document.getElementById('start-update');
-            var updateProgressCard = document.getElementById('update-progress-card');
-            var updateProgress = document.getElementById('update-progress');
             var requirementsCard = document.getElementById('requirements-card');
+            var progressCard = document.getElementById('update-progress-card');
+            var startUpdateButton = document.getElementById('start-update');
             var progressBar = document.querySelector('.progress-bar');
             var progressStatus = document.getElementById('progress-status');
             var updateError = document.getElementById('update-error');
             var errorMessage = document.getElementById('error-message');
             var updateSuccess = document.getElementById('update-success');
             var requirementsList = document.querySelector('.requirements-list');
-
-            // Note: Error handling now redirects to updates.php with flash message
 
             var updateSteps = ['download', 'backup', 'extract', 'finalize'];
             var currentStep = 0;
@@ -78,23 +75,16 @@
                 startUpdateButton.disabled = true;
 
                 // Hide requirements card and show progress card
-                if (requirementsCard) {
-                    requirementsCard.style.display = 'none';
-                }
-                if (updateProgressCard) {
-                    updateProgressCard.style.display = 'block';
-                }
+                requirementsCard.style.display = 'none';
+                progressCard.style.display = 'block';
+                updateError.style.display = 'none';
+                updateSuccess.style.display = 'none';
 
-                // Reset error and success states
-                if (updateError) {
-                    updateError.style.display = 'none';
-                }
-                if (updateSuccess) {
-                    updateSuccess.style.display = 'none';
-                }
-
-                // Smooth scroll to top of page
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                // Smooth scroll to top
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
 
                 // Start with first step
                 currentStep = 0;
@@ -124,12 +114,17 @@
                 // Prepare request data
                 var formData = new FormData();
                 formData.append('step', step);
-                formData.append('csrf_token', csrf_token);
+
+                // Add CSRF token
+                if (typeof getCsrfToken === 'function') {
+                    formData.append('csrf_token', getCsrfToken());
+                }
 
                 if (step === 'download' && typeof update_download_url !== 'undefined') {
                     formData.append('url', update_download_url);
-                    if (typeof update_sha256_hash !== 'undefined' && update_sha256_hash) {
-                        formData.append('hash', update_sha256_hash);
+                    // Add SHA256 hash if available
+                    if (typeof update_data !== 'undefined' && update_data.sha256) {
+                        formData.append('hash', update_data.sha256);
                     }
                 }
 
@@ -138,14 +133,8 @@
                     method: 'POST',
                     body: formData
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('HTTP ' + response.status + ': ' + response.statusText);
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
-                    console.log('Update step response:', data);
                     if (data.status === 'success') {
                         updateStepIndicator(step, 'complete');
                         currentStep++;
@@ -155,23 +144,18 @@
                             processUpdateStep();
                         }, 500);
                     } else {
-                        // Error occurred
+                        // Error occurred - redirect with error message
                         console.error('Update step failed:', data);
-                        showError(data.message || json_strings.updates.update_failed);
+                        console.log('Showing error:', data.message || json_strings.updates.update_failed);
 
-                        // Attempt rollback if we're past the download step
-                        if (currentStep > 0) {
-                            attemptRollback();
-                        }
+                        var errorMsg = data.message || json_strings.updates.update_failed;
+                        window.location.href = json_strings.uri.base + 'updates.php?error=' + encodeURIComponent(errorMsg);
                     }
                 })
                 .catch(error => {
                     console.error('Update error:', error);
-                    showError(json_strings.updates.update_failed + ': ' + error.message);
-
-                    if (currentStep > 0) {
-                        attemptRollback();
-                    }
+                    var errorMsg = json_strings.updates.update_failed + ': ' + error.message;
+                    window.location.href = json_strings.uri.base + 'updates.php?error=' + encodeURIComponent(errorMsg);
                 });
             }
 
@@ -181,7 +165,6 @@
 
                 var formData = new FormData();
                 formData.append('step', 'rollback');
-                formData.append('csrf_token', csrf_token);
 
                 fetch(json_strings.uri.base + 'process.php?do=perform_system_update', {
                     method: 'POST',
@@ -224,11 +207,14 @@
             }
 
             function showError(message) {
-                console.error('Update error occurred:', message);
+                updateProgress.style.display = 'none';
+                updateError.style.display = 'block';
+                errorMessage.textContent = message;
 
-                // Redirect to updates page with error message
-                var errorParam = encodeURIComponent(message);
-                window.location.href = json_strings.uri.base + 'updates.php?error=' + errorParam;
+                // Mark current step as error
+                if (currentStep < updateSteps.length) {
+                    updateStepIndicator(updateSteps[currentStep], 'error');
+                }
             }
 
             function showSuccess() {

@@ -17,11 +17,6 @@ $active_nav = 'dashboard';
 // Get update information
 $update_data = json_decode(get_latest_version_data());
 
-// Handle error messages from failed updates
-if (!empty($_GET['error'])) {
-    $flash->error(html_output($_GET['error']));
-}
-
 // Check if update is available
 if (!$update_data || $update_data->update_available != '1') {
     // Redirect to dashboard if no update available
@@ -31,60 +26,65 @@ if (!$update_data || $update_data->update_available != '1') {
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 ?>
 
+<?php
+// Show error message if redirected from update process
+if (isset($_GET['error'])) {
+    $flash->error($_GET['error']);
+}
+?>
+
 <div class="row">
     <div class="col-12 col-lg-8">
-        <!-- Update Progress Card (hidden initially) -->
+        <!-- Progress Section Card (hidden initially) -->
         <div id="update-progress-card" class="ps-card mb-4" style="display: none;">
             <div class="ps-card-body">
-                <div id="update-progress">
-                    <h4><?php _e('Update Progress', 'cftp_admin'); ?></h4>
+                <h4><?php _e('Update Progress', 'cftp_admin'); ?></h4>
 
-                    <div class="update-steps mb-3">
-                        <div class="row text-center">
-                            <div class="col">
-                                <div class="step-indicator" data-step="download">
-                                    <i class="fa fa-download fa-2x"></i>
-                                    <p><?php _e('Download', 'cftp_admin'); ?></p>
-                                </div>
+                <div class="update-steps mb-3">
+                    <div class="row text-center">
+                        <div class="col">
+                            <div class="step-indicator" data-step="download">
+                                <i class="fa fa-download fa-2x"></i>
+                                <p><?php _e('Download', 'cftp_admin'); ?></p>
                             </div>
-                            <div class="col">
-                                <div class="step-indicator" data-step="backup">
-                                    <i class="fa fa-save fa-2x"></i>
-                                    <p><?php _e('Backup', 'cftp_admin'); ?></p>
-                                </div>
+                        </div>
+                        <div class="col">
+                            <div class="step-indicator" data-step="backup">
+                                <i class="fa fa-save fa-2x"></i>
+                                <p><?php _e('Backup', 'cftp_admin'); ?></p>
                             </div>
-                            <div class="col">
-                                <div class="step-indicator" data-step="extract">
-                                    <i class="fa fa-file-archive-o fa-2x"></i>
-                                    <p><?php _e('Install', 'cftp_admin'); ?></p>
-                                </div>
+                        </div>
+                        <div class="col">
+                            <div class="step-indicator" data-step="extract">
+                                <i class="fa fa-file-archive-o fa-2x"></i>
+                                <p><?php _e('Install', 'cftp_admin'); ?></p>
                             </div>
-                            <div class="col">
-                                <div class="step-indicator" data-step="finalize">
-                                    <i class="fa fa-check fa-2x"></i>
-                                    <p><?php _e('Finalize', 'cftp_admin'); ?></p>
-                                </div>
+                        </div>
+                        <div class="col">
+                            <div class="step-indicator" data-step="finalize">
+                                <i class="fa fa-check fa-2x"></i>
+                                <p><?php _e('Finalize', 'cftp_admin'); ?></p>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="progress" style="height: 30px;">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <div id="progress-status" class="mt-3 text-muted"></div>
+                <div class="progress" style="height: 30px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div id="progress-status" class="mt-3 text-muted"></div>
 
-                    <!-- Error message area -->
-                    <div id="update-error" class="alert alert-danger mt-3" style="display: none;">
-                        <strong><?php _e('Update Failed', 'cftp_admin'); ?></strong>
-                        <p id="error-message"></p>
-                    </div>
+                <!-- Error message area -->
+                <div id="update-error" class="alert alert-danger mt-3" style="display: none;">
+                    <strong><?php _e('Update Failed', 'cftp_admin'); ?></strong>
+                    <p id="error-message"></p>
+                </div>
 
-                    <!-- Success message area -->
-                    <div id="update-success" class="alert alert-success mt-3" style="display: none;">
-                        <h4><?php _e('Update Completed Successfully', 'cftp_admin'); ?></h4>
-                        <p><?php _e('ProjectSend has been updated to the latest version.', 'cftp_admin'); ?></p>
-                        <p><?php _e('The page will reload in 5 seconds...', 'cftp_admin'); ?></p>
-                    </div>
+                <!-- Success message area -->
+                <div id="update-success" class="alert alert-success mt-3" style="display: none;">
+                    <h4><?php _e('Update Completed Successfully', 'cftp_admin'); ?></h4>
+                    <p><?php _e('ProjectSend has been updated to the latest version.', 'cftp_admin'); ?></p>
+                    <p><?php _e('The page will reload in 5 seconds...', 'cftp_admin'); ?></p>
                 </div>
             </div>
         </div>
@@ -207,8 +207,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 
 <script type="text/javascript">
     var update_download_url = '<?php echo addslashes($update_data->url); ?>';
-    var update_sha256_hash = '<?php echo addslashes($update_data->sha256 ?? ''); ?>';
-    var csrf_token = '<?php echo getCsrfToken(); ?>';
+    var update_data = <?php echo json_encode($update_data); ?>;
     var json_strings = <?php echo json_encode($json_strings); ?>;
 </script>
 
