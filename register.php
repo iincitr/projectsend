@@ -30,6 +30,7 @@ if ($_POST) {
         'address' => (isset($_POST["address"])) ? $_POST['address'] : null,
         'phone' => (isset($_POST["phone"])) ? $_POST['phone'] : null,
         'contact' => (isset($_POST["contact"])) ? $_POST['contact'] : null,
+        'role_id' => \ProjectSend\Classes\Roles::getClientRoleId(), // Set client role for self-registration
         'max_file_size' => 0,
         'notify_upload' => (isset($_POST["notify_upload"])) ? 1 : 0,
         'notify_account' => (isset($_POST["notify_account"])) ? 1 : 0,
@@ -69,7 +70,13 @@ if ($_POST) {
             $redirect_to = 'my_files/index.php';
         }
     } else {
-        $flash->error($create['message']);
+        // Store validation errors in session if they exist
+        if (!empty($create['errors'])) {
+            $_SESSION['registration_errors'] = $create['errors'];
+        } else {
+            // Use the generic message if no specific errors provided
+            $flash->error($create['message']);
+        }
         // Store form data in session to preserve it after redirect (except password)
         $_SESSION['registration_form_data'] = [
             'username' => $_POST['username'],
@@ -105,8 +112,14 @@ if ($_POST) {
             <div class="white-box-interior">
                 <?php
                 if (!isset($_GET['success'])) {
-                    // If the form was submitted with errors, show them here.
-                    echo $new_client->getValidationErrors();
+                    // Display validation errors if they exist
+                    if (isset($_SESSION['registration_errors'])) {
+                        echo $_SESSION['registration_errors'];
+                        unset($_SESSION['registration_errors']);
+                    } else {
+                        // Show any errors from the current object (for backward compatibility)
+                        echo $new_client->getValidationErrors();
+                    }
 
                     // Retrieve form data from session if available (after failed submission)
                     if (isset($_SESSION['registration_form_data'])) {
