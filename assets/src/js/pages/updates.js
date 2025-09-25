@@ -247,9 +247,9 @@
                     updateStepIndicator(step, 'complete');
                 });
 
-                // Reload page after 5 seconds
+                // Redirect to dashboard after 5 seconds
                 setTimeout(function() {
-                    window.location.reload();
+                    window.location.href = json_strings.uri.base + 'dashboard.php';
                 }, 5000);
             }
         }

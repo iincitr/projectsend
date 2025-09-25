@@ -84,7 +84,7 @@ if (isset($_GET['error'])) {
                 <div id="update-success" class="alert alert-success mt-3" style="display: none;">
                     <h4><?php _e('Update Completed Successfully', 'cftp_admin'); ?></h4>
                     <p><?php _e('ProjectSend has been updated to the latest version.', 'cftp_admin'); ?></p>
-                    <p><?php _e('The page will reload in 5 seconds...', 'cftp_admin'); ?></p>
+                    <p><?php _e('Redirecting to dashboard in 5 seconds...', 'cftp_admin'); ?></p>
                 </div>
             </div>
         </div>
