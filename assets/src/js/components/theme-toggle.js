@@ -55,9 +55,11 @@
         }
 
         getSystemTheme() {
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                return 'dark';
-            }
+            // Always default to light mode, ignoring system preference
+            // Uncomment the lines below to respect system preference
+            // if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            //     return 'dark';
+            // }
             return 'light';
         }
 

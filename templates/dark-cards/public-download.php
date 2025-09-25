@@ -17,7 +17,7 @@ $logo_file_info = generate_logo_url();
 $window_title = __('File Download', 'dark_cards_template') . ' - ' . $file->title;
 ?>
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
