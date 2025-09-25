@@ -938,24 +938,6 @@ function current_user_is_admin()
     }
 }
 
-/**
- * Check if current user is super admin
- * @return bool
- */
-function current_user_is_super_admin()
-{
-    if (!defined('CURRENT_USER_ID')) {
-        return false;
-    }
-
-    try {
-        $user = new \ProjectSend\Classes\Users(CURRENT_USER_ID);
-        $role_data = $user->getRoleData();
-        return $role_data && $role_data['name'] === 'System Administrator';
-    } catch (Exception $e) {
-        return false;
-    }
-}
 
 function client_can_upload_public($client_id)
 {

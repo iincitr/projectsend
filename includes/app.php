@@ -114,9 +114,23 @@ define('NEWS_FEED_URI','https://www.projectsend.org/serve/news');
 
 /**
  * Define the Feed from where to take the latest version
- * number.
+ * number based on the configured update channel.
  */
-define('UPDATES_FEED_URI','https://projectsend.org/serve/versions');
+// Set default update channel if not defined (for older installations)
+if (!defined('UPDATE_CHANNEL')) {
+    define('UPDATE_CHANNEL', 'stable');
+}
+
+// Set the update feed URI based on the channel
+switch (UPDATE_CHANNEL) {
+    case 'beta':
+        define('UPDATES_FEED_URI', 'https://projectsend.org/serve/versions?channel=beta');
+        break;
+    case 'stable':
+    default:
+        define('UPDATES_FEED_URI', 'https://projectsend.org/serve/versions');
+        break;
+}
 
 /**
  * Database connection driver

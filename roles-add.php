@@ -39,13 +39,8 @@ if ($_POST) {
         $result = $role->create($role_data);
 
         if ($result) {
-            // Set permissions if provided
-            if (!empty($_POST['permissions']) && is_array($_POST['permissions'])) {
-                $role->setPermissions($_POST['permissions']);
-            }
-
-            $flash->success(__('Role created successfully.', 'cftp_admin'));
-            ps_redirect('roles.php');
+            $flash->success(__('Role created successfully. You can now configure permissions.', 'cftp_admin'));
+            ps_redirect('role-permissions.php?role=' . $result);
         } else {
             $flash->error(__('Could not create role. Please try again.', 'cftp_admin'));
         }
@@ -58,9 +53,7 @@ if ($_POST) {
 
 // Role levels are no longer used - roles are created with auto-generated IDs
 
-// Get all permissions grouped by category
-$permissions_grouped = get_permissions_grouped_by_category();
-$permission_categories = get_permission_categories();
+// Permissions are configured separately after role creation
 
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 ?>
@@ -118,70 +111,6 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                         </div>
                     </div>
 
-                    <!-- Permissions Selection -->
-                    <div class="form-group row">
-                        <div class="col-sm-12">
-                            <hr>
-                            <h6><?php _e('Permissions', 'cftp_admin'); ?></h6>
-                            <p class="text-muted"><?php _e('Select the permissions this role should have. You can also configure permissions later.', 'cftp_admin'); ?></p>
-
-                            <div class="mb-3">
-                                <div class="btn-group btn-group-sm" role="group">
-                                    <button type="button" class="btn btn-outline-success" id="select-all-permissions">
-                                        <?php _e('Select All', 'cftp_admin'); ?>
-                                    </button>
-                                    <button type="button" class="btn btn-outline-danger" id="select-none-permissions">
-                                        <?php _e('Select None', 'cftp_admin'); ?>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <?php foreach ($permissions_grouped as $category => $permissions): ?>
-                                <div class="permission-category-create mb-4">
-                                    <h6 class="text-primary border-bottom pb-2">
-                                        <i class="fa fa-<?php
-                                        switch($category) {
-                                            case 'files': echo 'file'; break;
-                                            case 'users': echo 'users'; break;
-                                            case 'groups': echo 'th-large'; break;
-                                            case 'system': echo 'cogs'; break;
-                                            case 'categories': echo 'tags'; break;
-                                            case 'assets': echo 'code'; break;
-                                            default: echo 'circle';
-                                        }
-                                        ?>"></i>
-                                        <?php echo $permission_categories[$category]; ?>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary ms-2 category-toggle-create"
-                                                data-category="<?php echo $category; ?>">
-                                            <?php _e('Toggle All', 'cftp_admin'); ?>
-                                        </button>
-                                    </h6>
-
-                                    <div class="row">
-                                        <?php foreach ($permissions as $permission_key => $permission_data): ?>
-                                            <div class="col-md-6 col-lg-4 mb-2">
-                                                <div class="form-check">
-                                                    <input type="checkbox"
-                                                           name="permissions[]"
-                                                           value="<?php echo $permission_key; ?>"
-                                                           id="perm_create_<?php echo $permission_key; ?>"
-                                                           class="form-check-input permission-checkbox-create"
-                                                           data-category="<?php echo $category; ?>"
-                                                           <?php echo (isset($_POST['permissions']) && in_array($permission_key, $_POST['permissions'])) ? 'checked' : ''; ?> />
-                                                    <label for="perm_create_<?php echo $permission_key; ?>" class="form-check-label">
-                                                        <strong><?php echo $permission_data['label']; ?></strong>
-                                                        <?php if (!empty($permission_data['description'])): ?>
-                                                            <br><small class="text-muted"><?php echo $permission_data['description']; ?></small>
-                                                        <?php endif; ?>
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
 
                     <div class="form-group row">
                         <div class="col-sm-12">
@@ -201,25 +130,23 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
     <div class="col-12 col-lg-4">
         <div class="ps-card">
             <div class="ps-card-body">
-                <h5><?php _e('Permissions Preview', 'cftp_admin'); ?></h5>
-                <p class="text-muted"><?php _e('Create the role first and then customize permissions as needed.', 'cftp_admin'); ?></p>
+                <h5><?php _e('Next Steps', 'cftp_admin'); ?></h5>
+                <p class="text-muted"><?php _e('After creating the role, you will be redirected to configure its permissions.', 'cftp_admin'); ?></p>
 
-                <div id="permissions-preview" style="display: none;">
-                    <h6><?php _e('Default Permissions for Level:', 'cftp_admin'); ?> <span id="preview-level"></span></h6>
-                    <div id="permissions-list"></div>
+                <div class="alert alert-info">
+                    <i class="fa fa-info-circle"></i>
+                    <?php _e('New roles are created without any permissions by default for security reasons.', 'cftp_admin'); ?>
                 </div>
             </div>
         </div>
 
-        <div class="card mt-3">
-            <div class="card-header">
-                <h5 class="card-title"><?php _e('Role Guidelines', 'cftp_admin'); ?></h5>
-            </div>
-            <div class="card-body">
+        <div class="ps-card mt-3">
+            <div class="ps-card-body">
+                <h5><?php _e('Role Guidelines', 'cftp_admin'); ?></h5>
                 <ul class="list-unstyled">
                     <li><strong><?php _e('Naming:', 'cftp_admin'); ?></strong> <?php _e('Use descriptive names that indicate the role\'s purpose', 'cftp_admin'); ?></li>
-                    <li><strong><?php _e('Priority:', 'cftp_admin'); ?></strong> <?php _e('Higher numbers = more privileges', 'cftp_admin'); ?></li>
-                    <li><strong><?php _e('Permissions:', 'cftp_admin'); ?></strong> <?php _e('Can be customized after role creation', 'cftp_admin'); ?></li>
+                    <li><strong><?php _e('Description:', 'cftp_admin'); ?></strong> <?php _e('Optional but helpful for understanding the role\'s purpose', 'cftp_admin'); ?></li>
+                    <li><strong><?php _e('Permissions:', 'cftp_admin'); ?></strong> <?php _e('Configure after role creation for better security', 'cftp_admin'); ?></li>
                 </ul>
             </div>
         </div>

@@ -203,7 +203,7 @@
 
             // Get files for this batch
             $.ajax({
-                url: 'includes/ajax.process.php?do=thumbnails_regenerate_get_files',
+                url: json_strings.uri.base + 'includes/ajax.process.php?do=thumbnails_regenerate_get_files',
                 type: 'POST',
                 data: {
                     formats: formData.formats,
@@ -271,7 +271,7 @@
                 $('#current-file').text('Processing: ' + file.original_filename);
 
                 $.ajax({
-                    url: 'includes/ajax.process.php?do=thumbnails_regenerate_process',
+                    url: json_strings.uri.base + 'includes/ajax.process.php?do=thumbnails_regenerate_process',
                     type: 'POST',
                     data: {
                         file_id: file.id,

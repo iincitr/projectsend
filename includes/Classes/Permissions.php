@@ -223,6 +223,11 @@ class Permissions {
                 'label' => __('Unblock IP', 'cftp_admin'),
                 'description' => __('Allow user to unblock IP addresses', 'cftp_admin')
             ],
+            'manage_updates' => [
+                'category' => 'system',
+                'label' => __('Manage system updates', 'cftp_admin'),
+                'description' => __('Allow user to download and install system updates', 'cftp_admin')
+            ],
 
             // Asset Management
             'create_assets' => [

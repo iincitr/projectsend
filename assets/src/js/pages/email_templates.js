@@ -13,7 +13,7 @@
                 
                 if ( accept ) {
                     $.ajax({
-                        url: "emails/"+file,
+                        url: json_strings.uri.base + "emails/"+file,
                         cache: false,
                         success: function (data){
                             textarea.value = data;

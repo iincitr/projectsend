@@ -87,3 +87,15 @@ define('EMAIL_ENCODING', 'utf-8');
  * - Changes the error_reporting php value
  */
 define('DEBUG', false);
+
+/**
+ * Update channel configuration
+ * Defines which update channel to use for checking new versions.
+ *
+ * Possible values:
+ * - 'stable': Official stable releases (recommended)
+ * - 'beta': Beta versions with latest features (may contain bugs)
+ *
+ * Default: 'stable'
+ */
+define('UPDATE_CHANNEL', 'stable');

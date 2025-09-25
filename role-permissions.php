@@ -96,10 +96,13 @@ $current_permissions = $role->permissions;
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 ?>
 
-<div class="row">
+<div class="row mb-4">
     <div class="col-12">
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-lg-6">
+                <?php if ($role->is_system_role): ?>
+                    <span class="badge bg-primary ms"><?php _e('System Role', 'cftp_admin'); ?></span>
+                <?php endif; ?>
             </div>
             <div class="col-xs-12 col-sm-12 col-lg-6 text-end">
                 <a href="roles-edit.php?role=<?php echo $role->id; ?>" class="btn btn-secondary">
@@ -119,12 +122,6 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
             <div class="ps-card-body">
                 <div class="row align-items-center mb-3">
                     <div class="col">
-                        <h5 class="mb-0">
-                            <?php _e('Permissions', 'cftp_admin'); ?>
-                            <?php if ($role->is_system_role): ?>
-                                <span class="badge bg-primary ms-2"><?php _e('System Role', 'cftp_admin'); ?></span>
-                            <?php endif; ?>
-                        </h5>
                     </div>
                     <?php if ($role->permissions_editable): ?>
                     <div class="col-auto">

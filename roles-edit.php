@@ -25,30 +25,49 @@ if (!$role->exists()) {
 $page_title = sprintf(__('Edit Role: %s', 'cftp_admin'), $role->name);
 $page_id = 'roles_edit';
 
-// Check if this is the Client role - it should not be editable
+// Check if this is a system role and handle different editing levels
 $is_client_role = ($role->name === 'Client');
+$is_system_role = $role->is_system_role;
+
+// Different editing permissions for different role types
 if ($is_client_role) {
-    // Redirect to view-only mode
+    // Client role is completely read-only
     $view_only = true;
+    $can_edit_name = false;
+} elseif ($is_system_role) {
+    // Other system roles can edit description/status but not name
+    $view_only = false;
+    $can_edit_name = false;
+} else {
+    // Custom roles are fully editable
+    $view_only = false;
+    $can_edit_name = true;
 }
 
 // Process form submission
 if ($_POST && !$is_client_role) {
     $validation_errors = [];
 
-    // Validate required fields
-    if (empty($_POST['name'])) {
+    // Validate required fields (only for custom roles that can change name)
+    if ($can_edit_name && empty($_POST['name'])) {
         $validation_errors[] = __('Role name is required.', 'cftp_admin');
     }
 
-    // Role level changes removed - roles use auto-generated IDs
+    // Prevent name changes for system roles
+    if (!$can_edit_name && isset($_POST['name']) && $_POST['name'] !== $role->name) {
+        $validation_errors[] = __('System role names cannot be changed.', 'cftp_admin');
+    }
 
     if (empty($validation_errors)) {
         $role_data = [
-            'name' => $_POST['name'],
             'description' => $_POST['description'] ?? '',
             'active' => isset($_POST['active']) ? 1 : 0
         ];
+
+        // Only include name for custom roles
+        if ($can_edit_name) {
+            $role_data['name'] = $_POST['name'];
+        }
 
         // Role level changes removed - roles use auto-generated IDs
 
@@ -104,13 +123,13 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                         <span class="badge bg-primary ms-2"><?php _e('System Role', 'cftp_admin'); ?></span>
                     <?php endif; ?>
                 </h5>
-                <?php if ($role->is_system_role): ?>
+                <?php if ($is_system_role): ?>
                     <div class="alert alert-info">
                         <i class="fa fa-info-circle"></i>
                         <?php if ($is_client_role): ?>
                             <?php _e('The Client role is a core system role and cannot be edited.', 'cftp_admin'); ?>
                         <?php else: ?>
-                            <?php _e('This is a system role. Some properties cannot be changed.', 'cftp_admin'); ?>
+                            <?php _e('This is a system role. The role name cannot be changed as it may break system functionality.', 'cftp_admin'); ?>
                         <?php endif; ?>
                     </div>
                 <?php endif; ?>

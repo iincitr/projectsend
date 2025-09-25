@@ -521,7 +521,8 @@ class Users
         if (!$this->validate()) {
             return [
                 'status' => 'error',
-                'message' => __('Validation errors occurred.', 'cftp_admin')
+                'message' => __('Validation errors occurred.', 'cftp_admin'),
+                'errors' => $this->getValidationErrors()
             ];
         }
 
@@ -694,7 +695,8 @@ class Users
         if (!$this->validate()) {
             return [
                 'status' => 'error',
-                'message' => __('Validation errors occurred.', 'cftp_admin')
+                'message' => __('Validation errors occurred.', 'cftp_admin'),
+                'errors' => $this->getValidationErrors()
             ];
         }
 

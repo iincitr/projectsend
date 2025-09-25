@@ -2,6 +2,8 @@
 /**
  * Show the form to edit a system user.
  */
+
+
 require_once 'bootstrap.php';
 redirect_if_not_logged_in();
 
@@ -35,7 +37,7 @@ if (!isset($_GET['id'])) {
     exit_with_error_code(403);
 }
 
-$user_id = $_GET['id'];
+$user_id = (int)$_GET['id'];
 if (!user_exists_id($user_id)) {
     exit_with_error_code(403);
 }
@@ -43,6 +45,7 @@ if (!user_exists_id($user_id)) {
 // Create the object
 $edit_user = new \ProjectSend\Classes\Users($user_id);
 $user_arguments = $edit_user->getProperties();
+
 
 // Form type
 if (current_role_in(['Uploader'])) {
@@ -58,22 +61,36 @@ if (current_role_in(['Uploader'])) {
     }
 }
 
-// Compare the user editing this account to the on the database.
-if (!current_role_in(['System Administrator'])) {
-    if (CURRENT_USER_USERNAME != $user_arguments['username']) {
-        exit_with_error_code(403);
-    }
+// Additional permission check - using consistent permission system
+$can_edit_this_user = false;
+if ($user_arguments['id'] == CURRENT_USER_ID) {
+    // Editing own account
+    $can_edit_this_user = current_user_can('edit_self_account');
+} else {
+    // Editing another user's account
+    $can_edit_this_user = current_user_can('edit_users');
+}
+
+if (!$can_edit_this_user) {
+    exit_with_error_code(403);
 }
 
 if ($_POST) {
+
     /**
-     * If the user is not an admin, check if the id of the user
-     * that's being edited is the same as the current logged in one.
+     * Check if user can edit this account using the same logic as the initial permission check
      */
-    if (!current_role_in(['System Administrator'])) {
-        if ($user_id != CURRENT_USER_ID) {
-            exit_with_error_code(403);
-        }
+    $can_edit_in_post = false;
+    if ($user_id == CURRENT_USER_ID) {
+        // Editing own account
+        $can_edit_in_post = current_user_can('edit_self_account');
+    } else {
+        // Editing another user's account
+        $can_edit_in_post = current_user_can('edit_users');
+    }
+
+    if (!$can_edit_in_post) {
+        exit_with_error_code(403);
     }
 
     /**
@@ -120,10 +137,16 @@ if ($_POST) {
         $user_arguments['active'] = (isset($_POST["active"])) ? 1 : 0;
     }
 
+    // Debug: Log the user arguments being processed
+    error_log("Processing user edit for ID: " . $user_id);
+    error_log("User arguments: " . print_r($user_arguments, true));
+    error_log("POST data: " . print_r($_POST, true));
+
     // Validate the information from the posted form.
     $edit_user->set($user_arguments);
     $edit_user->setType("existing_user");
     $edit_response = $edit_user->edit();
+
 
     if ($edit_response['status'] === 'success') {
         $flash->success($edit_response['message']);
@@ -131,7 +154,9 @@ if ($_POST) {
         $flash->error($edit_response['message']);
     }
 
-    ps_redirect(BASE_URI . 'users-edit.php?id=' . $user_id);
+    // Ensure we're redirecting to the correct user ID from the original request
+    $redirect_user_id = isset($_GET['id']) ? (int)$_GET['id'] : $user_id;
+    ps_redirect(BASE_URI . 'users-edit.php?id=' . $redirect_user_id);
 }
 
 $page_title = __('Edit system user', 'cftp_admin');
@@ -142,7 +167,13 @@ if (CURRENT_USER_USERNAME == $user_arguments['username']) {
     $page_title = __('My account', 'cftp_admin');
 }
 
+// Preserve the user_id before header inclusion (header might overwrite it)
+$edit_user_id = $user_id;
+
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';
+
+// Restore the user_id after header inclusion
+$user_id = $edit_user_id;
 ?>
 <div class="row">
     <div class="col-12 col-sm-12 col-lg-6">

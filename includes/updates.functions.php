@@ -32,8 +32,9 @@ function get_latest_version_data()
             $return = [
                 'local_version' => $current_version,
                 'update_available' => '1',
-                'url' => $latest->download,
+                'url' => !empty($latest->download_direct->zip) ? $latest->download_direct->zip : $latest->download,
                 'chlog' => $latest->changelog,
+                'sha256' => !empty($latest->hash->sha256) ? $latest->hash->sha256 : null,
                 'diff' => [
                     'security' => $latest->diff->security,
                     'features' => $latest->diff->features,

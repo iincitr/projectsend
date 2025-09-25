@@ -110,10 +110,10 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                     $badge_class = 'info';
                 } elseif ($role['name'] == 'Client') {
                     $role_badge = 'Client';
-                    $badge_class = 'secondary';
+                    $badge_class = 'primary';
                 } else {
                     $role_badge = 'Custom';
-                    $badge_class = 'secondary';
+                    $badge_class = 'success';
                 }
 
                 // Status badge
@@ -128,18 +128,21 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                 $action_buttons = '';
 
                 // Permissions button - different styles based on editability
-                if ($role['permissions_editable']) {
-                    $action_buttons .= '<a href="role-permissions.php?role=' . $role['id'] . '" class="btn btn-primary btn-sm"><i class="fa fa-key"></i><span class="button_label">' . __('Permissions', 'cftp_admin') . '</span></a>' . "\n";
+                // if ($role['permissions_editable']) {
+                if ($role['name'] == 'System Administrator') {
+                    $action_buttons .= '<a href="role-permissions.php?role=' . $role['id'] . '" class="btn btn-pslight btn-sm"><i class="fa fa-key"></i><span class="button_label">' . __('View Permissions', 'cftp_admin') . '</span></a>' . "\n";
                 } else {
-                    $action_buttons .= '<a href="role-permissions.php?role=' . $role['id'] . '" class="btn btn-pslight btn-sm"><i class="fa fa-lock"></i><span class="button_label">' . __('View Permissions', 'cftp_admin') . '</span></a>' . "\n";
+                    $action_buttons .= '<a href="role-permissions.php?role=' . $role['id'] . '" class="btn btn-primary btn-sm"><i class="fa fa-key"></i><span class="button_label">' . __('Permissions', 'cftp_admin') . '</span></a>' . "\n";
                 }
 
                 // View Users/Clients button
-                if ($user_count > 0) {
-                    if ($role['name'] === 'Client') {
-                        $action_buttons .= '<a href="clients.php" class="btn btn-primary btn-sm"><i class="fa fa-users"></i><span class="button_label">' . __('View', 'cftp_admin') . '</span></a>' . "\n";
-                    } else {
+                if ($role['name'] === 'Client') {
+                    $action_buttons .= '<a href="clients.php" class="btn btn-primary btn-sm"><i class="fa fa-users"></i><span class="button_label">' . __('View', 'cftp_admin') . '</span></a>' . "\n";
+                } else {
+                    if ($user_count > 0) {
                         $action_buttons .= '<a href="users.php?role=' . $role['id'] . '" class="btn btn-primary btn-sm"><i class="fa fa-users"></i><span class="button_label">' . __('View', 'cftp_admin') . '</span></a>' . "\n";
+                    } else {
+                        $action_buttons .= '<a href="~" class="btn btn-pslight btn-sm disabled" disabled><i class="fa fa-users"></i><span class="button_label">' . __('View', 'cftp_admin') . '</span></a>' . "\n";
                     }
                 }
 
@@ -151,17 +154,17 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                 }
 
                 // Delete button
-                if (!$role['is_system_role'] && custom_roles_enabled() && $user_count == 0) {
-                    $action_buttons .= '<button type="button" class="btn btn-danger btn-sm delete-role" data-role="' . $role['id'] . '" data-name="' . html_output($role['name']) . '"><i class="fa fa-trash"></i><span class="button_label">' . __('Delete', 'cftp_admin') . '</span></button>' . "\n";
+                if (!$role['is_system_role'] && custom_roles_enabled()) {
+                    $action_buttons .= '<button type="button" class="btn btn-danger btn-sm delete-role" data-role="' . $role['id'] . '" data-name="' . html_output($role['name']) . '" data-user-count="' . $user_count . '"><i class="fa fa-trash"></i><span class="button_label">' . __('Delete', 'cftp_admin') . '</span></button>' . "\n";
                 }
 
                 // Add the cells to the row
                 $tbody_cells = array(
                     array(
-                        'content' => '<strong>' . html_output($role['name']) . '</strong> <span class="badge bg-' . $badge_class . ' ms-2">' . $role_badge . '</span>',
+                        'content' => '<strong>' . html_output($role['name']) . '</strong> <span class="d-none badge bg-' . $badge_class . ' ms-2">' . $role_badge . '</span>',
                     ),
                     array(
-                        'content' => '<small class="text-muted">' . html_output($role['description']) . '</small>',
+                        'content' => html_output($role['description']),
                     ),
                     array(
                         'content' => '<span class="badge bg-light text-dark">' . $user_count . '</span>',
@@ -194,7 +197,47 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
     </div>
 </div>
 
+<!-- User Reassignment Modal -->
+<div class="modal fade" id="reassignUsersModal" tabindex="-1" role="dialog" aria-labelledby="reassignUsersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reassignUsersModalLabel"><?php _e('Delete Role - Reassign Users', 'cftp_admin'); ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fa fa-warning"></i>
+                    <?php _e('This role has users assigned to it. You must reassign these users to another role before deleting this role.', 'cftp_admin'); ?>
+                </div>
 
+                <div class="mb-3">
+                    <label for="new-role-select" class="form-label"><?php _e('Reassign users to:', 'cftp_admin'); ?></label>
+                    <select class="form-select" id="new-role-select" required>
+                        <option value=""><?php _e('Select a role...', 'cftp_admin'); ?></option>
+                        <!-- Options populated via JavaScript -->
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <h6><?php _e('Users to be reassigned:', 'cftp_admin'); ?></h6>
+                    <div id="users-list" class="border rounded p-3 bg-light">
+                        <!-- Users populated via JavaScript -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php _e('Cancel', 'cftp_admin'); ?></button>
+                <button type="button" class="btn btn-danger" id="confirm-role-delete" disabled><?php _e('Reassign Users & Delete Role', 'cftp_admin'); ?></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden form for CSRF token -->
+<form style="display: none;" id="csrf-form">
+    <?php addCsrf(); ?>
+</form>
 
 <?php
 include_once ADMIN_VIEWS_DIR . DS . 'footer.php';

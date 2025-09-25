@@ -14,7 +14,7 @@
                 $.ajax({
                     type:	'GET',
                     cache:	false,
-                    url:	'includes/ajax-keep-alive.php',
+                    url:	json_strings.uri.base + 'includes/ajax-keep-alive.php',
                     data:	'timestamp='+timestamp,
                     success: function(result) {
                         var dummy = result;
