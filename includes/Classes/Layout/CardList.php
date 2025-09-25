@@ -179,6 +179,7 @@ class CardList
     {
         $continue = (!isset($attributes['condition']) || !empty($attributes['condition'])) ? true : false;
 
+
         if ($continue) {
             $this->content = (!empty($attributes['content'])) ? $attributes['content'] : '';
             $this->is_checkbox = (!empty($attributes['checkbox'])) ? true : false;
@@ -233,10 +234,11 @@ class CardList
             // Check if this cell has a custom column name identifier
             $custom_column_name = isset($cell['attributes']['column_name']) ? $cell['attributes']['column_name'] : '';
 
+
             if ($cell['is_checkbox']) {
                 $has_checkbox = true;
                 $checkbox_content = $cell['content'];
-            } elseif (!empty($column['actions']) || $cell_index >= count($this->columns) - 2) {
+            } elseif (!empty($column['actions']) || $cell_index >= count($this->columns) - 2 || $this->isActionCell($cell['content'])) {
                 // Actions
                 $card_data['actions'][] = $cell['content'];
             } else {
@@ -698,6 +700,28 @@ class CardList
     /**
      * Render the complete card list
      */
+    /**
+     * Check if a cell content is an action button
+     */
+    private function isActionCell($content)
+    {
+        // Check for common action button patterns
+        $action_patterns = [
+            'files-edit.php',           // Edit button
+            'btn btn-primary',          // Primary buttons
+            'btn btn-danger',           // Delete buttons
+            'btn btn-success',          // Success buttons
+        ];
+
+        foreach ($action_patterns as $pattern) {
+            if (strpos($content, $pattern) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function render()
     {
         $this->contents .= '</div>' . "\n"; // Close card-list-items

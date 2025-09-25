@@ -792,6 +792,7 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                         array(
                             'content' => __('Actions', 'cftp_admin'),
                             'hide' => 'phone',
+                            'actions' => true, // Mark this as actions column for CardList
                         ),
                     );
 
@@ -1021,6 +1022,7 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                             ),
                             array(
                                 'content' => '<a href="files-edit.php?ids=' . $file->id . '" class="btn btn-primary btn-sm" title="' . __('Edit file', 'cftp_admin') . '"><i class="fa fa-pencil"></i><span class="button_label">' . __('Edit', 'cftp_admin') . '</span></a>',
+                                'condition' => $file->currentUserCanEdit(), // Check if current user can edit this file
                             ),
                         );
 

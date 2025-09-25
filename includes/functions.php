@@ -2192,12 +2192,25 @@ function user_can_edit_file($user_id = null, $file_id = null)
     if (in_array('edit_files', $role_permissions)) {
         // Pre-update when column didn't exist
         if ($file_object->user_id == null) {
-            if ($user['username'] == $file_object->uploaded_by) {
+            if ($user['username'] === $file_object->uploaded_by) {
                 return true;
             }
         }
 
-        if ($user['id'] == $file_object->user_id) {
+        if ((string)$user['id'] === (string)$file_object->user_id) {
+            return true;
+        }
+    }
+
+    // Users with upload permission can edit their own uploaded files
+    if (in_array('upload', $role_permissions)) {
+        // Check if this user uploaded the file
+        if ((string)$file_object->user_id === (string)$user['id']) {
+            return true;
+        }
+
+        // Legacy check for when user_id column didn't exist
+        if ($file_object->user_id == null && $user['username'] === $file_object->uploaded_by) {
             return true;
         }
     }
