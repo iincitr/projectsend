@@ -76,50 +76,50 @@
                                                                 <input type="checkbox" class="checkbox_setting_expires" name="file[<?php echo $i; ?>][expires]" id="exp_checkbox_<?php echo $i; ?>" value="1" <?php if ($file->expires) { ?>checked="checked"<?php } ?> /> <?php _e('File expires', 'cftp_admin');?>
                                                             </label>
                                                         </div>
+                                                    </div>
+                                                </div>
+                                        <?php
+                                            }
 
-                                                        <?php
-                                                            // Public downloading options are available to users with upload_public permission
-                                                            if (current_user_can('upload_public')) {
-                                                        ?>
-                                                                <div class="divider"></div>
+                                            // Public downloading options are available to users with upload_public permission (separate from expiration)
+                                            if (current_user_can('upload_public')) {
+                                        ?>
+                                                <div class="col">
+                                                    <div class="file_data">
+                                                        <h3><?php _e('Public downloading', 'cftp_admin');?></h3>
 
-                                                                <h3><?php _e('Public downloading', 'cftp_admin');?></h3>
+                                                        <div class="checkbox">
+                                                            <label for="pub_checkbox_<?php echo $i; ?>">
+                                                                <input type="checkbox" class="checkbox_setting_public" id="pub_checkbox_<?php echo $i; ?>" name="file[<?php echo $i; ?>][public]" value="1" <?php if ($file->public) { ?>checked="checked"<?php } ?>/> <?php _e('Allow public downloading of this file.', 'cftp_admin');?>
+                                                            </label>
+                                                        </div>
 
-                                                                <div class="checkbox">
-                                                                    <label for="pub_checkbox_<?php echo $i; ?>">
-                                                                        <input type="checkbox" class="checkbox_setting_public" id="pub_checkbox_<?php echo $i; ?>" name="file[<?php echo $i; ?>][public]" value="1" <?php if ($file->public) { ?>checked="checked"<?php } ?>/> <?php _e('Allow public downloading of this file.', 'cftp_admin');?>
-                                                                    </label>
-                                                                </div>
-
-                                                                <div class="form-group">
-                                                                    <div class="divider"></div>
-                                                                    <h3><?php _e('Custom download aliases', 'cftp_admin');?></h3>
-                                                                    <?php foreach ($file->getCustomDownloads() as $j => $custom_download) {
-                                                                        $trans = __('Enter a custom download link.', 'cftp_admin');
-                                                                        $custom_download_uri = get_option('custom_download_uri');
-                                                                        if (!$custom_download_uri) $custom_download_uri = BASE_URI . 'custom-download.php?link=';
-                                                                        echo <<<EOL
-                                                                            <div class="input-group">
-                                                                                <input type="hidden" value="{$custom_download['link']}" name="file[$i][custom_downloads][$j][id]" />
-                                                                                <input type="text" name="file[$i][custom_downloads][$j][link]"
-                                                                                    id="custom_download_input_$j"
-                                                                                    value="{$custom_download['link']}"
-                                                                                    class="form-control"
-                                                                                    placeholder="$trans" />
-                                                                                <a href="#" class="input-group-text" onclick="copyTextToClipboard('$custom_download_uri' + document.getElementById('custom_download_input_$j').value);">
-                                                                                    <i class="fa fa-copy" style="cursor: pointer"></i>
-                                                                                </a>
-                                                                            </div>
+                                                        <div class="form-group">
+                                                            <div class="divider"></div>
+                                                            <h3><?php _e('Custom download aliases', 'cftp_admin');?></h3>
+                                                            <?php foreach ($file->getCustomDownloads() as $j => $custom_download) {
+                                                                $trans = __('Enter a custom download link.', 'cftp_admin');
+                                                                $custom_download_uri = get_option('custom_download_uri');
+                                                                if (!$custom_download_uri) $custom_download_uri = BASE_URI . 'custom-download.php?link=';
+                                                                echo <<<EOL
+                                                                    <div class="input-group">
+                                                                        <input type="hidden" value="{$custom_download['link']}" name="file[$i][custom_downloads][$j][id]" />
+                                                                        <input type="text" name="file[$i][custom_downloads][$j][link]"
+                                                                            id="custom_download_input_$j"
+                                                                            value="{$custom_download['link']}"
+                                                                            class="form-control"
+                                                                            placeholder="$trans" />
+                                                                        <a href="#" class="input-group-text" onclick="copyTextToClipboard('$custom_download_uri' + document.getElementById('custom_download_input_$j').value);">
+                                                                            <i class="fa fa-copy" style="cursor: pointer"></i>
+                                                                        </a>
+                                                                    </div>
 EOL;
-                                                                    }
-                                                                    ?>
-                                                                    <p class="field_note form-text">
-                                                                        <?php echo sprintf(__('Optional: enter an alias to use on the custom download link. Ej: "my-first-file" will let you download this file from %s'), BASE_URI.'custom-download.php?link=my-first-file'); ?>
-                                                                    </p>
-                                                                </div>
-                                                        <?php
                                                             }
-                                                        ?>
+                                                            ?>
+                                                            <p class="field_note form-text">
+                                                                <?php echo sprintf(__('Optional: enter an alias to use on the custom download link. Ej: "my-first-file" will let you download this file from %s'), BASE_URI.'custom-download.php?link=my-first-file'); ?>
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                         <?php

@@ -504,8 +504,9 @@ class Permissions {
         // Client permissions are now handled through the role-based system
         // The old option-based system has been migrated to role permissions
         if ($this->user->isClient()) {
-            // Special handling for upload_public which still uses the complex client_can_upload_public logic
-            $this->permissions['upload_public'] = client_can_upload_public($this->user->id);
+            // Check upload_public permission from client role instead of using old settings-based approach
+            $client_role = new \ProjectSend\Classes\Roles(\ProjectSend\Classes\Roles::getClientRoleId());
+            $this->permissions['upload_public'] = $client_role->hasPermission('upload_public');
         }
     }
 

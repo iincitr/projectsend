@@ -941,17 +941,15 @@ function current_user_is_admin()
 
 function client_can_upload_public($client_id)
 {
-    switch (get_option('clients_can_set_public')) {
-        case 'all':
-            return true;
-            break;
-        case 'allowed':
-            $client = get_client_by_id($client_id);
-            return (bool)$client['can_upload_public'];
-            break;
+    // First check: Client role must have upload_public permission
+    $client_role = new \ProjectSend\Classes\Roles(\ProjectSend\Classes\Roles::getClientRoleId());
+    if (!$client_role->hasPermission('upload_public')) {
+        return false;
     }
 
-    return false;
+    // Second check: Individual client must have can_upload_public enabled in their profile
+    $client = get_client_by_id($client_id);
+    return (bool)$client['can_upload_public'];
 }
 
 function client_can_assign_to_public_folder($client_id)
@@ -960,11 +958,9 @@ function client_can_assign_to_public_folder($client_id)
         return false;
     }
 
-    if (get_option('clients_can_upload_to_public_folders') == '1') {
-        return true;
-    }
-
-    return false;
+    // Check if client role has upload_to_public_folders permission
+    $client_role = new \ProjectSend\Classes\Roles(\ProjectSend\Classes\Roles::getClientRoleId());
+    return $client_role->hasPermission('upload_to_public_folders');
 }
 
 function current_user_can_upload()
@@ -976,10 +972,12 @@ function current_user_can_upload()
     try {
         $user = new \ProjectSend\Classes\Users(CURRENT_USER_ID);
         if ($user->isClient()) {
-            return (get_option('clients_can_upload') == '1');
+            // Check if client role has upload permission
+            $client_role = new \ProjectSend\Classes\Roles(\ProjectSend\Classes\Roles::getClientRoleId());
+            return $client_role->hasPermission('upload');
         } else {
-            // System users can upload
-            return true;
+            // For system users, check their role's upload permission
+            return current_user_can('upload');
         }
     } catch (Exception $e) {
         return false;
@@ -997,8 +995,8 @@ function current_user_can_upload_public()
         if ($user->isClient()) {
             return client_can_upload_public(CURRENT_USER_ID);
         } else {
-            // System users can always upload public
-            return true;
+            // For system users, check their role's upload_public permission
+            return current_user_can('upload_public');
         }
     } catch (Exception $e) {
         return false;
