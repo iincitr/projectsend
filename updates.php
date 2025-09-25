@@ -18,10 +18,7 @@ $active_nav = 'dashboard';
 $update_data = json_decode(get_latest_version_data());
 
 // Check if update is available
-if (!$update_data || $update_data->update_available != '1') {
-    // Redirect to dashboard if no update available
-    ps_redirect(BASE_URI . 'dashboard.php');
-}
+$update_available = $update_data && $update_data->update_available == '1';
 
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 ?>
@@ -32,6 +29,49 @@ if (isset($_GET['error'])) {
     $flash->error($_GET['error']);
 }
 ?>
+
+<?php if (!$update_available): ?>
+    <!-- Latest Version Card -->
+    <div class="row">
+        <div class="col-12 col-lg-8">
+            <div class="ps-card mb-4">
+                <div class="ps-card-body text-center">
+                    <i class="fa fa-check-circle fa-4x text-success mb-3"></i>
+                    <h3><?php _e('You\'re up to date!', 'cftp_admin'); ?></h3>
+                    <p class="text-muted mb-4">
+                        <?php _e('ProjectSend is already running the latest version.', 'cftp_admin'); ?>
+                    </p>
+
+                    <?php if ($update_data): ?>
+                        <div class="version-info">
+                            <dl class="row">
+                                <dt class="col-sm-6"><?php _e('Current version', 'cftp_admin'); ?></dt>
+                                <dd class="col-sm-6"><strong><?php echo $update_data->local_version; ?></strong></dd>
+                            </dl>
+                        </div>
+                    <?php endif; ?>
+
+                    <a href="<?php echo BASE_URI; ?>dashboard.php" class="btn btn-primary">
+                        <i class="fa fa-arrow-left"></i> <?php _e('Back to Dashboard', 'cftp_admin'); ?>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="ps-card">
+                <div class="ps-card-body">
+                    <h4><?php _e('Stay Updated', 'cftp_admin'); ?></h4>
+                    <p><?php _e('ProjectSend automatically checks for updates. You\'ll be notified when a new version is available.', 'cftp_admin'); ?></p>
+
+                    <div class="alert alert-info">
+                        <p><strong><?php _e('Tip', 'cftp_admin'); ?>:</strong> <?php _e('Regular updates include security fixes and new features.', 'cftp_admin'); ?></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php else: ?>
 
 <div class="row">
     <div class="col-12 col-lg-8">
@@ -205,14 +245,18 @@ if (isset($_GET['error'])) {
     </div>
 </div>
 
+<?php endif; ?>
+
 <!-- Hidden CSRF token for JavaScript access -->
 <?php addCsrf(); ?>
 
+<?php if ($update_available): ?>
 <script type="text/javascript">
     var update_download_url = '<?php echo addslashes($update_data->url); ?>';
     var update_data = <?php echo json_encode($update_data); ?>;
     var json_strings = <?php echo json_encode($json_strings); ?>;
 </script>
+<?php endif; ?>
 
 <?php
 include_once ADMIN_VIEWS_DIR . DS . 'footer.php';
