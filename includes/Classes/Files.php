@@ -230,6 +230,30 @@ class Files
         return true;
     }
 
+    /**
+     * Get file by filename (URL column)
+     * Searches for a file by its filename_on_disk (url column) and populates the object
+     *
+     * @param string $filename The filename to search for
+     * @return bool True if file found and loaded, false otherwise
+     */
+    public function getByFilename($filename)
+    {
+        $statement = $this->dbh->prepare("SELECT id FROM " . TABLE_FILES . " WHERE url = :filename");
+        $statement->execute([':filename' => $filename]);
+
+        if ($statement->rowCount() > 0) {
+            $row = $statement->fetch();
+            $file_id = $row['id'];
+
+            if (!empty($file_id)) {
+                return $this->get($file_id);
+            }
+        }
+
+        return false;
+    }
+
     public function getCustomDownloads()
     {
         if (!empty($this->custom_downloads))

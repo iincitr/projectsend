@@ -1017,74 +1017,7 @@ function current_user_is_system_user()
 }
 
 
-/**
- * Get all the file information knowing only the id
- * Used on the Download information page.
- *
- * @return array
- */
-function get_file_by_id($id)
-{
-    global $dbh;
-    $statement = $dbh->prepare("SELECT * FROM " . TABLE_FILES . " WHERE id=:id");
-    $statement->bindParam(':id', $id, PDO::PARAM_INT);
-    $statement->execute();
-    $statement->setFetchMode(PDO::FETCH_ASSOC);
 
-    while ($row = $statement->fetch()) {
-        $information = array(
-            'id' => html_output($row['id']),
-            'user_id' => html_output($row['user_id']),
-            'title' => html_output($row['filename']),
-            'original_url' => html_output($row['original_url']),
-            'url' => html_output($row['url']),
-            'description' => html_output($row['description']),
-            'uploaded_date' => html_output($row['timestamp']),
-            'uploaded_by' => html_output($row['uploader']),
-            'expires' => html_output($row['expires']),
-            'expiry_date' => html_output($row['expiry_date']),
-            'public' => html_output($row['public_allow']),
-            'public_token' => html_output($row['public_token']),
-        );
-
-        if (!empty($information)) {
-            return $information;
-        } else {
-            return false;
-        }
-    }
-}
-
-/**
- * Get all the file information knowing only the id
- * Used on the Download information page.
- *
- * @return array
- */
-function get_file_by_filename($filename)
-{
-    global $dbh;
-    $statement = $dbh->prepare("SELECT * FROM " . TABLE_FILES . " WHERE url=:filename");
-    $statement->execute(
-        array(
-            ':filename' => $filename
-        )
-    );
-
-    if ($statement->rowCount() > 0) {
-        while ($row = $statement->fetch()) {
-            $found_id = $row['id'];
-            if (!empty($found_id)) {
-                $information = get_file_by_id($found_id);
-                return $information;
-            } else {
-                return false;
-            }
-        }
-    }
-
-    return false;
-}
 
 function get_file_assignations($file_id)
 {
@@ -2232,9 +2165,18 @@ function user_can_edit_file($user_id = null, $file_id = null)
     }
 
     $user = get_user_by_id($user_id);
-    $file = get_file_by_id($file_id);
 
-    if (!$user || !$file) {
+    // Use Files class to get file data
+    try {
+        $file_object = new \ProjectSend\Classes\Files($file_id);
+        if (!$file_object->recordExists()) {
+            return false;
+        }
+    } catch (Exception $e) {
+        return false;
+    }
+
+    if (!$user) {
         return false;
     }
 
@@ -2249,13 +2191,13 @@ function user_can_edit_file($user_id = null, $file_id = null)
     // Check if user has permission to edit files and this is their own file
     if (in_array('edit_files', $role_permissions)) {
         // Pre-update when column didn't exist
-        if ($file['user_id'] == null) {
-            if ($user['username'] == $file['uploaded_by']) {
+        if ($file_object->user_id == null) {
+            if ($user['username'] == $file_object->uploaded_by) {
                 return true;
             }
         }
 
-        if ($user['id'] == $file['user_id']) {
+        if ($user['id'] == $file_object->user_id) {
             return true;
         }
     }

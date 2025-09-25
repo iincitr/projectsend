@@ -111,8 +111,10 @@ class ActionsLog
 
         /** Get the title of the file on downloads */
         if (!empty($arguments['file_title_column'])) {
-            $file = get_file_by_filename($this->affected_file_name);
-            $this->affected_file_name = $file['title'];
+            $file_object = new \ProjectSend\Classes\Files();
+            if ($file_object->getByFilename($this->affected_file_name)) {
+                $this->affected_file_name = $file_object->title; // XSS-protected via __get
+            }
         }
 
         if (is_array($this->details)) {
