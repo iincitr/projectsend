@@ -171,7 +171,7 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                     $checkbox = ($file->expired == false) ? '<input type="checkbox" name="files[]" value="' . $file->id . '" class="batch_checkbox" />' : null;
 
                     /** File title */
-                    $file_title_content = '<strong>' . $file->title . '</strong>';
+                    $file_title_content = '<strong>' . html_output($file->title) . '</strong>';
                     if ($file->expired == false) {
                         $title_content = '<a href="' . $file->download_link . '" target="_blank">' . $file_title_content . '</a>';
                     } else {
