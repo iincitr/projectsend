@@ -205,6 +205,9 @@ if (isset($_GET['error'])) {
     </div>
 </div>
 
+<!-- Hidden CSRF token for JavaScript access -->
+<?php addCsrf(); ?>
+
 <script type="text/javascript">
     var update_download_url = '<?php echo addslashes($update_data->url); ?>';
     var update_data = <?php echo json_encode($update_data); ?>;

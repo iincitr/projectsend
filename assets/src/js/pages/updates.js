@@ -36,8 +36,9 @@
 
                 // Prepare request data with CSRF token for POST request
                 var formData = new FormData();
-                if (typeof getCsrfToken === 'function') {
-                    formData.append('csrf_token', getCsrfToken());
+                var csrfToken = document.getElementById('csrf_token');
+                if (csrfToken) {
+                    formData.append('csrf_token', csrfToken.value);
                 }
 
                 fetch(json_strings.uri.base + 'process.php?do=check_update_requirements', {
@@ -126,8 +127,9 @@
                 formData.append('step', step);
 
                 // Add CSRF token
-                if (typeof getCsrfToken === 'function') {
-                    formData.append('csrf_token', getCsrfToken());
+                var csrfToken = document.getElementById('csrf_token');
+                if (csrfToken) {
+                    formData.append('csrf_token', csrfToken.value);
                 }
 
                 if (step === 'download' && typeof update_download_url !== 'undefined') {
@@ -177,8 +179,9 @@
                 formData.append('step', 'rollback');
 
                 // Add CSRF token
-                if (typeof getCsrfToken === 'function') {
-                    formData.append('csrf_token', getCsrfToken());
+                var csrfToken = document.getElementById('csrf_token');
+                if (csrfToken) {
+                    formData.append('csrf_token', csrfToken.value);
                 }
 
                 fetch(json_strings.uri.base + 'process.php?do=perform_system_update', {
