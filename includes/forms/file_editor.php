@@ -27,7 +27,7 @@
                                         <button type="button" class="btn btn-md btn-secondary toggle_file_editor">
                                             <i class="fa fa-chevron-right" aria-hidden="true"></i>
                                         </button>
-                                        <p><?php echo $file->filename_original; ?></p>
+                                        <p><?php echo html_output($file->filename_original); ?></p>
                                     </div>
                                 </div>
                             </div>
@@ -48,7 +48,7 @@
 
                                                 <div class="form-group">
                                                     <label><?php _e('Description', 'cftp_admin');?></label>
-                                                    <textarea id="description_<?php echo $file->id; ?>" name="file[<?php echo $i; ?>][description]" class="<?php if ( get_option('files_descriptions_use_ckeditor') == 1 ) { echo 'ckeditor'; } ?> form-control textarea_description" placeholder="<?php _e('Optionally, enter here a description for the file.', 'cftp_admin');?>"><?php if (!empty($file->description)) { echo $file->description; } ?></textarea>
+                                                    <textarea id="description_<?php echo $file->id; ?>" name="file[<?php echo $i; ?>][description]" class="<?php if ( get_option('files_descriptions_use_ckeditor') == 1 ) { echo 'ckeditor'; } ?> form-control textarea_description" placeholder="<?php _e('Optionally, enter here a description for the file.', 'cftp_admin');?>"><?php if (!empty($file->description)) { echo html_output($file->description); } ?></textarea>
                                                 </div>
                                             </div>
                                         </div>
