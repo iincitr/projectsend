@@ -1028,8 +1028,8 @@ class Files
         }
 
         // Set data
-        $this->name = $data["name"];
-        $this->description = $data["description"];
+        $this->name = encode_html($data["name"]);
+        $this->description = encode_html($data["description"]);
         $this->expires = (isset($data["expires"])) ? $data["expires"] : 0;
         $this->expiry_date = (isset($expiration_str)) ? $expiration_str : $current["expiry_date"];
         $this->is_public = (isset($data["public"])) ? $data["public"] : 0;
