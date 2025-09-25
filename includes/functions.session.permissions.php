@@ -46,12 +46,19 @@ function redirect_if_not_logged_in()
                 $redirect = true;
             }
         }
+
+        // Also check if CURRENT_USER_ID is properly defined
+        // This can be undefined if session is partially invalid
+        if (!defined('CURRENT_USER_ID')) {
+            $redirect = true;
+        }
     }
 
     if ($redirect) {
         $_SESSION = [];
         session_destroy();
         ps_redirect(BASE_URI . "index.php");
+        exit; // Ensure script execution stops
     }
 }
 
@@ -412,6 +419,11 @@ function current_user_can_view_files_list()
 {
     if (defined('IS_PUBLIC_VIEW')) {
         return true;
+    }
+
+    // Check if user is properly logged in with CURRENT_USER_ID defined
+    if (!defined('CURRENT_USER_ID') || !defined('CURRENT_USER_USERNAME')) {
+        return false;
     }
 
     $user = new \ProjectSend\Classes\Users(CURRENT_USER_ID);
