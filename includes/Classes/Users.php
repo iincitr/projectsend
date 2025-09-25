@@ -503,7 +503,10 @@ class Users
     {
         // Check permissions based on account type
         if ($this->isClient()) {
-            if (!\current_user_can('create_clients')) {
+            // Allow self-registration if not logged in and clients_can_register is enabled
+            $is_self_registration = ($this->validation_type == 'new_client' && !user_is_logged_in() && get_option('clients_can_register') == '1');
+
+            if (!$is_self_registration && !\current_user_can('create_clients')) {
                 return [
                     'status' => 'error',
                     'message' => __('You do not have permission to create clients.', 'cftp_admin')
