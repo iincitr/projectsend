@@ -33,7 +33,17 @@
             function checkRequirements() {
                 console.log('Starting requirements check');
                 console.log('URL:', json_strings.uri.base + 'process.php?do=check_update_requirements');
-                fetch(json_strings.uri.base + 'process.php?do=check_update_requirements')
+
+                // Prepare request data with CSRF token for POST request
+                var formData = new FormData();
+                if (typeof getCsrfToken === 'function') {
+                    formData.append('csrf_token', getCsrfToken());
+                }
+
+                fetch(json_strings.uri.base + 'process.php?do=check_update_requirements', {
+                    method: 'POST',
+                    body: formData
+                })
                     .then(response => response.json())
                     .then(data => {
                         // Hide loading indicator
@@ -165,6 +175,11 @@
 
                 var formData = new FormData();
                 formData.append('step', 'rollback');
+
+                // Add CSRF token
+                if (typeof getCsrfToken === 'function') {
+                    formData.append('csrf_token', getCsrfToken());
+                }
 
                 fetch(json_strings.uri.base + 'process.php?do=perform_system_update', {
                     method: 'POST',
