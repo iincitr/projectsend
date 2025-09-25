@@ -17,7 +17,7 @@ class AutoUpdate
     {
         $this->temp_dir = ROOT_DIR . DS . 'upload' . DS . 'temp';
         $this->backup_dir = $this->temp_dir . DS . 'backup_' . time();
-        $this->update_file = $this->temp_dir . DS . 'update_' . time() . '.zip';
+        $this->update_file = $this->temp_dir . DS . 'projectsend_update.zip';
     }
 
     /**
@@ -159,6 +159,11 @@ class AutoUpdate
                 if (!mkdir($this->temp_dir, 0755, true)) {
                     throw new \Exception(__('Cannot create temp directory', 'cftp_admin'));
                 }
+            }
+
+            // Clean up any existing update file
+            if (file_exists($this->update_file)) {
+                @unlink($this->update_file);
             }
 
             // Download file with context for timeout and user agent
@@ -313,9 +318,13 @@ class AutoUpdate
     public function extractUpdate()
     {
         try {
-            // Check if update file exists
+            // Check if update file exists, if not try to find any update file
             if (!file_exists($this->update_file)) {
-                throw new \Exception(__('Update file not found', 'cftp_admin'));
+                $update_file = $this->findLatestUpdateFile();
+                if (!$update_file) {
+                    throw new \Exception(__('Update file not found', 'cftp_admin'));
+                }
+                $this->update_file = $update_file;
             }
 
             // Open ZIP archive
@@ -361,6 +370,12 @@ class AutoUpdate
             // Clean up temporary files
             if (file_exists($this->update_file)) {
                 @unlink($this->update_file);
+            }
+
+            // Clean up any old update files
+            $old_update_files = glob($this->temp_dir . DS . 'update_*.zip');
+            foreach ($old_update_files as $file) {
+                @unlink($file);
             }
 
             // Remove backup directory (successful update)
@@ -433,6 +448,12 @@ class AutoUpdate
                 @unlink($this->update_file);
             }
 
+            // Clean up any old update files
+            $old_update_files = glob($this->temp_dir . DS . 'update_*.zip');
+            foreach ($old_update_files as $file) {
+                @unlink($file);
+            }
+
             return [
                 'status' => 'success',
                 'message' => sprintf(__('Rollback completed (%d files restored)', 'cftp_admin'), $restored),
@@ -445,6 +466,27 @@ class AutoUpdate
                 'message' => $e->getMessage()
             ];
         }
+    }
+
+    /**
+     * Find the latest update file in temp directory
+     * @return string|false Path to latest update file or false if none found
+     */
+    private function findLatestUpdateFile()
+    {
+        $pattern = $this->temp_dir . DS . 'update_*.zip';
+        $files = glob($pattern);
+
+        if (empty($files)) {
+            return false;
+        }
+
+        // Sort by modification time (newest first)
+        usort($files, function($a, $b) {
+            return filemtime($b) - filemtime($a);
+        });
+
+        return $files[0];
     }
 
     /**
