@@ -459,9 +459,9 @@ include_once LAYOUT_DIR . DS . 'search-filters-bar.php';
 
                         $custom_download_uri = get_option('custom_download_uri');
                         if (!$custom_download_uri) $custom_download_uri = 'custom-download.php?link=';
-                        $custom_download_link = $custom_download_uri . $custom_download->link;
+                        $custom_download_link = $custom_download_uri . html_output($custom_download->link);
 
-                        $title_content = '<a href="' . $custom_download_link . '" target="_blank">' . $custom_download->link . '</a>';
+                        $title_content = '<a href="' . html_output($custom_download_link) . '" target="_blank">' . html_output($custom_download->link) . '</a>';
                         if (file_is_image($file->full_path)) {
                             $dimensions = $file->getDimensions();
                             if (!empty($dimensions)) {
