@@ -41,12 +41,67 @@ function custom_download_exists($link)
     return $statement->fetchColumn();
 }
 
+/**
+ * Validate and sanitize custom download link
+ * @param string $link The custom download link to validate
+ * @return array Status and sanitized link or error message
+ */
+function validate_custom_download_link($link)
+{
+    // Remove any HTML tags and decode entities
+    $link = strip_tags($link);
+    $link = html_entity_decode($link, ENT_QUOTES, 'UTF-8');
+
+    // Trim whitespace
+    $link = trim($link);
+
+    // Check length (1-255 characters)
+    if (empty($link)) {
+        return ['valid' => false, 'message' => __('Custom download link cannot be empty', 'cftp_admin')];
+    }
+
+    if (strlen($link) > 255) {
+        return ['valid' => false, 'message' => __('Custom download link too long (max 255 characters)', 'cftp_admin')];
+    }
+
+    // Only allow alphanumeric characters, hyphens, underscores, and dots
+    if (!preg_match('/^[a-zA-Z0-9._-]+$/', $link)) {
+        return ['valid' => false, 'message' => __('Custom download link can only contain letters, numbers, dots, hyphens and underscores', 'cftp_admin')];
+    }
+
+    // Additional security: reject common XSS patterns
+    $dangerous_patterns = [
+        'javascript:', 'data:', 'vbscript:', 'onload', 'onerror',
+        '<script', '</script', '&lt;script', '&lt;/script'
+    ];
+
+    $link_lower = strtolower($link);
+    foreach ($dangerous_patterns as $pattern) {
+        if (strpos($link_lower, strtolower($pattern)) !== false) {
+            return ['valid' => false, 'message' => __('Custom download link contains invalid characters', 'cftp_admin')];
+        }
+    }
+
+    return ['valid' => true, 'link' => $link];
+}
+
 function create_custom_download($link, $file_id, $client_id)
 {
     global $dbh;
-    if (custom_download_exists($link)) {
+
+    // Validate and sanitize the link
+    $validation = validate_custom_download_link($link);
+    if (!$validation['valid']) {
+        global $flash;
+        $flash->error($validation['message']);
+        return false;
+    }
+
+    $sanitized_link = $validation['link'];
+
+    if (custom_download_exists($sanitized_link)) {
         $statement = $dbh->prepare('UPDATE ' . TABLE_CUSTOM_DOWNLOADS . ' SET file_id=:file_id, client_id=:client_id WHERE link=:link');
-        $statement->bindParam(':link', $link);
+        $statement->bindParam(':link', $sanitized_link);
         $statement->bindParam(':file_id', $file_id, PDO::PARAM_INT);
         $statement->bindParam(':client_id', $client_id, PDO::PARAM_INT);
         $statement->execute();
@@ -54,12 +109,12 @@ function create_custom_download($link, $file_id, $client_id)
     }
     else {
         $statement = $dbh->prepare('INSERT INTO ' . TABLE_CUSTOM_DOWNLOADS . ' (link, file_id, client_id) VALUES (:link, :file_id, :client_id)');
-        $statement->bindParam(':link', $link);
+        $statement->bindParam(':link', $sanitized_link);
         $statement->bindParam(':file_id', $file_id);
         $statement->bindParam(':client_id', $client_id, PDO::PARAM_INT);
         $statement->execute();
     }
-    return false;
+    return true;
 }
 
 if (isset($_POST['save'])) {
