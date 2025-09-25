@@ -225,7 +225,7 @@
             }
 
             function showError(message) {
-                updateProgress.style.display = 'none';
+                progressCard.style.display = 'block';
                 updateError.style.display = 'block';
                 errorMessage.textContent = message;
 
