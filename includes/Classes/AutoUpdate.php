@@ -30,14 +30,15 @@ class AutoUpdate
         $all_pass = true;
 
         // Check if root directory is writable
+        $root_writable = is_writable(ROOT_DIR);
         $requirements[] = [
             'name' => __('Root directory writable', 'cftp_admin'),
-            'status' => is_writable(ROOT_DIR),
-            'message' => is_writable(ROOT_DIR)
+            'status' => $root_writable,
+            'message' => $root_writable
                 ? sprintf(__('System can write to root directory (%s)', 'cftp_admin'), ROOT_DIR)
-                : sprintf(__('Root directory is not writable (%s)', 'cftp_admin'), ROOT_DIR)
+                : sprintf(__('Root directory is not writable (%s). Try: sudo chown -R www-data:www-data %s', 'cftp_admin'), ROOT_DIR, ROOT_DIR)
         ];
-        if (!is_writable(ROOT_DIR)) $all_pass = false;
+        if (!$root_writable) $all_pass = false;
 
         // Check if temp directory is writable
         $requirements[] = [
@@ -133,9 +134,16 @@ class AutoUpdate
         ];
         if (!$can_connect) $all_pass = false;
 
+        // Add additional warnings if root directory is not writable
+        $warnings = [];
+        if (!$root_writable) {
+            $warnings[] = __('Some files may fail to update due to permission restrictions. The update will proceed but may require manual file permission fixes.', 'cftp_admin');
+        }
+
         return [
             'status' => $all_pass ? 'success' : 'error',
             'requirements' => $requirements,
+            'warnings' => $warnings,
             'can_update' => $all_pass
         ];
     }
@@ -333,19 +341,83 @@ class AutoUpdate
                 throw new \Exception(__('Cannot open update archive', 'cftp_admin'));
             }
 
-            // Extract to root directory
-            if (!$zip->extractTo(ROOT_DIR)) {
-                $zip->close();
-                throw new \Exception(__('Failed to extract update files', 'cftp_admin'));
+            // Extract files individually to handle permission issues
+            $extracted = 0;
+            $failed = 0;
+            $failed_files = [];
+            $num_files = $zip->numFiles;
+
+            for ($i = 0; $i < $num_files; $i++) {
+                $filename = $zip->getNameIndex($i);
+                $fileinfo = $zip->statIndex($i);
+
+                // Skip directories
+                if (substr($filename, -1) === '/') {
+                    continue;
+                }
+
+                // Get file content
+                $content = $zip->getFromIndex($i);
+                if ($content === false) {
+                    $failed++;
+                    $failed_files[] = $filename . ' (could not read from archive)';
+                    continue;
+                }
+
+                // Determine target path
+                $target_path = ROOT_DIR . DS . $filename;
+                $target_dir = dirname($target_path);
+
+                // Create directory if it doesn't exist
+                if (!is_dir($target_dir)) {
+                    if (!@mkdir($target_dir, 0755, true)) {
+                        $failed++;
+                        $failed_files[] = $filename . ' (could not create directory)';
+                        continue;
+                    }
+                }
+
+                // Try to write the file
+                if (@file_put_contents($target_path, $content) !== false) {
+                    $extracted++;
+                    // Try to set file permissions to match existing files
+                    @chmod($target_path, 0644);
+                } else {
+                    $failed++;
+                    $failed_files[] = $filename . ' (permission denied)';
+                }
             }
 
-            $num_files = $zip->numFiles;
             $zip->close();
+
+            // Determine if extraction was successful enough
+            $success_rate = $extracted / max(1, $extracted + $failed);
+
+            if ($extracted === 0) {
+                throw new \Exception(
+                    sprintf(__('No files could be extracted. Failed files: %s', 'cftp_admin'),
+                    implode(', ', array_slice($failed_files, 0, 5)) . ($failed > 5 ? '...' : ''))
+                );
+            } elseif ($success_rate < 0.8) {
+                // Less than 80% success rate is considered a failure
+                throw new \Exception(
+                    sprintf(__('Too many files failed to extract (%d extracted, %d failed). Some failed files: %s', 'cftp_admin'),
+                    $extracted, $failed, implode(', ', array_slice($failed_files, 0, 3)))
+                );
+            }
+
+            // Success or partial success
+            $message = sprintf(__('Update extracted successfully (%d files)', 'cftp_admin'), $extracted);
+            if ($failed > 0) {
+                $message .= sprintf(__(' - %d files skipped due to permissions', 'cftp_admin'), $failed);
+            }
 
             return [
                 'status' => 'success',
-                'message' => sprintf(__('Update extracted successfully (%d files)', 'cftp_admin'), $num_files),
-                'files_extracted' => $num_files
+                'message' => $message,
+                'files_extracted' => $extracted,
+                'files_failed' => $failed,
+                'failed_files' => $failed_files
             ];
 
         } catch (\Exception $e) {
