@@ -17,6 +17,11 @@ $active_nav = 'dashboard';
 // Get update information
 $update_data = json_decode(get_latest_version_data());
 
+// Handle error messages from failed updates
+if (!empty($_GET['error'])) {
+    $flash->error(html_output($_GET['error']));
+}
+
 // Check if update is available
 if (!$update_data || $update_data->update_available != '1') {
     // Redirect to dashboard if no update available
@@ -28,82 +33,10 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 
 <div class="row">
     <div class="col-12 col-lg-8">
-        <div class="ps-card mb-4">
+        <!-- Update Progress Card (hidden initially) -->
+        <div id="update-progress-card" class="ps-card mb-4" style="display: none;">
             <div class="ps-card-body">
-                <!-- Version Information -->
-                <div class="version-info mb-4">
-                    <dl class="row">
-                        <dt class="col-sm-4"><?php _e('Current version', 'cftp_admin'); ?></dt>
-                        <dd class="col-sm-8"><?php echo $update_data->local_version; ?></dd>
-                        <dt class="col-sm-4"><?php _e('New version', 'cftp_admin'); ?></dt>
-                        <dd class="col-sm-8"><strong><?php echo $update_data->latest_version; ?></strong></dd>
-                    </dl>
-
-                    <?php if (!empty($update_data->diff)) { ?>
-                        <h5><?php _e('Changes', 'cftp_admin'); ?></h5>
-                        <div class="d-flex flex-wrap gap-3 mb-4">
-                            <span>
-                                <?php if (!empty($update_data->diff->security) && $update_data->diff->security > 0) { ?>
-                                    <span class="badge bg-success text-white"><?php _e('YES', 'cftp_admin'); ?></span>
-                                <?php } else { ?>
-                                    <span class="badge bg-secondary text-white"><?php _e('NO', 'cftp_admin'); ?></span>
-                                <?php } ?>
-                                <?php _e('Security fixes', 'cftp_admin'); ?>
-                            </span>
-                            <span>
-                                <?php if (!empty($update_data->diff->features) && $update_data->diff->features > 0) { ?>
-                                    <span class="badge bg-success text-white"><?php _e('YES', 'cftp_admin'); ?></span>
-                                <?php } else { ?>
-                                    <span class="badge bg-secondary text-white"><?php _e('NO', 'cftp_admin'); ?></span>
-                                <?php } ?>
-                                <?php _e('New features', 'cftp_admin'); ?>
-                            </span>
-                            <span>
-                                <?php if (!empty($update_data->diff->important) && $update_data->diff->important > 0) { ?>
-                                    <span class="badge bg-success text-white"><?php _e('YES', 'cftp_admin'); ?></span>
-                                <?php } else { ?>
-                                    <span class="badge bg-secondary text-white"><?php _e('NO', 'cftp_admin'); ?></span>
-                                <?php } ?>
-                                <?php _e('Important updates', 'cftp_admin'); ?>
-                            </span>
-                        </div>
-                    <?php } ?>
-
-                    <?php if (!empty($update_data->chlog)) { ?>
-                        <a href="<?php echo $update_data->chlog; ?>" target="_blank" class="btn btn-sm btn-outline-primary"><?php _e('View full changelog', 'cftp_admin'); ?></a>
-                    <?php } ?>
-                </div>
-            </div>
-        </div>
-
-        <div class="ps-card">
-            <div class="ps-card-body">
-                <!-- System Requirements -->
-                <div class="requirements-section mb-4">
-                    <h3><?php _e('System Requirements Check', 'cftp_admin'); ?></h3>
-                    <div id="requirements-check">
-                        <div class="text-center p-3">
-                            <i class="fa fa-spinner fa-spin fa-2x"></i>
-                            <p class="mt-2"><?php _e('Checking system requirements...', 'cftp_admin'); ?></p>
-                        </div>
-                        <ul class="list-unstyled requirements-list" style="display: none;">
-                            <!-- Populated via JavaScript -->
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Update Actions -->
-                <div class="update-actions">
-                    <button id="start-update" class="btn btn-primary btn-wide" disabled>
-                        <i class="fa fa-download"></i> <?php _e('Start Update', 'cftp_admin'); ?>
-                    </button>
-                    <a href="<?php echo BASE_URI; ?>dashboard.php" class="btn btn-outline-secondary">
-                        <?php _e('Cancel', 'cftp_admin'); ?>
-                    </a>
-                </div>
-
-                <!-- Progress Section (hidden initially) -->
-                <div id="update-progress" style="display: none;" class="mt-5">
+                <div id="update-progress">
                     <h4><?php _e('Update Progress', 'cftp_admin'); ?></h4>
 
                     <div class="update-steps mb-3">
@@ -155,6 +88,90 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                 </div>
             </div>
         </div>
+
+        <!-- Version Information Card -->
+        <div class="ps-card mb-4">
+            <div class="ps-card-body">
+                <!-- Version Information -->
+                <div class="version-info mb-4">
+                    <dl class="row">
+                        <dt class="col-sm-4"><?php _e('Current version', 'cftp_admin'); ?></dt>
+                        <dd class="col-sm-8"><?php echo $update_data->local_version; ?></dd>
+                        <dt class="col-sm-4"><?php _e('New version', 'cftp_admin'); ?></dt>
+                        <dd class="col-sm-8"><strong><?php echo $update_data->latest_version; ?></strong></dd>
+                        <?php if (!empty($update_data->sha256)) { ?>
+                            <dt class="col-sm-4"><?php _e('SHA256 Hash', 'cftp_admin'); ?></dt>
+                            <dd class="col-sm-8">
+                                <code class="text-muted small"><?php echo html_output($update_data->sha256); ?></code>
+                            </dd>
+                        <?php } ?>
+                    </dl>
+
+                    <?php if (!empty($update_data->diff)) { ?>
+                        <h5><?php _e('Changes', 'cftp_admin'); ?></h5>
+                        <div class="d-flex flex-wrap gap-3 mb-4">
+                            <span>
+                                <?php if (!empty($update_data->diff->security) && $update_data->diff->security > 0) { ?>
+                                    <span class="badge bg-success text-white"><?php _e('YES', 'cftp_admin'); ?></span>
+                                <?php } else { ?>
+                                    <span class="badge bg-secondary text-white"><?php _e('NO', 'cftp_admin'); ?></span>
+                                <?php } ?>
+                                <?php _e('Security fixes', 'cftp_admin'); ?>
+                            </span>
+                            <span>
+                                <?php if (!empty($update_data->diff->features) && $update_data->diff->features > 0) { ?>
+                                    <span class="badge bg-success text-white"><?php _e('YES', 'cftp_admin'); ?></span>
+                                <?php } else { ?>
+                                    <span class="badge bg-secondary text-white"><?php _e('NO', 'cftp_admin'); ?></span>
+                                <?php } ?>
+                                <?php _e('New features', 'cftp_admin'); ?>
+                            </span>
+                            <span>
+                                <?php if (!empty($update_data->diff->important) && $update_data->diff->important > 0) { ?>
+                                    <span class="badge bg-success text-white"><?php _e('YES', 'cftp_admin'); ?></span>
+                                <?php } else { ?>
+                                    <span class="badge bg-secondary text-white"><?php _e('NO', 'cftp_admin'); ?></span>
+                                <?php } ?>
+                                <?php _e('Important updates', 'cftp_admin'); ?>
+                            </span>
+                        </div>
+                    <?php } ?>
+
+                    <?php if (!empty($update_data->chlog)) { ?>
+                        <a href="<?php echo $update_data->chlog; ?>" target="_blank" class="btn btn-sm btn-outline-primary"><?php _e('View full changelog', 'cftp_admin'); ?></a>
+                    <?php } ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Requirements Card -->
+        <div id="requirements-card" class="ps-card">
+            <div class="ps-card-body">
+                <!-- System Requirements -->
+                <div class="requirements-section mb-4">
+                    <h3><?php _e('System Requirements Check', 'cftp_admin'); ?></h3>
+                    <div id="requirements-check">
+                        <div class="text-center p-3">
+                            <i class="fa fa-spinner fa-spin fa-2x"></i>
+                            <p class="mt-2"><?php _e('Checking system requirements...', 'cftp_admin'); ?></p>
+                        </div>
+                        <ul class="list-unstyled requirements-list" style="display: none;">
+                            <!-- Populated via JavaScript -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Update Actions -->
+                <div class="update-actions">
+                    <button id="start-update" class="btn btn-primary btn-wide" disabled>
+                        <i class="fa fa-download"></i> <?php _e('Start Update', 'cftp_admin'); ?>
+                    </button>
+                    <a href="<?php echo BASE_URI; ?>dashboard.php" class="btn btn-outline-secondary">
+                        <?php _e('Cancel', 'cftp_admin'); ?>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Information Panel -->
@@ -190,6 +207,8 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 
 <script type="text/javascript">
     var update_download_url = '<?php echo addslashes($update_data->url); ?>';
+    var update_sha256_hash = '<?php echo addslashes($update_data->sha256 ?? ''); ?>';
+    var csrf_token = '<?php echo getCsrfToken(); ?>';
     var json_strings = <?php echo json_encode($json_strings); ?>;
 </script>
 

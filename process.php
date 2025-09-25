@@ -298,7 +298,8 @@ switch ($_GET['do']) {
                     echo json_encode(['status' => 'error', 'message' => __('Download URL is required', 'cftp_admin')]);
                     exit;
                 }
-                $result = $updater->downloadUpdate($url);
+                $hash = $_POST['hash'] ?? null;
+                $result = $updater->downloadUpdate($url, $hash);
                 break;
 
             case 'backup':

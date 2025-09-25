@@ -143,9 +143,10 @@ class AutoUpdate
     /**
      * Download update package
      * @param string $url Download URL
+     * @param string $expected_hash Optional SHA256 hash to verify
      * @return array Status and message
      */
-    public function downloadUpdate($url)
+    public function downloadUpdate($url, $expected_hash = null)
     {
         try {
             // Validate URL
@@ -176,6 +177,19 @@ class AutoUpdate
             // Save to temp file
             if (!file_put_contents($this->update_file, $content)) {
                 throw new \Exception(__('Failed to save update file', 'cftp_admin'));
+            }
+
+            // Verify SHA256 hash if provided
+            if (!empty($expected_hash)) {
+                $actual_hash = hash_file('sha256', $this->update_file);
+                if (strtolower($actual_hash) !== strtolower($expected_hash)) {
+                    @unlink($this->update_file);
+                    throw new \Exception(sprintf(
+                        __('Hash verification failed. Expected: %s, Got: %s', 'cftp_admin'),
+                        $expected_hash,
+                        $actual_hash
+                    ));
+                }
             }
 
             // Verify it's a valid ZIP file
