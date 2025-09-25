@@ -324,9 +324,46 @@ switch ($_GET['do']) {
         echo json_encode($result);
         break;
 
+    case 'get_roles_for_reassignment':
+        // Get all active roles except the one being deleted
+        if (!current_user_can('edit_settings')) {
+            echo json_encode(['error' => 'Access denied']);
+            exit;
+        }
+
+        $exclude_role = (int)$_GET['exclude_role'];
+        $roles = get_all_roles();
+        $available_roles = [];
+
+        foreach ($roles as $role) {
+            if ($role['id'] != $exclude_role && $role['active']) {
+                $available_roles[] = [
+                    'id' => $role['id'],
+                    'name' => $role['name']
+                ];
+            }
+        }
+
+        echo json_encode(['roles' => $available_roles]);
+        break;
+
+    case 'get_role_users':
+        // Get users assigned to a specific role
+        if (!current_user_can('edit_settings')) {
+            echo json_encode(['error' => 'Access denied']);
+            exit;
+        }
+
+        $role_id = (int)$_GET['role_id'];
+        $role = new \ProjectSend\Classes\Roles($role_id);
+        $users = $role->getUsers();
+
+        echo json_encode(['users' => $users]);
+        break;
+
     case 'delete_role':
-        // Only super admins can delete roles
-        if (!current_user_is_super_admin()) {
+        // Only users with edit_settings permission can delete roles
+        if (!current_user_can('edit_settings')) {
             $flash->error(__('You do not have permission to delete roles.', 'cftp_admin'));
             ps_redirect('roles.php');
         }
@@ -349,9 +386,27 @@ switch ($_GET['do']) {
             ps_redirect('roles.php');
         }
 
+        // Handle user reassignment if needed
         if ($role->getUserCount() > 0) {
-            $flash->error(__('Cannot delete role with assigned users.', 'cftp_admin'));
-            ps_redirect('roles.php');
+            if (empty($_POST['reassign_to_role'])) {
+                $flash->error(__('Cannot delete role with assigned users. Please reassign users first.', 'cftp_admin'));
+                ps_redirect('roles.php');
+            }
+
+            $new_role_id = (int)$_POST['reassign_to_role'];
+            $new_role = new \ProjectSend\Classes\Roles($new_role_id);
+
+            if (!$new_role->exists()) {
+                $flash->error(__('Target role for reassignment not found.', 'cftp_admin'));
+                ps_redirect('roles.php');
+            }
+
+            // Reassign all users to the new role
+            $reassignment_result = $role->reassignUsersToRole($new_role_id);
+            if ($reassignment_result['status'] !== 'success') {
+                $flash->error(__('Failed to reassign users: ', 'cftp_admin') . $reassignment_result['message']);
+                ps_redirect('roles.php');
+            }
         }
 
         $result = $role->delete();

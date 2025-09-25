@@ -508,4 +508,54 @@ class Roles
 
         return null;
     }
+
+    /**
+     * Get users assigned to this role
+     * @return array
+     */
+    public function getUsers()
+    {
+        if (empty($this->id)) {
+            return [];
+        }
+
+        $sql = "SELECT id, name, user, email FROM " . TABLE_USERS . " WHERE role_id = :role_id AND active = 1 ORDER BY name";
+        $statement = $this->dbh->prepare($sql);
+        $statement->execute(['role_id' => $this->id]);
+
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Reassign all users from this role to another role
+     * @param int $new_role_id
+     * @return array
+     */
+    public function reassignUsersToRole($new_role_id)
+    {
+        if (empty($this->id)) {
+            return ['status' => 'error', 'message' => 'Role not loaded'];
+        }
+
+        try {
+            $sql = "UPDATE " . TABLE_USERS . " SET role_id = :new_role_id WHERE role_id = :old_role_id";
+            $statement = $this->dbh->prepare($sql);
+            $result = $statement->execute([
+                'new_role_id' => $new_role_id,
+                'old_role_id' => $this->id
+            ]);
+
+            if ($result) {
+                $affected_rows = $statement->rowCount();
+                return [
+                    'status' => 'success',
+                    'message' => sprintf('Successfully reassigned %d users', $affected_rows)
+                ];
+            } else {
+                return ['status' => 'error', 'message' => 'Failed to update users'];
+            }
+        } catch (Exception $e) {
+            return ['status' => 'error', 'message' => $e->getMessage()];
+        }
+    }
 }
