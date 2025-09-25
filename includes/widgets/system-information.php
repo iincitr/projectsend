@@ -40,7 +40,7 @@
 		<h3><?php _e('System','cftp_admin'); ?></h3>
 		<dl class="row">
 			<dt class="col-6 text-end"><?php _e('Server','cftp_admin'); ?></dt>
-			<dd class="col-6"><?php echo $_SERVER["SERVER_SOFTWARE"]; ?>
+			<dd class="col-6"><?php echo html_output($_SERVER["SERVER_SOFTWARE"]); ?></dd>
 
 			<dt class="col-6 text-end"><?php _e('PHP version','cftp_admin'); ?></dt>
 			<dd class="col-6"><?php echo PHP_VERSION; ?></dd>
