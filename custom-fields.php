@@ -234,3 +234,10 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 </div>
 
 <?php include_once ADMIN_VIEWS_DIR . DS . 'footer.php'; ?>
+
+<script>
+    // Initialize custom fields page JavaScript
+    if (typeof admin !== 'undefined' && admin.pages && admin.pages.custom_fields) {
+        admin.pages.custom_fields();
+    }
+</script>

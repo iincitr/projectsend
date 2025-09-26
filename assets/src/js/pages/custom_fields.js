@@ -1,39 +1,45 @@
 (function () {
     'use strict';
 
-    admin.pages.customFields = function () {
-        document.addEventListener('DOMContentLoaded', function() {
+    admin.pages.custom_fields = function () {
+        function initCustomFields() {
             // Handle delete confirmations
-            const deleteButtons = document.querySelectorAll('.delete-confirm');
+            var deleteButtons = document.querySelectorAll('.delete-confirm');
 
             deleteButtons.forEach(function(button) {
                 button.addEventListener('click', function(e) {
                     e.preventDefault();
+                    var deleteUrl = this.getAttribute('href');
 
-                    const confirmMessage = projectSendVars.strings.confirmDelete || 'Are you sure you want to delete this custom field? All associated data will be lost.';
-
-                    if (confirm(confirmMessage)) {
-                        window.location.href = this.href;
-                    }
-                });
-            });
-
-            // Initialize data tables if the table exists
-            const customFieldsTable = document.getElementById('custom_fields_tbl');
-            if (customFieldsTable) {
-                // If the table library is available, initialize it
-                if (typeof $.fn.footable !== 'undefined') {
-                    $(customFieldsTable).footable({
-                        sorting: {
-                            enabled: true
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "This will permanently delete this custom field and all its data. This action cannot be undone!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel',
+                        showClass: {
+                            popup: 'animate__animated animate__fadeIn'
                         },
-                        paging: {
-                            enabled: true,
-                            size: 10
+                        hideClass: {
+                            popup: 'animate__animated animate__fadeOut'
+                        }
+                    }).then(function(result) {
+                        if (result.isConfirmed) {
+                            window.location.href = deleteUrl;
                         }
                     });
-                }
-            }
-        });
+                });
+            });
+        }
+
+        // Check if DOM is already loaded or wait for it
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initCustomFields);
+        } else {
+            initCustomFields();
+        }
     };
 })();
