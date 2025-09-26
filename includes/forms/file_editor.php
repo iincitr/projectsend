@@ -18,7 +18,7 @@
                 clearstatcache();
                 $file = new ProjectSend\Classes\Files($file_id);
                 if ($file->recordExists()) {
-                    if ($file->existsOnDisk()) {
+                    if ($file->existsInStorage()) {
             ?>
                         <div class="file_editor_wrapper">
                             <div class="row">
@@ -50,6 +50,37 @@
                                                     <label><?php _e('Description', 'cftp_admin');?></label>
                                                     <textarea id="description_<?php echo $file->id; ?>" name="file[<?php echo $i; ?>][description]" class="<?php if ( get_option('files_descriptions_use_ckeditor') == 1 ) { echo 'ckeditor'; } ?> form-control textarea_description" placeholder="<?php _e('Optionally, enter here a description for the file.', 'cftp_admin');?>"><?php if (!empty($file->description)) { echo html_output($file->description); } ?></textarea>
                                                 </div>
+
+                                                <?php if (current_user_can('upload_storage_select')): ?>
+                                                <div class="form-group">
+                                                    <label><?php _e('Storage Location', 'cftp_admin');?></label>
+                                                    <div class="form-control-static">
+                                                        <?php
+                                                            if ($file->storage_type === 'local') {
+                                                                echo '<i class="fa fa-server"></i> ' . __('Local Storage', 'cftp_admin');
+                                                            } else {
+                                                                // Get integration details for external storage
+                                                                if (!empty($file->integration_id)) {
+                                                                    $integrations_handler = new \ProjectSend\Classes\Integrations();
+                                                                    $integration = $integrations_handler->getById($file->integration_id);
+                                                                    if ($integration) {
+                                                                        $type_config = \ProjectSend\Classes\Integrations::getTypeConfig($integration['type']);
+                                                                        $type_name = $type_config ? $type_config['name'] : ucfirst($integration['type']);
+                                                                        echo '<i class="fa fa-cloud"></i> ' . html_output($integration['name']) . ' (' . $type_name . ')';
+                                                                        if (!empty($file->external_path)) {
+                                                                            echo '<br><small class="text-muted">' . __('Path:', 'cftp_admin') . ' ' . html_output($file->external_path) . '</small>';
+                                                                        }
+                                                                    } else {
+                                                                        echo '<i class="fa fa-exclamation-triangle text-warning"></i> ' . __('External Storage (Integration Not Found)', 'cftp_admin');
+                                                                    }
+                                                                } else {
+                                                                    echo '<i class="fa fa-cloud"></i> ' . ucfirst(html_output($file->storage_type)) . ' ' . __('Storage', 'cftp_admin');
+                                                                }
+                                                            }
+                                                        ?>
+                                                    </div>
+                                                </div>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
 
@@ -185,6 +216,7 @@ EOL;
                                             <?php
                                                 // Categories assignment is available to users with set_file_categories permission
                                                 if (current_user_can('set_file_categories')) {
+                                                    $ignore = []; // Initialize ignore array for categories
                                                     $generate_categories_options = generate_categories_options( $get_categories['arranged'], 0, $file->categories);
                                             ?>
                                                     <div class="categories">

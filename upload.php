@@ -76,8 +76,35 @@ $chunk_size = get_option('upload_chunk_size');
                             //$('#uploader_container').removeAttr("title");
                         }
                     },
-                    init: {}
+                    init: {
+                        BeforeUpload: function(up, file) {
+                            // Pass the storage selection with each file upload
+                            var selectedStorage = $('#selected_storage').val();
+                            up.settings.multipart_params = up.settings.multipart_params || {};
+                            up.settings.multipart_params.storage_selection = selectedStorage;
+                        }
+                    }
                 });
+
+                // Handle storage selection
+                <?php if (current_user_can('upload_storage_select')): ?>
+                $('#storage_selector').on('change', function() {
+                    var selectedStorage = $(this).val();
+                    $('#selected_storage').val(selectedStorage);
+                    console.log('Storage selected:', selectedStorage);
+                });
+
+                // Set initial storage value
+                $(document).ready(function() {
+                    var initialStorage = $('#storage_selector').val() || '<?php echo get_option('default_upload_storage', 'local'); ?>';
+                    $('#selected_storage').val(initialStorage);
+                });
+                <?php else: ?>
+                // Set default storage for users without permission
+                $(document).ready(function() {
+                    $('#selected_storage').val('<?php echo get_option('default_upload_storage', 'local'); ?>');
+                });
+                <?php endif; ?>
             });
         </script>
 

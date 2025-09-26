@@ -267,6 +267,10 @@ if (!current_role_in(['Client'])) {
                 'link' => 'options.php?section=general',
             ),
             array(
+                'label' => __('Uploads', 'cftp_admin'),
+                'link' => 'options.php?section=uploads',
+            ),
+            array(
                 'label' => __('Clients', 'cftp_admin'),
                 'link' => 'options.php?section=clients',
             ),

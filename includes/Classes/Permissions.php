@@ -75,6 +75,11 @@ class Permissions {
                 'label' => __('Import orphan files', 'cftp_admin'),
                 'description' => __('Allow user to import orphan files from upload directory', 'cftp_admin')
             ],
+            'upload_storage_select' => [
+                'category' => 'files',
+                'label' => __('Select upload storage', 'cftp_admin'),
+                'description' => __('Allow user to select storage destination during file upload', 'cftp_admin')
+            ],
 
             // Category Management
             'create_categories' => [

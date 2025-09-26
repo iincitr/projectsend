@@ -636,6 +636,27 @@ class Files
         return false;
     }
 
+    /**
+     * Check if file exists in storage (local or external)
+     * For external storage files, they don't exist on local disk but are editable
+     */
+    public function existsInStorage()
+    {
+        // For local storage, check if file exists on disk
+        if ($this->storage_type === 'local' || empty($this->storage_type)) {
+            return $this->existsOnDisk();
+        }
+
+        // For external storage files, they should be editable even if not on local disk
+        // The file exists if it has valid external storage properties
+        if (!empty($this->storage_type) && $this->storage_type !== 'local') {
+            // File exists in external storage if it has an external path or integration
+            return (!empty($this->external_path) || !empty($this->integration_id));
+        }
+
+        return false;
+    }
+
     public function setExtension()
     {
         $this->extension = pathinfo($this->filename_on_disk, PATHINFO_EXTENSION);
@@ -1056,25 +1077,26 @@ class Files
         $this->disk_folder_year = (isset($this->date_folder_year)) ? (int)$this->date_folder_year : null;
         $this->disk_folder_month = (isset($this->date_folder_month)) ? (int)$this->date_folder_month : null;
 		
-        $statement = $this->dbh->prepare("INSERT INTO " . TABLE_FILES . " (user_id, url, original_url, filename, description, uploader, expires, expiry_date, public_allow, public_token, disk_folder_year, disk_folder_month, storage_type, external_path, bucket_name, integration_id, size)"
-                                        ."VALUES (:user_id, :url, :original_url, :title, :description, :uploader, :expires, :expiry_date, :public, :public_token, :disk_folder_year, :disk_folder_month, :storage_type, :external_path, :bucket_name, :integration_id, :size)");
+        $statement = $this->dbh->prepare("INSERT INTO " . TABLE_FILES . " (user_id, url, original_url, size, filename, description, uploader, expires, expiry_date, public_allow, public_token, folder_id, disk_folder_year, disk_folder_month, storage_type, external_path, bucket_name, integration_id)"
+                                        ."VALUES (:user_id, :url, :original_url, :size, :filename, :description, :uploader, :expires, :expiry_date, :public, :public_token, :folder_id, :disk_folder_year, :disk_folder_month, :storage_type, :external_path, :bucket_name, :integration_id)");
         $statement->bindParam(':user_id', $this->uploader_id, PDO::PARAM_INT);
         $statement->bindParam(':url', $this->filename_on_disk);
         $statement->bindParam(':original_url', $this->filename_original);
-        $statement->bindParam(':title', $this->title);
+        $statement->bindParam(':size', $this->size, PDO::PARAM_INT);
+        $statement->bindParam(':filename', $this->filename_original);
         $statement->bindParam(':description', $this->description);
         $statement->bindParam(':uploader', $this->uploader);
         $statement->bindParam(':expires', $this->expires, PDO::PARAM_INT);
         $statement->bindParam(':expiry_date', $this->expiry_date);
         $statement->bindParam(':public', $this->public, PDO::PARAM_INT);
         $statement->bindParam(':public_token', $this->public_token);
+        $statement->bindParam(':folder_id', $this->folder_id, PDO::PARAM_INT);
         $statement->bindParam(':disk_folder_year', $this->disk_folder_year, PDO::PARAM_INT);
         $statement->bindParam(':disk_folder_month', $this->disk_folder_month, PDO::PARAM_INT);
         $statement->bindParam(':storage_type', $this->storage_type);
         $statement->bindParam(':external_path', $this->external_path);
         $statement->bindParam(':bucket_name', $this->bucket_name);
         $statement->bindParam(':integration_id', $this->integration_id, PDO::PARAM_INT);
-        $statement->bindParam(':size', $this->size, PDO::PARAM_INT);
         $statement->execute();
 
         $this->file_id = $this->dbh->lastInsertId();
@@ -1951,5 +1973,114 @@ class Files
         }
 
         return $storage->getFileMetadata($this->external_path);
+    }
+
+    /**
+     * Upload file directly to external storage (bypass local temp storage)
+     *
+     * @param string $temp_file_path Temporary file path from plupload
+     * @param int $integration_id Integration ID for external storage
+     * @param string $original_filename Original filename
+     * @return array Result with success/error status
+     */
+    public function uploadToExternalStorage($temp_file_path, $integration_id, $original_filename)
+    {
+        // Get integration details
+        $integrations_handler = new \ProjectSend\Classes\Integrations();
+        $integration = $integrations_handler->getById($integration_id);
+
+        if (!$integration) {
+            return [
+                'success' => false,
+                'message' => __('Integration not found', 'cftp_admin')
+            ];
+        }
+
+        // Create storage instance
+        $storage = $integrations_handler->createStorageInstance($integration);
+        if (!$storage) {
+            return [
+                'success' => false,
+                'message' => __('Failed to initialize storage connection', 'cftp_admin')
+            ];
+        }
+
+        // Generate safe filename and external path
+        $safe_filename = $this->generateSafeFilename($temp_file_path);
+        $this->uid = CURRENT_USER_ID;
+        $this->username = CURRENT_USER_USERNAME;
+        $this->makehash = sha1($this->username);
+
+        // Create unique external path
+        $external_key = time() . '-' . $this->makehash . '-' . $safe_filename;
+
+        // Add folder structure if using date organization
+        if (get_option('uploads_organize_folders_by_date') == 1) {
+            $current_date = date('Y/m');
+            $external_key = $current_date . '/' . $external_key;
+        }
+
+        // Get file metadata
+        $file_size = file_exists($temp_file_path) ? filesize($temp_file_path) : 0;
+        $metadata = [
+            'uploaded_by' => $this->username,
+            'upload_date' => date('Y-m-d H:i:s')
+        ];
+
+        // Upload to external storage
+        $upload_result = $storage->uploadFile($temp_file_path, $external_key, $metadata);
+
+        if (!$upload_result['success']) {
+            return $upload_result;
+        }
+
+        // Set file properties for external storage
+        $this->filename_original = $original_filename;
+        $this->filename_on_disk = $external_key;
+        $this->storage_type = $integration['type'];
+        $this->external_path = $external_key;
+        $this->integration_id = $integration_id;
+        $this->bucket_name = $storage->getBucketName();
+        $this->size = $file_size;
+
+        // Clean up temp file
+        if (file_exists($temp_file_path)) {
+            unlink($temp_file_path);
+        }
+
+        return [
+            'success' => true,
+            'filename_original' => $this->filename_original,
+            'filename_disk' => $this->filename_on_disk,
+            'external_path' => $this->external_path
+        ];
+    }
+
+    /**
+     * Route file to appropriate storage based on selection
+     *
+     * @param string $temp_file_path Temporary file path
+     * @param string $storage_selection Storage selection ('local' or integration ID)
+     * @param string $original_filename Original filename
+     * @return array Result with success/error status
+     */
+    public function routeToStorage($temp_file_path, $storage_selection, $original_filename)
+    {
+        $this->filename_original = $original_filename;
+
+        // Route to local storage
+        if ($storage_selection === 'local') {
+            return $this->moveToUploadDirectory($temp_file_path);
+        }
+
+        // Route to external storage
+        if (is_numeric($storage_selection)) {
+            return $this->uploadToExternalStorage($temp_file_path, (int)$storage_selection, $original_filename);
+        }
+
+        return [
+            'success' => false,
+            'message' => __('Invalid storage selection', 'cftp_admin')
+        ];
     }
 }
