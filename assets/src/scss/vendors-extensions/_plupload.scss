@@ -108,4 +108,10 @@ li.plupload_droptext,
         background-color: var(--bg-card);
         color: var(--text-primary);
     }
+
+    li.plupload_droptext,
+    .plupload_filelist_header,
+    .plupload_filelist_footer {
+        background-color: var(--bg-card) !important;
+    }
 }
