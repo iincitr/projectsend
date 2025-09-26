@@ -220,16 +220,16 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 
                     <div class="d-flex gap-3">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fa fa-save"></i> <?php _e('Update Integration', 'cftp_admin'); ?>
+                            <?php _e('Update Integration', 'cftp_admin'); ?>
                         </button>
                         <a href="integrations.php" class="btn btn-outline-secondary">
-                            <i class="fa fa-arrow-left"></i> <?php _e('Back to List', 'cftp_admin'); ?>
+                            </i> <?php _e('Back to List', 'cftp_admin'); ?>
                         </a>
                         <?php if ($file_count == 0): ?>
                             <a href="integrations.php?action=delete&id=<?php echo $integration_id; ?>"
                                class="btn btn-outline-danger ms-auto"
                                onclick="return confirm('<?php _e('Are you sure you want to delete this integration?', 'cftp_admin'); ?>')">
-                                <i class="fa fa-trash"></i> <?php _e('Delete Integration', 'cftp_admin'); ?>
+                                <?php _e('Delete Integration', 'cftp_admin'); ?>
                             </a>
                         <?php endif; ?>
                     </div>
