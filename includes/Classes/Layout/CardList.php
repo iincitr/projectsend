@@ -678,6 +678,11 @@ class CardList
         try {
             $file = new \ProjectSend\Classes\Files($file_id);
             if ($file && $file->exists()) {
+                // For external files, we can't generate thumbnails since files aren't local
+                if ($file->storage_type !== 'local') {
+                    return null; // Will fall back to extension badge
+                }
+
                 // Use larger dimensions and higher quality for card previews
                 $thumbnail = make_thumbnail($file->full_path, 'proportional', 300, 300, 90);
                 if (!empty($thumbnail['thumbnail']['url'])) {

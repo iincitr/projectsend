@@ -156,11 +156,24 @@ if (!$chunks || $chunk == $chunks - 1) {
 	// Strip the temp .part suffix off 
 	rename("{$filePath}.part", $filePath);
 
+    // Get storage selection from request or use default
+    $storage_selection = isset($_REQUEST['storage_selection']) ? $_REQUEST['storage_selection'] : get_option('default_upload_storage', 'local');
+
     // Add to database
     $file = new \ProjectSend\Classes\Files;
-    $file->moveToUploadDirectory($filePath);
     $file->setDefaults();
-    $result = $file->addToDatabase();
+
+    // Route to appropriate storage based on selection
+    $route_result = $file->routeToStorage($filePath, $storage_selection, $fileName);
+
+    if ($route_result && isset($route_result['filename_original'])) {
+        $result = $file->addToDatabase();
+    } else {
+        $result = [
+            'status' => 'error',
+            'message' => __('Failed to process file upload to selected storage.', 'cftp_admin')
+        ];
+    }
 
     if ($result['status'] === 'success') {
         // Return JSON-RPC response

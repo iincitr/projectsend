@@ -59,6 +59,13 @@ a.plupload_start {
 	display:none;
 }
 
+// Light mode styling for plupload
+li.plupload_droptext,
+.plupload_filelist_header,
+.plupload_filelist_footer {
+    background-color: #ffffff !important;
+}
+
 // Dark mode overrides for plupload
 [data-theme="dark"] {
     .plupload_scroll .plupload_filelist {
@@ -100,5 +107,11 @@ a.plupload_start {
     .plupload_wrapper {
         background-color: var(--bg-card);
         color: var(--text-primary);
+    }
+
+    li.plupload_droptext,
+    .plupload_filelist_header,
+    .plupload_filelist_footer {
+        background-color: var(--bg-card) !important;
     }
 }

@@ -100,6 +100,9 @@
             case 'updates':
                 admin.pages.updates();
                 break;
+            case 'import_external':
+                admin.pages.import_external();
+                break;
             default:
                 // do nothing
                 break;

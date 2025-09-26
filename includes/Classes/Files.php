@@ -43,8 +43,13 @@ class Files
     public $embeddable;
     public $embeddable_type;
     public $custom_downloads = [];
+    public $storage_type; // 'local', 's3', 'gcs', 'azure'
+    public $external_path; // path/key in external storage
+    public $bucket_name; // bucket/container name
+    public $integration_id; // foreign key to tbl_integrations
     private $dbh;
     private $logger;
+    private $external_storage;
     private $date_folder_year;
     private $date_folder_month;
 
@@ -68,6 +73,13 @@ class Files
         $this->categories = [];
 
         $this->embeddable = false;
+
+        // Initialize external storage properties
+        $this->storage_type = 'local';
+        $this->external_path = null;
+        $this->bucket_name = null;
+        $this->integration_id = null;
+        $this->external_storage = null;
 
         if (!empty($file_id)) {
             $this->get($file_id);
@@ -98,6 +110,29 @@ class Files
         }
 
         return false;
+    }
+
+    /**
+     * Check if the file exists (local or external storage)
+     */
+    public function exists()
+    {
+        // For external files, check if they exist in external storage
+        if ($this->storage_type !== 'local' && !empty($this->integration_id)) {
+            $integrations_handler = new \ProjectSend\Classes\Integrations();
+            $integration = $integrations_handler->getById($this->integration_id);
+
+            if ($integration) {
+                $storage = $integrations_handler->createStorageInstance($integration);
+                if ($storage && !empty($this->external_path)) {
+                    return $storage->fileExists($this->external_path);
+                }
+            }
+            return false;
+        }
+
+        // For local files, check the filesystem
+        return !empty($this->full_path) && file_exists($this->full_path);
     }
 
     public function currentUserCanEdit()
@@ -214,6 +249,12 @@ class Files
                 $this->size = $row['size'];
                 $this->size_formatted = format_file_size($this->size);
             }
+
+            // Load external storage properties
+            $this->storage_type = html_output($row['storage_type'] ?? 'local');
+            $this->external_path = html_output($row['external_path'] ?? null);
+            $this->bucket_name = html_output($row['bucket_name'] ?? null);
+            $this->integration_id = html_output($row['integration_id'] ?? null);
         }
 
         $this->full_path = $this->getFilePath();
@@ -595,6 +636,27 @@ class Files
         return false;
     }
 
+    /**
+     * Check if file exists in storage (local or external)
+     * For external storage files, they don't exist on local disk but are editable
+     */
+    public function existsInStorage()
+    {
+        // For local storage, check if file exists on disk
+        if ($this->storage_type === 'local' || empty($this->storage_type)) {
+            return $this->existsOnDisk();
+        }
+
+        // For external storage files, they should be editable even if not on local disk
+        // The file exists if it has valid external storage properties
+        if (!empty($this->storage_type) && $this->storage_type !== 'local') {
+            // File exists in external storage if it has an external path or integration
+            return (!empty($this->external_path) || !empty($this->integration_id));
+        }
+
+        return false;
+    }
+
     public function setExtension()
     {
         $this->extension = pathinfo($this->filename_on_disk, PATHINFO_EXTENSION);
@@ -957,6 +1019,44 @@ class Files
     }
 
     /**
+     * Set up external file properties for import from external storage
+     * This is used instead of moveToUploadDirectory for files already in external storage
+     */
+    public function setExternalFileProperties($file_key, $metadata, $integration_id, $storage_type)
+    {
+        $this->uid = CURRENT_USER_ID;
+        $this->username = CURRENT_USER_USERNAME;
+        $this->makehash = sha1($this->username);
+
+        // Extract filename from key
+        $this->filename_original = basename($file_key);
+
+        // For external files, we use the external key as the "disk filename"
+        $this->filename_on_disk = $file_key;
+
+        // Set external storage properties
+        $this->storage_type = $storage_type;
+        $this->external_path = $file_key;
+        $this->integration_id = $integration_id;
+
+        // Set file properties from metadata
+        $this->size = $metadata['size'] ?? 0;
+
+        // Set mime type if available
+        if (isset($metadata['content_type'])) {
+            $this->mime_type = $metadata['content_type'];
+        }
+
+        // Don't set full_path for external files as they don't exist locally
+        $this->full_path = null;
+
+        return [
+            'filename_original' => $this->filename_original,
+            'filename_disk' => $this->filename_on_disk,
+        ];
+    }
+
+    /**
 	 * Called after correctly moving the file to the final location.
 	 */
 	public function addToDatabase()
@@ -977,20 +1077,26 @@ class Files
         $this->disk_folder_year = (isset($this->date_folder_year)) ? (int)$this->date_folder_year : null;
         $this->disk_folder_month = (isset($this->date_folder_month)) ? (int)$this->date_folder_month : null;
 		
-        $statement = $this->dbh->prepare("INSERT INTO " . TABLE_FILES . " (user_id, url, original_url, filename, description, uploader, expires, expiry_date, public_allow, public_token, disk_folder_year, disk_folder_month)"
-                                        ."VALUES (:user_id, :url, :original_url, :title, :description, :uploader, :expires, :expiry_date, :public, :public_token, :disk_folder_year, :disk_folder_month)");
+        $statement = $this->dbh->prepare("INSERT INTO " . TABLE_FILES . " (user_id, url, original_url, size, filename, description, uploader, expires, expiry_date, public_allow, public_token, folder_id, disk_folder_year, disk_folder_month, storage_type, external_path, bucket_name, integration_id)"
+                                        ."VALUES (:user_id, :url, :original_url, :size, :filename, :description, :uploader, :expires, :expiry_date, :public, :public_token, :folder_id, :disk_folder_year, :disk_folder_month, :storage_type, :external_path, :bucket_name, :integration_id)");
         $statement->bindParam(':user_id', $this->uploader_id, PDO::PARAM_INT);
         $statement->bindParam(':url', $this->filename_on_disk);
         $statement->bindParam(':original_url', $this->filename_original);
-        $statement->bindParam(':title', $this->title);
+        $statement->bindParam(':size', $this->size, PDO::PARAM_INT);
+        $statement->bindParam(':filename', $this->filename_original);
         $statement->bindParam(':description', $this->description);
         $statement->bindParam(':uploader', $this->uploader);
         $statement->bindParam(':expires', $this->expires, PDO::PARAM_INT);
         $statement->bindParam(':expiry_date', $this->expiry_date);
         $statement->bindParam(':public', $this->public, PDO::PARAM_INT);
         $statement->bindParam(':public_token', $this->public_token);
+        $statement->bindParam(':folder_id', $this->folder_id, PDO::PARAM_INT);
         $statement->bindParam(':disk_folder_year', $this->disk_folder_year, PDO::PARAM_INT);
         $statement->bindParam(':disk_folder_month', $this->disk_folder_month, PDO::PARAM_INT);
+        $statement->bindParam(':storage_type', $this->storage_type);
+        $statement->bindParam(':external_path', $this->external_path);
+        $statement->bindParam(':bucket_name', $this->bucket_name);
+        $statement->bindParam(':integration_id', $this->integration_id, PDO::PARAM_INT);
         $statement->execute();
 
         $this->file_id = $this->dbh->lastInsertId();
@@ -1564,5 +1670,417 @@ class Files
         }
 
         return false;
+    }
+
+    /**
+     * External Storage Methods
+     */
+
+    /**
+     * Check if file uses external storage
+     *
+     * @return bool
+     */
+    public function isExternal()
+    {
+        return $this->storage_type !== 'local';
+    }
+
+    /**
+     * Get external storage instance
+     *
+     * @return ExternalStorage|null
+     */
+    public function getExternalStorage()
+    {
+        if ($this->external_storage !== null) {
+            return $this->external_storage;
+        }
+
+        if (!$this->isExternal() || !$this->integration_id) {
+            return null;
+        }
+
+        $integrations = new \ProjectSend\Classes\Integrations();
+        $integration = $integrations->getById($this->integration_id);
+
+        if (!$integration) {
+            return null;
+        }
+
+        $this->external_storage = $integrations->createStorageInstance($integration);
+        return $this->external_storage;
+    }
+
+    /**
+     * Upload file to external storage
+     *
+     * @param string $local_file_path Local file path
+     * @param int $integration_id Integration ID
+     * @param string $remote_path Optional custom remote path
+     * @return array Upload result
+     */
+    public function uploadToExternal($local_file_path, $integration_id, $remote_path = null)
+    {
+        $integrations = new \ProjectSend\Classes\Integrations();
+        $integration = $integrations->getById($integration_id);
+
+        if (!$integration) {
+            return [
+                'success' => false,
+                'message' => __('Integration not found.', 'cftp_admin')
+            ];
+        }
+
+        $storage = $integrations->createStorageInstance($integration);
+        if (!$storage) {
+            return [
+                'success' => false,
+                'message' => __('Failed to initialize storage.', 'cftp_admin')
+            ];
+        }
+
+        // Generate remote path if not provided
+        if (!$remote_path) {
+            $remote_path = $storage->generateFileKey($this->filename_original ?: $this->filename_on_disk);
+        }
+
+        // Prepare metadata
+        $metadata = [
+            'original_filename' => $this->filename_original,
+            'uploaded_by' => $this->uploaded_by,
+            'file_id' => $this->id
+        ];
+
+        $result = $storage->uploadFile($local_file_path, $remote_path, $metadata);
+
+        if ($result['success']) {
+            // Update file record with external storage information
+            $this->updateExternalStorageInfo($integration_id, $remote_path, $integration['type']);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Download file from external storage to local path
+     *
+     * @param string $local_path Local destination path
+     * @return array Download result
+     */
+    public function downloadFromExternal($local_path)
+    {
+        if (!$this->isExternal()) {
+            return [
+                'success' => false,
+                'message' => __('File is not stored externally.', 'cftp_admin')
+            ];
+        }
+
+        $storage = $this->getExternalStorage();
+        if (!$storage) {
+            return [
+                'success' => false,
+                'message' => __('External storage not available.', 'cftp_admin')
+            ];
+        }
+
+        return $storage->downloadFile($this->external_path, $local_path);
+    }
+
+    /**
+     * Get presigned URL for direct external access
+     *
+     * @param int $expires_in Expiration in seconds
+     * @return string|false Presigned URL or false on error
+     */
+    public function getExternalPresignedUrl($expires_in = 3600)
+    {
+        if (!$this->isExternal()) {
+            return false;
+        }
+
+        $storage = $this->getExternalStorage();
+        if (!$storage) {
+            return false;
+        }
+
+        return $storage->getPresignedUrl($this->external_path, $expires_in);
+    }
+
+    /**
+     * Delete file from external storage
+     *
+     * @return array Delete result
+     */
+    public function deleteFromExternal()
+    {
+        if (!$this->isExternal()) {
+            return [
+                'success' => false,
+                'message' => __('File is not stored externally.', 'cftp_admin')
+            ];
+        }
+
+        $storage = $this->getExternalStorage();
+        if (!$storage) {
+            return [
+                'success' => false,
+                'message' => __('External storage not available.', 'cftp_admin')
+            ];
+        }
+
+        return $storage->deleteFile($this->external_path);
+    }
+
+    /**
+     * Update external storage information in database
+     *
+     * @param int $integration_id Integration ID
+     * @param string $external_path External file path
+     * @param string $storage_type Storage type
+     * @param string $bucket_name Optional bucket name
+     * @return bool Success status
+     */
+    public function updateExternalStorageInfo($integration_id, $external_path, $storage_type, $bucket_name = null)
+    {
+        if (!$this->id) {
+            return false;
+        }
+
+        try {
+            $query = "UPDATE " . TABLE_FILES . "
+                      SET storage_type = :storage_type,
+                          external_path = :external_path,
+                          bucket_name = :bucket_name,
+                          integration_id = :integration_id
+                      WHERE id = :id";
+
+            $statement = $this->dbh->prepare($query);
+            $statement->bindParam(':storage_type', $storage_type, \PDO::PARAM_STR);
+            $statement->bindParam(':external_path', $external_path, \PDO::PARAM_STR);
+            $statement->bindParam(':bucket_name', $bucket_name, \PDO::PARAM_STR);
+            $statement->bindParam(':integration_id', $integration_id, \PDO::PARAM_INT);
+            $statement->bindParam(':id', $this->id, \PDO::PARAM_INT);
+
+            $result = $statement->execute();
+
+            if ($result) {
+                // Update object properties
+                $this->storage_type = $storage_type;
+                $this->external_path = $external_path;
+                $this->bucket_name = $bucket_name;
+                $this->integration_id = $integration_id;
+            }
+
+            return $result;
+
+        } catch (\PDOException $e) {
+            error_log('Failed to update external storage info: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Move file from external storage back to local storage
+     *
+     * @return array Migration result
+     */
+    public function moveToLocal()
+    {
+        if (!$this->isExternal()) {
+            return [
+                'success' => false,
+                'message' => __('File is already stored locally.', 'cftp_admin')
+            ];
+        }
+
+        // Download file to local storage
+        $local_path = $this->getFilePath();
+        $download_result = $this->downloadFromExternal($local_path);
+
+        if (!$download_result['success']) {
+            return $download_result;
+        }
+
+        // Update database to mark as local storage
+        $update_result = $this->updateExternalStorageInfo(null, null, 'local', null);
+
+        if ($update_result) {
+            return [
+                'success' => true,
+                'message' => __('File moved to local storage successfully.', 'cftp_admin')
+            ];
+        } else {
+            // Clean up downloaded file if database update failed
+            if (file_exists($local_path)) {
+                unlink($local_path);
+            }
+            return [
+                'success' => false,
+                'message' => __('Failed to update file record.', 'cftp_admin')
+            ];
+        }
+    }
+
+    /**
+     * Override getFilePath to handle external storage
+     *
+     * @return string File path (local or external)
+     */
+    public function getExternalFilePath()
+    {
+        if ($this->isExternal()) {
+            return $this->external_path;
+        }
+
+        return $this->getFilePath();
+    }
+
+    /**
+     * Check if external file exists
+     *
+     * @return bool
+     */
+    public function externalFileExists()
+    {
+        if (!$this->isExternal()) {
+            return false;
+        }
+
+        $storage = $this->getExternalStorage();
+        if (!$storage) {
+            return false;
+        }
+
+        return $storage->fileExists($this->external_path);
+    }
+
+    /**
+     * Get external file metadata
+     *
+     * @return array|false File metadata or false on error
+     */
+    public function getExternalFileMetadata()
+    {
+        if (!$this->isExternal()) {
+            return false;
+        }
+
+        $storage = $this->getExternalStorage();
+        if (!$storage) {
+            return false;
+        }
+
+        return $storage->getFileMetadata($this->external_path);
+    }
+
+    /**
+     * Upload file directly to external storage (bypass local temp storage)
+     *
+     * @param string $temp_file_path Temporary file path from plupload
+     * @param int $integration_id Integration ID for external storage
+     * @param string $original_filename Original filename
+     * @return array Result with success/error status
+     */
+    public function uploadToExternalStorage($temp_file_path, $integration_id, $original_filename)
+    {
+        // Get integration details
+        $integrations_handler = new \ProjectSend\Classes\Integrations();
+        $integration = $integrations_handler->getById($integration_id);
+
+        if (!$integration) {
+            return [
+                'success' => false,
+                'message' => __('Integration not found', 'cftp_admin')
+            ];
+        }
+
+        // Create storage instance
+        $storage = $integrations_handler->createStorageInstance($integration);
+        if (!$storage) {
+            return [
+                'success' => false,
+                'message' => __('Failed to initialize storage connection', 'cftp_admin')
+            ];
+        }
+
+        // Generate safe filename and external path
+        $safe_filename = $this->generateSafeFilename($temp_file_path);
+        $this->uid = CURRENT_USER_ID;
+        $this->username = CURRENT_USER_USERNAME;
+        $this->makehash = sha1($this->username);
+
+        // Create unique external path
+        $external_key = time() . '-' . $this->makehash . '-' . $safe_filename;
+
+        // Add folder structure if using date organization
+        if (get_option('uploads_organize_folders_by_date') == 1) {
+            $current_date = date('Y/m');
+            $external_key = $current_date . '/' . $external_key;
+        }
+
+        // Get file metadata
+        $file_size = file_exists($temp_file_path) ? filesize($temp_file_path) : 0;
+        $metadata = [
+            'uploaded_by' => $this->username,
+            'upload_date' => date('Y-m-d H:i:s')
+        ];
+
+        // Upload to external storage
+        $upload_result = $storage->uploadFile($temp_file_path, $external_key, $metadata);
+
+        if (!$upload_result['success']) {
+            return $upload_result;
+        }
+
+        // Set file properties for external storage
+        $this->filename_original = $original_filename;
+        $this->filename_on_disk = $external_key;
+        $this->storage_type = $integration['type'];
+        $this->external_path = $external_key;
+        $this->integration_id = $integration_id;
+        $this->bucket_name = $storage->getBucketName();
+        $this->size = $file_size;
+
+        // Clean up temp file
+        if (file_exists($temp_file_path)) {
+            unlink($temp_file_path);
+        }
+
+        return [
+            'success' => true,
+            'filename_original' => $this->filename_original,
+            'filename_disk' => $this->filename_on_disk,
+            'external_path' => $this->external_path
+        ];
+    }
+
+    /**
+     * Route file to appropriate storage based on selection
+     *
+     * @param string $temp_file_path Temporary file path
+     * @param string $storage_selection Storage selection ('local' or integration ID)
+     * @param string $original_filename Original filename
+     * @return array Result with success/error status
+     */
+    public function routeToStorage($temp_file_path, $storage_selection, $original_filename)
+    {
+        $this->filename_original = $original_filename;
+
+        // Route to local storage
+        if ($storage_selection === 'local') {
+            return $this->moveToUploadDirectory($temp_file_path);
+        }
+
+        // Route to external storage
+        if (is_numeric($storage_selection)) {
+            return $this->uploadToExternalStorage($temp_file_path, (int)$storage_selection, $original_filename);
+        }
+
+        return [
+            'success' => false,
+            'message' => __('Invalid storage selection', 'cftp_admin')
+        ];
     }
 }

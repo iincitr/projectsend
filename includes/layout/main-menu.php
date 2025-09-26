@@ -52,6 +52,11 @@ if (!current_role_in(['Client'])) {
                 'permission' => 'import_orphans',
             ),
             array(
+                'label' => __('Import external files', 'cftp_admin'),
+                'link' => 'import-external.php',
+                'permission' => 'edit_settings',
+            ),
+            array(
                 'divider' => true,
             ),
             array(
@@ -262,6 +267,10 @@ if (!current_role_in(['Client'])) {
                 'link' => 'options.php?section=general',
             ),
             array(
+                'label' => __('Uploads', 'cftp_admin'),
+                'link' => 'options.php?section=uploads',
+            ),
+            array(
                 'label' => __('Clients', 'cftp_admin'),
                 'link' => 'options.php?section=clients',
             ),
@@ -292,6 +301,14 @@ if (!current_role_in(['Client'])) {
             array(
                 'label' => __('Scheduled tasks (cron)', 'cftp_admin'),
                 'link' => 'options.php?section=cron',
+            ),
+            array(
+                'divider' => true,
+            ),
+            array(
+                'label' => __('External Storage', 'cftp_admin'),
+                'link' => 'integrations.php',
+                'permission' => 'edit_settings',
             ),
         ),
     );

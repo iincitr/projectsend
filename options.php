@@ -15,11 +15,16 @@ switch ($section) {
         $checkboxes = array(
             'xsendfile_enable',
             'footer_custom_enable',
-            'files_default_expire',
-            'files_default_public',
+            'use_browser_lang',
+        );
+        break;
+    case 'uploads':
+        $section_title = __('Uploads', 'cftp_admin');
+        $checkboxes = array(
             'uploads_organize_folders_by_date',
             'files_descriptions_use_ckeditor',
-            'use_browser_lang',
+            'files_default_expire',
+            'files_default_public',
             'download_logging_ignore_file_author',
         );
         break;
