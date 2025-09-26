@@ -12,7 +12,7 @@ if (!current_role_in(['System Administrator']) && !current_user_can('manage_cust
     exit_with_error_code(403);
 }
 
-$active_nav = 'options';
+$active_nav = 'clients';
 $page_title = __('Custom Fields', 'cftp_admin');
 $page_id = 'custom_fields';
 

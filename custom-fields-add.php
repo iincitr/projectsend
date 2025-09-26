@@ -11,9 +11,9 @@ if (!current_role_in(['System Administrator']) && !current_user_can('manage_cust
     exit_with_error_code(403);
 }
 
-$active_nav = 'options';
+$active_nav = 'clients';
 $page_title = __('Add Custom Field', 'cftp_admin');
-$page_id = 'custom_field_form';
+$page_id = 'custom_fields_form';
 
 global $flash;
 
@@ -69,7 +69,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                     <?php addCsrf(); ?>
 
                     <div class="mb-4">
-                        <label for="field_label" class="form-label"><?php _e('Field Label', 'cftp_admin'); ?> *</label>
+                        <label for="field_label" class="form-label"><?php _e('Field Label', 'cftp_admin'); ?> <span class="required-indicator" aria-label="required">*</span></label>
                         <input type="text" name="field_label" id="field_label" class="form-control"
                                value="<?php echo isset($_POST['field_label']) ? html_output($_POST['field_label']) : ''; ?>"
                                required maxlength="255">
@@ -77,7 +77,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                     </div>
 
                     <div class="mb-4">
-                        <label for="field_name" class="form-label"><?php _e('Field Name', 'cftp_admin'); ?> *</label>
+                        <label for="field_name" class="form-label"><?php _e('Field Name', 'cftp_admin'); ?> <span class="required-indicator" aria-label="required">*</span></label>
                         <input type="text" name="field_name" id="field_name" class="form-control"
                                value="<?php echo isset($_POST['field_name']) ? html_output($_POST['field_name']) : ''; ?>"
                                required maxlength="100" pattern="[a-z0-9_]+">
@@ -85,7 +85,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                     </div>
 
                     <div class="mb-4">
-                        <label for="field_type" class="form-label"><?php _e('Field Type', 'cftp_admin'); ?> *</label>
+                        <label for="field_type" class="form-label"><?php _e('Field Type', 'cftp_admin'); ?> <span class="required-indicator" aria-label="required">*</span></label>
                         <select name="field_type" id="field_type" class="form-select" required>
                             <?php foreach ($field_types as $type => $label): ?>
                                 <option value="<?php echo $type; ?>"
@@ -98,7 +98,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                     </div>
 
                     <div class="mb-4" id="field_options_container" <?php echo (isset($_POST['field_type']) && $_POST['field_type'] != 'select') ? 'style="display: none;"' : ''; ?>>
-                        <label for="field_options" class="form-label"><?php _e('Field Options', 'cftp_admin'); ?> *</label>
+                        <label for="field_options" class="form-label"><?php _e('Field Options', 'cftp_admin'); ?> <span class="required-indicator" aria-label="required">*</span></label>
                         <textarea name="field_options" id="field_options" class="form-control" rows="5"><?php echo isset($_POST['field_options']) ? html_output($_POST['field_options']) : ''; ?></textarea>
                         <div class="form-text"><?php _e('For select fields, enter one option per line. These will be the available choices for users.', 'cftp_admin'); ?></div>
                     </div>
@@ -111,7 +111,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                     </div>
 
                     <div class="mb-4">
-                        <label for="applies_to" class="form-label"><?php _e('Applies To', 'cftp_admin'); ?> *</label>
+                        <label for="applies_to" class="form-label"><?php _e('Applies To', 'cftp_admin'); ?> <span class="required-indicator" aria-label="required">*</span></label>
                         <select name="applies_to" id="applies_to" class="form-select" required>
                             <?php foreach ($applies_to_options as $value => $label): ?>
                                 <option value="<?php echo $value; ?>"
@@ -158,7 +158,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                         </div>
                     </div>
 
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 mt-4">
                         <button type="submit" class="btn btn-primary">
                             <?php _e('Create Custom Field', 'cftp_admin'); ?>
                         </button>
@@ -208,3 +208,10 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 </div>
 
 <?php include_once ADMIN_VIEWS_DIR . DS . 'footer.php'; ?>
+
+<script>
+    // Initialize custom fields form page JavaScript
+    if (typeof admin !== 'undefined' && admin.pages && admin.pages.custom_fields_form) {
+        admin.pages.custom_fields_form();
+    }
+</script>

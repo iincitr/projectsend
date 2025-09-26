@@ -225,22 +225,9 @@ class CustomFields
             ];
         }
 
-        // Check if field name already exists (excluding current field)
-        $statement = $this->dbh->prepare("SELECT COUNT(*) as total FROM " . TABLE_CUSTOM_FIELDS . " WHERE field_name = :field_name AND id != :id");
-        $statement->bindParam(':field_name', $this->field_name, PDO::PARAM_STR);
-        $statement->bindParam(':id', $this->id, PDO::PARAM_INT);
-        $statement->execute();
-        $row = $statement->fetch(PDO::FETCH_ASSOC);
-
-        if ($row['total'] > 0) {
-            return [
-                'status' => 'error',
-                'message' => __('A field with this name already exists.', 'cftp_admin')
-            ];
-        }
-
+        // Field name should never be changed after creation to maintain data integrity
+        // We don't check for duplicate field_name since we're not updating it
         $sql = "UPDATE " . TABLE_CUSTOM_FIELDS . " SET
-                field_name = :field_name,
                 field_label = :field_label,
                 field_type = :field_type,
                 field_options = :field_options,
@@ -252,7 +239,6 @@ class CustomFields
                 WHERE id = :id";
 
         $statement = $this->dbh->prepare($sql);
-        $statement->bindParam(':field_name', $this->field_name, PDO::PARAM_STR);
         $statement->bindParam(':field_label', $this->field_label, PDO::PARAM_STR);
         $statement->bindParam(':field_type', $this->field_type, PDO::PARAM_STR);
         $statement->bindParam(':field_options', $this->field_options, PDO::PARAM_STR);

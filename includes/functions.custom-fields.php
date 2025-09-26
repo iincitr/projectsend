@@ -37,7 +37,7 @@ function render_custom_fields($applies_to, $user_id = null, $form_type = 'full')
 
     // Only show the section header if we have fields to show
     $output .= '<div class="custom-fields-section">';
-    $output .= '<h5 class="mb-3">' . __('Additional Fields', 'cftp_admin') . '</h5>';
+    $output .= '<h5 class="mb-3">' . __('Additional Information', 'cftp_admin') . '</h5>';
 
     foreach ($custom_fields as $field) {
         // Skip hidden fields for self forms
@@ -48,7 +48,7 @@ function render_custom_fields($applies_to, $user_id = null, $form_type = 'full')
         $field_value = isset($existing_values[$field['id']]) ? $existing_values[$field['id']] : $field['default_value'];
         $field_name = 'custom_field_' . $field['id'];
         $required_attr = $field['is_required'] ? 'required' : '';
-        $required_label = $field['is_required'] ? ' *' : '';
+        $required_label = $field['is_required'] ? ' <span class="required-indicator" aria-label="required">*</span>' : '';
 
         $output .= '<div class="form-group row">';
         $output .= '<label for="' . $field_name . '" class="col-sm-4 control-label">' . html_output($field['field_label']) . $required_label . '</label>';

@@ -96,6 +96,11 @@ if (!current_role_in(['Client'])) {
                 'badge' => count_account_requests(),
                 'permission' => 'approve_account_requests',
             ),
+            array(
+                'label' => __('Custom Fields', 'cftp_admin'),
+                'link' => 'custom-fields.php',
+                'permission' => 'manage_custom_fields',
+            ),
         ),
     );
 
@@ -156,6 +161,11 @@ if (!current_role_in(['Client'])) {
                 'label' => __('User Roles', 'cftp_admin'),
                 'link' => 'roles.php',
                 'permission' => 'edit_settings',
+            ),
+            array(
+                'label' => __('Custom Fields', 'cftp_admin'),
+                'link' => 'custom-fields.php',
+                'permission' => 'manage_custom_fields',
             ),
         ),
     );
@@ -307,11 +317,6 @@ if (!current_role_in(['Client'])) {
             ),
             array(
                 'divider' => true,
-            ),
-            array(
-                'label' => __('Custom Fields', 'cftp_admin'),
-                'link' => 'custom-fields.php',
-                'permission' => 'manage_custom_fields',
             ),
             array(
                 'label' => __('External Storage', 'cftp_admin'),
