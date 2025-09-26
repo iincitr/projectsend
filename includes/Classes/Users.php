@@ -58,6 +58,9 @@ class Users
     public $account_request;
     public $recaptcha;
 
+    // Custom field data
+    public $custom_field_data;
+
     // Permissions
     private $allowed_actions_roles;
 
@@ -77,6 +80,7 @@ class Users
         $this->require_password_change = false;
 
         $this->metadata = [];
+        $this->custom_field_data = [];
 
         if (!empty($user_id)) {
             $this->get($user_id);
@@ -570,6 +574,13 @@ class Users
                 // Uploader role: limit who user can upload to
                 $this->limitUploadToSave($this->limit_upload_to);
 
+                // Process custom field data if provided
+                if (!empty($this->custom_field_data)) {
+                    $custom_fields_values = new \ProjectSend\Classes\CustomFieldValues();
+                    $applies_to = $this->isClient() ? 'client' : 'user';
+                    $custom_fields_values->saveUserValues($this->id, $this->custom_field_data);
+                }
+
                 $email_type = $this->isClient() ? "new_client" : "new_user";
 
                 /** Send account data by email */
@@ -763,6 +774,13 @@ class Users
             }
 
             $this->limitUploadToSave($this->limit_upload_to);
+
+            // Process custom field data if provided
+            if (!empty($this->custom_field_data)) {
+                $custom_fields_values = new \ProjectSend\Classes\CustomFieldValues();
+                $applies_to = $this->isClient() ? 'client' : 'user';
+                $custom_fields_values->saveUserValues($this->id, $this->custom_field_data);
+            }
 
             $log_action_number = $this->isClient() ? 14 : 13;
 

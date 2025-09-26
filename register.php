@@ -42,6 +42,16 @@ if ($_POST) {
         'recaptcha' => (recaptcha2_is_enabled()) ? recaptcha2_get_request() : null,
     ]);
 
+    // Process custom fields for visible fields only
+    $custom_field_data = [];
+    foreach ($_POST as $key => $value) {
+        if (strpos($key, 'custom_field_') === 0) {
+            $field_id = str_replace('custom_field_', '', $key);
+            $custom_field_data[$field_id] = $value;
+        }
+    }
+    $new_client->custom_field_data = $custom_field_data;
+
     $create = $new_client->create();
     if ($create['status'] === 'success') {
         $new_client->triggerAfterSelfRegister([

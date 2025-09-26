@@ -178,6 +178,20 @@ switch ($user_form_type) {
 			}
 		?>
 
+    <?php
+    // Render custom fields for users
+    $custom_field_type = 'user';
+    $custom_form_type = ($user_form_type == 'edit_user_self') ? 'self' : 'full';
+
+    // Get user ID for existing values
+    $custom_user_id = null;
+    if (isset($user_id)) {
+        $custom_user_id = $user_id;
+    }
+
+    echo render_custom_fields($custom_field_type, $custom_user_id, $custom_form_type);
+    ?>
+
 	<div class="inside_form_buttons">
 		<button type="submit" class="btn btn-wide btn-primary"><?php echo $submit_value; ?></button>
 	</div>
