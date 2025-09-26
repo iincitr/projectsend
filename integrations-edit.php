@@ -264,9 +264,11 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                     <dd class="col-7">
                         <?php echo date(get_option('timeformat'), strtotime($integration['created_date'])); ?>
                         <br>
-                        <small class="text-muted">
-                            <?php _e('by', 'cftp_admin'); ?> <?php echo html_output($integration['created_by']); ?>
-                        </small>
+                        <?php if (!empty($integration['created_by'])): ?>
+                            <small class="text-muted">
+                                <?php _e('by', 'cftp_admin'); ?> <?php echo html_output($integration['created_by']); ?>
+                            </small>
+                        <?php endif; ?>
                     </dd>
 
                     <?php if ($integration['updated_date']): ?>
@@ -324,20 +326,6 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const updateCredentialsCheckbox = document.getElementById('update_credentials');
-    const credentialsSection = document.getElementById('credentials_section');
-
-    updateCredentialsCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-            credentialsSection.style.display = 'block';
-        } else {
-            credentialsSection.style.display = 'none';
-        }
-    });
-});
-</script>
 
 <?php
 include_once ADMIN_VIEWS_DIR . DS . 'footer.php';

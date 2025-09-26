@@ -68,7 +68,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
     <div class="col-12 col-lg-8">
         <div class="ps-card">
             <div class="ps-card-body">
-                <form action="integrations-add.php" method="post" id="integration_form">
+                <form action="integrations-add.php" method="post" id="integration_form" data-available-types="<?php echo html_output(json_encode($available_types)); ?>">
                     <?php addCsrf(); ?>
 
                     <div class="mb-4">
@@ -186,96 +186,6 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const typeSelect = document.getElementById('type');
-    const credentialsContainer = document.getElementById('credentials_fields');
-    const integrationInfos = document.querySelectorAll('.integration-type-info');
-    const defaultInfo = document.getElementById('default_info');
-
-    // Available types configuration
-    const availableTypes = <?php echo json_encode($available_types); ?>;
-
-    function updateCredentialFields() {
-        const selectedType = typeSelect.value;
-        credentialsContainer.innerHTML = '';
-
-        // Hide all integration info panels
-        integrationInfos.forEach(info => info.style.display = 'none');
-
-        if (selectedType && availableTypes[selectedType]) {
-            const typeConfig = availableTypes[selectedType];
-
-            // Show relevant integration info
-            const typeInfo = document.querySelector(`[data-type="${selectedType}"]`);
-            if (typeInfo) {
-                typeInfo.style.display = 'block';
-                defaultInfo.style.display = 'none';
-            }
-
-            // Don't create fields for coming soon types
-            if (typeConfig.coming_soon) {
-                return;
-            }
-
-            if (typeConfig.fields) {
-                // Create header
-                const header = document.createElement('div');
-                header.className = 'mb-4';
-                header.innerHTML = `
-                    <h5>${typeConfig.name} <?php _e('Configuration', 'cftp_admin'); ?></h5>
-                    <hr>
-                `;
-                credentialsContainer.appendChild(header);
-
-                // Create fields
-                Object.keys(typeConfig.fields).forEach(fieldName => {
-                    const fieldConfig = typeConfig.fields[fieldName];
-                    const fieldContainer = document.createElement('div');
-                    fieldContainer.className = 'mb-3';
-
-                    let fieldHtml = '';
-                    const fieldId = `credentials_${fieldName}`;
-                    const fieldNameAttr = `credentials[${fieldName}]`;
-                    const isRequired = fieldConfig.required ? 'required' : '';
-                    const requiredMark = fieldConfig.required ? ' *' : '';
-
-                    if (fieldConfig.type === 'select' && fieldConfig.options) {
-                        fieldHtml = `
-                            <label for="${fieldId}" class="form-label">${fieldConfig.label}${requiredMark}</label>
-                            <select name="${fieldNameAttr}" id="${fieldId}" class="form-select" ${isRequired}>
-                                <option value="">Choose...</option>
-                        `;
-                        Object.keys(fieldConfig.options).forEach(optionValue => {
-                            fieldHtml += `<option value="${optionValue}">${fieldConfig.options[optionValue]}</option>`;
-                        });
-                        fieldHtml += '</select>';
-                    } else {
-                        const inputType = fieldConfig.type === 'password' ? 'password' : 'text';
-                        fieldHtml = `
-                            <label for="${fieldId}" class="form-label">${fieldConfig.label}${requiredMark}</label>
-                            <input type="${inputType}" name="${fieldNameAttr}" id="${fieldId}"
-                                   class="form-control" ${isRequired}>
-                        `;
-                    }
-
-                    fieldContainer.innerHTML = fieldHtml;
-                    credentialsContainer.appendChild(fieldContainer);
-                });
-            }
-        } else {
-            // Show default info when no type selected
-            defaultInfo.style.display = 'block';
-        }
-    }
-
-    // Update fields when type changes
-    typeSelect.addEventListener('change', updateCredentialFields);
-
-    // Initialize on page load
-    updateCredentialFields();
-});
-</script>
 
 <?php
 include_once ADMIN_VIEWS_DIR . DS . 'footer.php';

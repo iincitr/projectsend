@@ -103,6 +103,9 @@
             case 'import_external':
                 admin.pages.import_external();
                 break;
+            case 'integration_form':
+                admin.pages.integration_form();
+                break;
             default:
                 // do nothing
                 break;
