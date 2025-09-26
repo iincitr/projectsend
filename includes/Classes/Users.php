@@ -1157,9 +1157,11 @@ class Users
         }
 
         // Get default role for LDAP users
-        $default_role = get_option('ldap_default_role', null, '0'); // Default to client role
+        $client_role_id = \ProjectSend\Classes\Roles::getClientRoleId(); // Get the actual client role ID
+        $default_role = get_option('ldap_default_role', null, $client_role_id); // Default to client role
         error_log("LDAP Create User Debug - Default role: " . $default_role);
         error_log("LDAP Create User Debug - Default role type: " . gettype($default_role));
+        error_log("LDAP Create User Debug - Client role ID: " . $client_role_id);
         error_log("LDAP Create User Debug - Name: " . $name);
         error_log("LDAP Create User Debug - Username: " . $username);
         error_log("LDAP Create User Debug - Email: " . $email);
@@ -1182,7 +1184,7 @@ class Users
             'can_upload_public' => get_option('ldap_default_can_upload_public', null, '0'),
             'account_requested' => 0,
             'account_denied' => 0, // Add this required field
-            'type' => ($default_role == 0) ? 'new_client' : 'new_user',
+            'type' => ($default_role == $client_role_id) ? 'new_client' : 'new_user',
         ]);
 
         // Create the user
