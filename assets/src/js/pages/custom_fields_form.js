@@ -52,12 +52,30 @@
             // Show/hide field options based on field type
             if (fieldType && fieldOptionsContainer) {
                 function toggleFieldOptions() {
-                    if (fieldType.value === 'select') {
+                    var fieldOptionsHelp = document.getElementById('field_options_help');
+
+                    if (fieldType.value === 'select' || fieldType.value === 'checkbox') {
                         fieldOptionsContainer.style.display = 'block';
-                        // Make field_options required when visible
+                        // Make field_options required when visible (optional for checkbox)
                         var fieldOptions = document.getElementById('field_options');
                         if (fieldOptions) {
-                            fieldOptions.setAttribute('required', 'required');
+                            if (fieldType.value === 'select') {
+                                fieldOptions.setAttribute('required', 'required');
+                                fieldOptions.setAttribute('rows', '5');
+                            } else {
+                                // Checkbox label is optional (defaults to "Yes")
+                                fieldOptions.removeAttribute('required');
+                                fieldOptions.setAttribute('rows', '2');
+                            }
+                        }
+
+                        // Update help text based on type
+                        if (fieldOptionsHelp) {
+                            if (fieldType.value === 'select') {
+                                fieldOptionsHelp.innerHTML = 'For select fields: Enter one option per line.';
+                            } else {
+                                fieldOptionsHelp.innerHTML = 'For checkbox fields: Enter the checkbox label (e.g., "I agree to the terms"). Leave empty for default "Yes".';
+                            }
                         }
                     } else {
                         fieldOptionsContainer.style.display = 'none';

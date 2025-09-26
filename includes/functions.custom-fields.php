@@ -83,9 +83,11 @@ function render_custom_fields($applies_to, $user_id = null, $form_type = 'full')
 
             case 'checkbox':
                 $checked = (!empty($field_value) && $field_value != '0') ? 'checked' : '';
+                // Use custom label from field_options if available, otherwise default to "Yes"
+                $checkbox_label = !empty($field['field_options']) ? trim($field['field_options']) : __('Yes', 'cftp_admin');
                 $output .= '<div class="form-check">';
                 $output .= '<input type="checkbox" name="' . $field_name . '" id="' . $field_name . '" class="form-check-input" value="1" ' . $checked . ' />';
-                $output .= '<label class="form-check-label" for="' . $field_name . '">' . __('Yes', 'cftp_admin') . '</label>';
+                $output .= '<label class="form-check-label" for="' . $field_name . '">' . html_output($checkbox_label) . '</label>';
                 $output .= '</div>';
                 break;
         }
