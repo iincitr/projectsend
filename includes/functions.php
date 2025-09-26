@@ -1629,6 +1629,7 @@ function make_thumbnail($file, $type = 'thumbnail', $width = THUMBS_MAX_WIDTH, $
         $thumbnail['thumbnail']['url'] = THUMBNAILS_FILES_URL . '/' . $thumbnail_file;
 
         $file = ASSETS_IMG_DIR . DS . '/thumbnail-unavailable.png'; // Reset to make thumbnail
+        $mime_type = 'image/png'; // Set mime type for unavailable thumbnail
     } else {
         if (file_is_image($file)) {
             if (file_is_svg($file)) {

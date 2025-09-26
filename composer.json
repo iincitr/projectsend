@@ -24,7 +24,7 @@
     ]
   },
   "require": {
-    "php": ">=7.0",
+    "php": ">=7.1",
     "claviska/simpleimage": "~3",
     "enshrined/svg-sanitize": "^0.15.0",
     "moxiecode/plupload": "3.1.5",
@@ -33,6 +33,7 @@
     "tamtamchik/simple-flash": "^2.0",
     "hybridauth/hybridauth": "^3.0",
     "cocur/slugify": "^4.2",
+    "aws/aws-sdk-php": "^3.0",
     "ext-pdo": "*",
     "ext-json": "*",
     "ext-exif": "*"

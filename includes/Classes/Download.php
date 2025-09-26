@@ -30,7 +30,78 @@ class Download
 
         $file = new \ProjectSend\Classes\Files($file_id);
         record_new_download(CURRENT_USER_ID, $file->id);
-        $this->downloadFile($file->filename_on_disk, $file->filename_unfiltered, $file->id);
+
+        // Handle external files differently
+        if ($file->storage_type !== 'local' && !empty($file->integration_id)) {
+            $this->downloadExternalFile($file);
+        } else {
+            $this->downloadFile($file->filename_on_disk, $file->filename_unfiltered, $file->id);
+        }
+    }
+
+    /**
+     * Handle downloads for external storage files
+     */
+    private function downloadExternalFile($file)
+    {
+        // Get the integration and create storage instance
+        $integrations_handler = new \ProjectSend\Classes\Integrations();
+        $integration = $integrations_handler->getById($file->integration_id);
+
+        if (!$integration) {
+            exit_with_error_code(404);
+        }
+
+        $storage = $integrations_handler->createStorageInstance($integration);
+        if (!$storage) {
+            exit_with_error_code(500);
+        }
+
+        // Record the download log
+        if (current_role_in(['Client'])) {
+            $log_action_number = 8;
+        } else {
+            $log_action_number = 7;
+        }
+
+        $this->logger->addEntry([
+            'action' => $log_action_number,
+            'owner_id' => CURRENT_USER_ID,
+            'affected_file' => (int)$file->id,
+            'affected_file_name' => $file->filename_original,
+            'affected_account' => CURRENT_USER_ID,
+            'file_title_column' => true
+        ]);
+
+        // For S3 and similar services, redirect to presigned URL for direct download
+        if (method_exists($storage, 'getPresignedUrl')) {
+            // Generate a presigned URL with 1 hour expiration
+            $presigned_url = $storage->getPresignedUrl($file->external_path, 3600);
+            if ($presigned_url) {
+                // Set headers to force download with correct filename
+                header('Content-Type: application/octet-stream');
+                header('Content-Disposition: attachment; filename="' . $file->filename_original . '"');
+                header('Location: ' . $presigned_url);
+                exit;
+            }
+        }
+
+        // Fallback: Stream the file through PHP (slower but more compatible)
+        $download_result = $storage->downloadFile($file->external_path, tempnam(sys_get_temp_dir(), 'ps_download_'));
+        if ($download_result['success']) {
+            $temp_file = $download_result['local_path'];
+
+            // Serve the temporary file
+            $alias = $this->getAlias($file);
+            $this->serveFile($temp_file, $file->filename_original, $alias);
+
+            // Clean up temporary file
+            unlink($temp_file);
+            exit;
+        }
+
+        // If all else fails, return 404
+        exit_with_error_code(404);
     }
 
     /**

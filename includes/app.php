@@ -175,6 +175,7 @@ define('TABLE_REMEMBER_TOKENS', TABLES_PREFIX . 'remember_tokens');
 define('TABLE_ROLES', TABLES_PREFIX . 'roles');
 define('TABLE_PERMISSIONS', TABLES_PREFIX . 'permissions');
 define('TABLE_ROLE_PERMISSIONS', TABLES_PREFIX . 'role_permissions');
+define('TABLE_INTEGRATIONS', TABLES_PREFIX . 'integrations');
 
 $original_basic_tables = array(
     TABLE_FILES,
