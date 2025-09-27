@@ -72,6 +72,17 @@ $applies_to_options = [
     'both' => __('Both Users and Clients', 'cftp_admin'),
 ];
 
+// Header buttons
+$header_action_buttons = [];
+if (current_user_can('manage_custom_fields')) {
+    $header_action_buttons = [
+        [
+            'url' => 'custom-fields-add.php',
+            'label' => __('Add Custom Field', 'cftp_admin'),
+        ],
+    ];
+}
+
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 ?>
 

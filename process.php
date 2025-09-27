@@ -419,6 +419,74 @@ switch ($_GET['do']) {
 
         ps_redirect('roles.php');
     break;
+
+    case 'update_custom_fields_order':
+        // Check permissions
+        if (!current_role_in(['System Administrator']) && !current_user_can('manage_custom_fields')) {
+            echo json_encode(['status' => 'error', 'message' => __('Permission denied', 'cftp_admin')]);
+            exit;
+        }
+
+        // Get JSON input
+        $input = json_decode(file_get_contents('php://input'), true);
+
+        // Validate CSRF token from JSON input
+        if (!isset($input['csrf_token']) || !isset($_SESSION['csrf_token']) ||
+            !hash_equals($_SESSION['csrf_token'], $input['csrf_token'])) {
+            echo json_encode(['status' => 'error', 'message' => __('Invalid CSRF token', 'cftp_admin')]);
+            exit;
+        }
+
+        if (!isset($input['sort_data']) || !is_array($input['sort_data'])) {
+            echo json_encode(['status' => 'error', 'message' => __('Invalid sort data', 'cftp_admin')]);
+            exit;
+        }
+
+        $success_count = 0;
+        $total_count = count($input['sort_data']);
+        $debug_info = [];
+
+        foreach ($input['sort_data'] as $item) {
+            if (!isset($item['id']) || !isset($item['sort_order'])) {
+                $debug_info[] = "Missing id or sort_order in item";
+                continue;
+            }
+
+            $field_id = (int)$item['id'];
+            $sort_order = (int)$item['sort_order'];
+
+            $field = new \ProjectSend\Classes\CustomFields($field_id);
+
+            $debug_info[] = "Field ID: $field_id, exists: " . ($field->exists ? 'true' : 'false');
+
+            if ($field->exists) {
+                // Check permissions explicitly
+                $has_permission = current_role_in(['System Administrator']) || current_user_can('manage_custom_fields');
+                $debug_info[] = "Field $field_id permissions check: " . ($has_permission ? 'passed' : 'failed');
+
+                $result = $field->updateSortOrder($sort_order);
+                $debug_info[] = "Update result for field $field_id: " . ($result ? 'success' : 'failed');
+                if ($result) {
+                    $success_count++;
+                }
+            } else {
+                $debug_info[] = "Field $field_id does not exist";
+            }
+        }
+
+        if ($success_count === $total_count) {
+            echo json_encode([
+                'status' => 'success',
+                'message' => __('Field order updated successfully', 'cftp_admin')
+            ]);
+        } else {
+            echo json_encode([
+                'status' => 'error',
+                'message' => sprintf(__('Only %d of %d fields were updated', 'cftp_admin'), $success_count, $total_count),
+                'debug' => $debug_info
+            ]);
+        }
+    break;
 }
 
 exit;

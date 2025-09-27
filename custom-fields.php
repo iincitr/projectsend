@@ -81,6 +81,11 @@ if (current_user_can('manage_custom_fields')) {
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 ?>
 
+<!-- Hidden CSRF token for AJAX requests -->
+<div style="display: none;">
+    <?php addCsrf(); ?>
+</div>
+
 <div class="row">
     <div class="col-12">
         <?php if (empty($custom_fields)): ?>
@@ -99,6 +104,11 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
             ]);
 
             $thead_columns = array(
+                array(
+                    'content' => '',
+                    'class' => 'drag-handle-header text-center',
+                    'style' => 'width: 60px;',
+                ),
                 array(
                     'content' => __('Label', 'cftp_admin'),
                 ),
@@ -132,7 +142,9 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
             $table->thead($thead_columns);
 
             foreach ($custom_fields as $field) {
-                $table->addRow();
+                $table->addRow([
+                    'data-field-id' => $field['id'],
+                ]);
 
                 // Label column
                 $label_content = '<strong>' . html_output($field['field_label']) . '</strong>';
@@ -188,43 +200,49 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                 // Delete button
                 $action_buttons .= '<a href="custom-fields.php?action=delete&id=' . $field['id'] . '" class="btn btn-danger btn-sm delete-confirm"><i class="fa fa-trash"></i><span class="button_label">' . __('Delete', 'cftp_admin') . '</span></a>' . "\n";
 
-                // Add all cells to the table
-                $table->addCell([
-                    'content' => $label_content,
-                ]);
+                // Define all cells using the proper structure
+                $tbody_cells = [
+                    [
+                        'content' => '<i class="fa fa-arrows drag-handle" style="cursor: move;" title="' . __('Drag to reorder', 'cftp_admin') . '"></i><span class="field-id-hidden" style="display:none;">' . $field['id'] . '</span>',
+                        'class' => 'text-center drag-handle-cell',
+                        'attributes' => [
+                            'data-field-id' => $field['id'],
+                        ],
+                    ],
+                    [
+                        'content' => $label_content,
+                    ],
+                    [
+                        'content' => $name_content,
+                        'hide' => 'phone',
+                    ],
+                    [
+                        'content' => $type_content,
+                    ],
+                    [
+                        'content' => $applies_to_content,
+                        'hide' => 'phone',
+                    ],
+                    [
+                        'content' => $required_content,
+                        'hide' => 'phone',
+                    ],
+                    [
+                        'content' => $visible_content,
+                        'hide' => 'phone',
+                    ],
+                    [
+                        'content' => $status_badge,
+                    ],
+                    [
+                        'content' => $action_buttons,
+                        'hide' => 'phone',
+                    ],
+                ];
 
-                $table->addCell([
-                    'content' => $name_content,
-                    'hide' => 'phone',
-                ]);
-
-                $table->addCell([
-                    'content' => $type_content,
-                ]);
-
-                $table->addCell([
-                    'content' => $applies_to_content,
-                    'hide' => 'phone',
-                ]);
-
-                $table->addCell([
-                    'content' => $required_content,
-                    'hide' => 'phone',
-                ]);
-
-                $table->addCell([
-                    'content' => $visible_content,
-                    'hide' => 'phone',
-                ]);
-
-                $table->addCell([
-                    'content' => $status_badge,
-                ]);
-
-                $table->addCell([
-                    'content' => $action_buttons,
-                    'hide' => 'phone',
-                ]);
+                foreach ($tbody_cells as $cell) {
+                    $table->addCell($cell);
+                }
             }
 
             echo $table->render();

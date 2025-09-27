@@ -58,6 +58,88 @@
     margin-right: 0.25rem;
     margin-bottom: 0.25rem;
   }
+
+  // Drag and drop styles
+  .drag-handle-header {
+    user-select: none;
+  }
+
+  .drag-handle-cell {
+    user-select: none;
+    vertical-align: middle;
+    padding: 0.75rem 0.5rem !important;
+    text-align: center;
+    width: 50px;
+  }
+
+  .drag-handle {
+    color: #6c757d;
+    cursor: grab;
+    transition: all 0.2s ease;
+    font-size: 1.2em;
+    padding: 0.4rem;
+    border-radius: 0.25rem;
+    display: inline-block;
+    min-width: 24px;
+    min-height: 24px;
+    line-height: 1;
+
+    &:hover {
+      color: var(--main_color, #007bff);
+      background-color: rgba(0, 123, 255, 0.1);
+      transform: scale(1.1);
+    }
+
+    &:active {
+      cursor: grabbing;
+      transform: scale(1.05);
+    }
+  }
+
+  // Row states during drag and drop - target actual ProjectSend table classes
+  tr {
+    transition: all 0.2s ease;
+
+    &.dragging {
+      opacity: 0.6;
+      background-color: #f8f9fa !important;
+      transform: scale(0.98);
+      border: 2px dashed var(--main_color, #007bff);
+
+      td {
+        border-color: transparent !important;
+        background-color: #f8f9fa !important;
+      }
+    }
+
+    &.drag-over {
+      position: relative;
+      background-color: rgba(0, 123, 255, 0.1) !important;
+
+      td {
+        background-color: rgba(0, 123, 255, 0.05) !important;
+      }
+
+      // Add top border indicator
+      &::before {
+        content: '';
+        position: absolute;
+        top: -1px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background-color: var(--main_color, #007bff);
+        z-index: 10;
+      }
+    }
+
+    // Hover effect on rows when not dragging
+    &:not(.dragging):hover {
+      .drag-handle {
+        color: var(--main_color, #007bff);
+      }
+    }
+  }
 }
 
 // Field type help section
