@@ -4,7 +4,7 @@
  * Loads a template's header and footer into the system options
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['edit_settings']);
+check_access_enhanced(['edit_settings']);
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

@@ -3,7 +3,7 @@
  * Show the form to add a new group.
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['create_groups']);
+check_access_enhanced(['create_groups']);
 
 $active_nav = 'groups';
 

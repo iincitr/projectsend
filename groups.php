@@ -3,7 +3,7 @@
  * Show the list of current groups.
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['manage_groups', 'create_groups', 'edit_groups', 'delete_groups'], 'any');
+check_access_enhanced(['manage_groups', 'create_groups', 'edit_groups', 'delete_groups'], 'any');
 
 $active_nav = 'groups';
 

@@ -4,7 +4,7 @@
  * sent by the system.
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['edit_email_templates']);
+check_access_enhanced(['edit_email_templates']);
 
 $section = (!empty($_GET['section'])) ? $_GET['section'] : $_POST['section'];
 

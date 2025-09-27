@@ -3,7 +3,7 @@
  * Export the log as a CSV file.
  */
 require_once '../bootstrap.php';
-check_access_enhanced(null, ['edit_settings']);
+check_access_enhanced(['edit_settings']);
 
 header('Content-Type: text/csv; charset=utf-8');
 header('Content-Disposition: attachment; filename=cron-log.csv');

@@ -4,7 +4,7 @@
  * Shows a preview of a selected email template
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['edit_email_templates']); // Check for email template editing permission
+check_access_enhanced(['edit_email_templates']); // Check for email template editing permission
 
 $template_id = isset($_GET['template']) ? $_GET['template'] : null;
 

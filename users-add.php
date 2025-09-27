@@ -3,7 +3,7 @@
  * Show the form to add a new system user.
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['create_users']);
+check_access_enhanced(['create_users']);
 
 $active_nav = 'users';
 

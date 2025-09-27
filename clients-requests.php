@@ -3,7 +3,7 @@
  * Show the list of current clients.
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['manage_clients', 'approve_account_requests'], 'any');
+check_access_enhanced(['manage_clients', 'approve_account_requests'], 'any');
 
 $active_nav = 'clients';
 $this_page = 'clients-requests.php';

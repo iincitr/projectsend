@@ -3,7 +3,7 @@
  * Regenerate thumbnails for uploaded images
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['edit_settings']);
+check_access_enhanced(['edit_settings']);
 
 $page_title = __('Regenerate Thumbnails', 'cftp_admin');
 
