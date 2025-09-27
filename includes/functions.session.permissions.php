@@ -224,45 +224,6 @@ function redirect_if_role_not_allowed($allowed_levels = null) {
 }
 
 /**
- * Helper functions for common access patterns - easier migration from $allowed_levels
- */
-
-/**
- * Check if current user can access admin-only areas
- */
-function redirect_if_not_admin() {
-    redirect_if_role_not_allowed([9, 8]); // System Administrator, Account Manager
-}
-
-/**
- * Check if current user can access super-admin-only areas
- */
-function redirect_if_not_super_admin() {
-    redirect_if_role_not_allowed([9]); // System Administrator only
-}
-
-/**
- * Check if current user can access system user areas (non-clients)
- */
-function redirect_if_not_system_user() {
-    redirect_if_role_not_allowed([9, 8, 7]); // System Administrator, Account Manager, Uploader
-}
-
-/**
- * Allow access to all logged-in users (including clients)
- */
-function redirect_if_not_logged_in_user() {
-    redirect_if_role_not_allowed([9, 8, 7, 0]);
-}
-
-/**
- * Check if current user can access client-only areas
- */
-function redirect_if_not_client() {
-    redirect_if_role_not_allowed([0]);
-}
-
-/**
  * Enhanced access control that supports both roles and permissions
  * @param array $allowed_levels Legacy role levels (for backward compatibility)
  * @param array $required_permissions Array of permission names required
