@@ -4,7 +4,7 @@
  * Only accessible to Super Administrators (level 9)
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['edit_settings']);
+check_access_enhanced(['edit_settings']);
 
 // Check if custom roles are enabled
 if (!custom_roles_enabled()) {

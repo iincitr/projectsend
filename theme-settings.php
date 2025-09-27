@@ -4,7 +4,7 @@
  * Allows administrators to configure individual theme options
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['change_template']);
+check_access_enhanced(['change_template']);
 
 $page_title = __("Theme Settings", 'cftp_admin');
 $active_nav = 'themes';

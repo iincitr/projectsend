@@ -3,7 +3,7 @@
  * Show the form to add a new system user.
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['create_users']);
+check_access_enhanced(['create_users']);
 
 $active_nav = 'users';
 
@@ -41,10 +41,20 @@ if ($_POST) {
         'type' => 'new_user',
     );
 
+    // Process custom fields
+    $custom_field_data = [];
+    foreach ($_POST as $key => $value) {
+        if (strpos($key, 'custom_field_') === 0) {
+            $field_id = str_replace('custom_field_', '', $key);
+            $custom_field_data[$field_id] = $value;
+        }
+    }
+
     // Validate the information from the posted form
     // Create the user if validation is correct
     $new_user->setType('new_user');
     $new_user->set($user_arguments);
+    $new_user->custom_field_data = $custom_field_data;
     $create = $new_user->create();
 
     if ($create['status'] === 'success') {

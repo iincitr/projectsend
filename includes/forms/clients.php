@@ -260,6 +260,27 @@ switch ($clients_form_type) {
     ?>
 
     <?php
+    // Render custom fields
+    $custom_field_type = 'client';
+    $custom_form_type = 'full';
+
+    // Determine form type for custom fields
+    if ($clients_form_type == 'new_client_self') {
+        $custom_form_type = 'registration';
+    } elseif ($clients_form_type == 'edit_client_self') {
+        $custom_form_type = 'self';
+    }
+
+    // Get user ID for existing values
+    $custom_user_id = null;
+    if (isset($client_id)) {
+        $custom_user_id = $client_id;
+    }
+
+    echo render_custom_fields($custom_field_type, $custom_user_id, $custom_form_type);
+    ?>
+
+    <?php
     if ($clients_form_type == 'new_client_self') {
         recaptcha2_render_widget();
     }

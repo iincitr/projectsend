@@ -3,7 +3,7 @@
  * Show the form to edit an existing client.
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['manage_clients', 'edit_clients', 'create_clients', 'edit_own_client_profile'], 'any');
+check_access_enhanced(['manage_clients', 'edit_clients', 'create_clients', 'edit_own_client_profile'], 'any');
 
 $active_nav = 'clients';
 
@@ -99,9 +99,19 @@ if ($_POST) {
      */
     $client_arguments['password'] = (isset($_POST['password'])) ? $_POST['password'] : null;
 
+    // Process custom fields
+    $custom_field_data = [];
+    foreach ($_POST as $key => $value) {
+        if (strpos($key, 'custom_field_') === 0) {
+            $field_id = str_replace('custom_field_', '', $key);
+            $custom_field_data[$field_id] = $value;
+        }
+    }
+
     /** Validate the information from the posted form. */
     $edit_client->set($client_arguments);
     $edit_client->setType("existing_client");
+    $edit_client->custom_field_data = $custom_field_data;
     $edit_response = $edit_client->edit();
 
     $edit_groups = (!empty($_POST['groups_request'])) ? $_POST['groups_request'] : array();

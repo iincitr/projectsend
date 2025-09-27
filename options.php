@@ -3,7 +3,7 @@
  * Options page and form.
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['edit_settings']);
+check_access_enhanced(['edit_settings']);
 
 $section = (!empty($_GET['section'])) ? $_GET['section'] : $_POST['section'];
 

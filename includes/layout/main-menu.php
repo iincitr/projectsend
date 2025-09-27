@@ -96,6 +96,11 @@ if (!current_role_in(['Client'])) {
                 'badge' => count_account_requests(),
                 'permission' => 'approve_account_requests',
             ),
+            array(
+                'label' => __('Custom Fields', 'cftp_admin'),
+                'link' => 'custom-fields.php',
+                'permission' => 'manage_custom_fields',
+            ),
         ),
     );
 
@@ -156,6 +161,11 @@ if (!current_role_in(['Client'])) {
                 'label' => __('User Roles', 'cftp_admin'),
                 'link' => 'roles.php',
                 'permission' => 'edit_settings',
+            ),
+            array(
+                'label' => __('Custom Fields', 'cftp_admin'),
+                'link' => 'custom-fields.php',
+                'permission' => 'manage_custom_fields',
             ),
         ),
     );
@@ -291,16 +301,19 @@ if (!current_role_in(['Client'])) {
                 'link' => 'options.php?section=branding',
             ),
             array(
+                'label' => __('Scheduled tasks (cron)', 'cftp_admin'),
+                'link' => 'options.php?section=cron',
+            ),
+            array(
+                'divider' => true,
+            ),
+            array(
                 'label' => __('Social Networks Login', 'cftp_admin'),
                 'link' => 'options.php?section=social_login',
             ),
             array(
                 'label' => __('LDAP Authentication', 'cftp_admin'),
                 'link' => 'options.php?section=ldap',
-            ),
-            array(
-                'label' => __('Scheduled tasks (cron)', 'cftp_admin'),
-                'link' => 'options.php?section=cron',
             ),
             array(
                 'divider' => true,

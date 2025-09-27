@@ -5,7 +5,7 @@
 define('IS_FILE_EDITOR', true);
 
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['edit_files']);
+check_access_enhanced(['edit_files']);
 
 $active_nav = 'files';
 

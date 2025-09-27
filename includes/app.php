@@ -176,6 +176,8 @@ define('TABLE_ROLES', TABLES_PREFIX . 'roles');
 define('TABLE_PERMISSIONS', TABLES_PREFIX . 'permissions');
 define('TABLE_ROLE_PERMISSIONS', TABLES_PREFIX . 'role_permissions');
 define('TABLE_INTEGRATIONS', TABLES_PREFIX . 'integrations');
+define('TABLE_CUSTOM_FIELDS', TABLES_PREFIX . 'custom_fields');
+define('TABLE_CUSTOM_FIELD_VALUES', TABLES_PREFIX . 'custom_field_values');
 
 $original_basic_tables = array(
     TABLE_FILES,
@@ -204,6 +206,8 @@ $all_system_tables = array(
     'custom_assets',
     'user_limit_upload_to',
     'authentication_codes',
+    'custom_fields',
+    'custom_field_values',
 );
 
 /**

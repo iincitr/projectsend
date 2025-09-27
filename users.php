@@ -3,7 +3,7 @@
  * Show the list of current users.
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['edit_users']);
+check_access_enhanced(['edit_users']);
 
 $active_nav = 'users';
 

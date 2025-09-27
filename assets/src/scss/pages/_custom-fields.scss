@@ -1,0 +1,95 @@
+// Custom Fields Styling
+
+.custom-fields-section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+
+  h5 {
+    margin-bottom: 1rem;
+    color: #495057;
+    font-weight: 600;
+  }
+}
+
+// Custom field form styling
+#custom_field_form {
+  .form-label {
+    font-weight: 500;
+  }
+
+  .form-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+  }
+
+  #field_options_container {
+    transition: all 0.3s ease;
+
+    &.hidden {
+      display: none !important;
+    }
+  }
+
+  .form-check {
+    .form-text {
+      margin-top: 0.25rem;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+// Custom fields table styling
+#custom_fields_tbl {
+  .badge {
+    font-size: 0.75rem;
+  }
+
+  code {
+    background-color: #f8f9fa;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+  }
+
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    margin-right: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+}
+
+// Field type help section
+.ps-card {
+  .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  h6 {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #495057;
+  }
+
+  .text-muted.small {
+    line-height: 1.4;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .custom-fields-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+  }
+
+  #custom_fields_tbl {
+    .btn-sm {
+      padding: 0.2rem 0.4rem;
+      font-size: 0.75rem;
+    }
+  }
+}

@@ -229,22 +229,6 @@ function get_file_type_icon($extension)
     return $iconMap[strtolower($extension)] ?? 'fas fa-file';
 }
 
-/**
- * Prepare the current files template and show it
- *
- * @return void
- */
-function set_up_template()
-{
-    // Load values from the config file
-
-    // If config file doesn't exist, set default values
-
-    // Include the common functions
-
-    // Include the main template file
-}
-
 function template_load_translation($template)
 {
     $lang = (isset($_SESSION['lang'])) ? $_SESSION['lang'] : SITE_LANG;

@@ -3,7 +3,7 @@
  * Show a preview of the currently selected e-mail template
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['edit_settings']);
+check_access_enhanced(['edit_settings']);
 
 $page_title = __('E-mail templates','cftp_admin') . ': ' . __('Preview','cftp_admin');
 

@@ -152,14 +152,21 @@ $form_sections = [
                 'type' => 'custom',
                 'name' => 'ldap_default_role',
                 'render_callback' => function($field) {
+                    // Get all active roles from database
+                    $roles = \ProjectSend\Classes\Roles::getAllRoles(true);
+                    // Get the client role ID as the default fallback
+                    $client_role_id = \ProjectSend\Classes\Roles::getClientRoleId();
+                    $current_role = get_option('ldap_default_role', null, $client_role_id);
                     ?>
                     <div class="form-group row">
                         <label for="ldap_default_role" class="col-sm-4 control-label"><?php _e('Default role for new LDAP users','cftp_admin'); ?></label>
                         <div class="col-sm-8">
                             <select class="form-select" name="ldap_default_role" id="ldap_default_role">
-                                <option value="0" <?php echo (get_option('ldap_default_role', null, '0') == '0') ? 'selected="selected"' : ''; ?>><?php _e('Client','cftp_admin'); ?></option>
-                                <option value="7" <?php echo (get_option('ldap_default_role', null, '0') == '7') ? 'selected="selected"' : ''; ?>><?php _e('Uploader','cftp_admin'); ?></option>
-                                <option value="8" <?php echo (get_option('ldap_default_role', null, '0') == '8') ? 'selected="selected"' : ''; ?>><?php _e('Account Manager','cftp_admin'); ?></option>
+                                <?php foreach ($roles as $role): ?>
+                                    <option value="<?php echo $role['id']; ?>" <?php echo ($current_role == $role['id']) ? 'selected="selected"' : ''; ?>>
+                                        <?php echo html_output($role['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                             <small class="form-text text-muted"><?php _e('Role assigned to new users created from LDAP','cftp_admin'); ?></small>
                         </div>

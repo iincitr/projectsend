@@ -3,7 +3,7 @@
  * Show the list of activities logged.
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['edit_settings']);
+check_access_enhanced(['edit_settings']);
 
 $active_nav = 'tools';
 

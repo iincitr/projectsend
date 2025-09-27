@@ -3,7 +3,7 @@
  * Show the form to add a new client.
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['create_clients', 'manage_clients'], 'any');
+check_access_enhanced(['create_clients', 'manage_clients'], 'any');
 
 $active_nav = 'clients';
 
@@ -45,9 +45,19 @@ if ($_POST) {
         'type' => 'new_client',
     );
 
+    // Process custom fields
+    $custom_field_data = [];
+    foreach ($_POST as $key => $value) {
+        if (strpos($key, 'custom_field_') === 0) {
+            $field_id = str_replace('custom_field_', '', $key);
+            $custom_field_data[$field_id] = $value;
+        }
+    }
+
     // Validate the information from the posted form.
     $new_client->setType('new_client');
     $new_client->set($client_arguments);
+    $new_client->custom_field_data = $custom_field_data;
     $create = $new_client->create();
 
     // Record the action log

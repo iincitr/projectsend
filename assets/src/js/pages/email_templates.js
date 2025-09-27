@@ -159,6 +159,12 @@
                 customClass: {
                     confirmButton: 'btn btn-success me-2',
                     cancelButton: 'btn btn-secondary'
+                },
+                showClass: {
+                    popup: 'animate__animated animate__fadeIn'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOut'
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -178,6 +184,12 @@
                 showConfirmButton: false,
                 didOpen: () => {
                     Swal.showLoading();
+                },
+                showClass: {
+                    popup: 'animate__animated animate__fadeIn'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOut'
                 }
             });
 
@@ -200,6 +212,12 @@
                             buttonsStyling: false,
                             customClass: {
                                 confirmButton: 'btn btn-success'
+                            },
+                            showClass: {
+                                popup: 'animate__animated animate__fadeIn'
+                            },
+                            hideClass: {
+                                popup: 'animate__animated animate__fadeOut'
                             }
                         }).then(() => {
                             // Optionally redirect to header/footer page
@@ -215,6 +233,12 @@
                             buttonsStyling: false,
                             customClass: {
                                 confirmButton: 'btn btn-primary'
+                            },
+                            showClass: {
+                                popup: 'animate__animated animate__fadeIn'
+                            },
+                            hideClass: {
+                                popup: 'animate__animated animate__fadeOut'
                             }
                         });
                     }
@@ -229,6 +253,12 @@
                         buttonsStyling: false,
                         customClass: {
                             confirmButton: 'btn btn-primary'
+                        },
+                        showClass: {
+                            popup: 'animate__animated animate__fadeIn'
+                        },
+                        hideClass: {
+                            popup: 'animate__animated animate__fadeOut'
                         }
                     });
                 }

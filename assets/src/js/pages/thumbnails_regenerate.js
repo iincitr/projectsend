@@ -24,6 +24,12 @@
                         buttonsStyling: false,
                         customClass: {
                             confirmButton: 'btn btn-primary'
+                        },
+                        showClass: {
+                            popup: 'animate__animated animate__fadeIn'
+                        },
+                        hideClass: {
+                            popup: 'animate__animated animate__fadeOut'
                         }
                     });
                     return false;
@@ -42,6 +48,12 @@
                         buttonsStyling: false,
                         customClass: {
                             confirmButton: 'btn btn-primary'
+                        },
+                        showClass: {
+                            popup: 'animate__animated animate__fadeIn'
+                        },
+                        hideClass: {
+                            popup: 'animate__animated animate__fadeOut'
                         }
                     });
                     return false;
@@ -70,6 +82,12 @@
                     customClass: {
                         confirmButton: 'btn btn-primary me-2',
                         cancelButton: 'btn btn-secondary'
+                    },
+                    showClass: {
+                        popup: 'animate__animated animate__fadeIn'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOut'
                     }
                 }).then((result) => {
                     if (result.isConfirmed) {
@@ -95,6 +113,12 @@
                         buttonsStyling: false,
                         customClass: {
                             confirmButton: 'btn btn-primary'
+                        },
+                        showClass: {
+                            popup: 'animate__animated animate__fadeIn'
+                        },
+                        hideClass: {
+                            popup: 'animate__animated animate__fadeOut'
                         }
                     });
                     $(this).val('');
@@ -355,6 +379,12 @@
                     buttonsStyling: false,
                     customClass: {
                         confirmButton: 'btn btn-primary'
+                    },
+                    showClass: {
+                        popup: 'animate__animated animate__fadeIn'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOut'
                     }
                 });
             } else {
@@ -368,6 +398,12 @@
                     buttonsStyling: false,
                     customClass: {
                         confirmButton: 'btn btn-primary'
+                    },
+                    showClass: {
+                        popup: 'animate__animated animate__fadeIn'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOut'
                     }
                 });
             }

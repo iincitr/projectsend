@@ -224,61 +224,11 @@ function redirect_if_role_not_allowed($allowed_levels = null) {
 }
 
 /**
- * Helper functions for common access patterns - easier migration from $allowed_levels
- */
-
-/**
- * Check if current user can access admin-only areas
- */
-function redirect_if_not_admin() {
-    redirect_if_role_not_allowed([9, 8]); // System Administrator, Account Manager
-}
-
-/**
- * Check if current user can access super-admin-only areas
- */
-function redirect_if_not_super_admin() {
-    redirect_if_role_not_allowed([9]); // System Administrator only
-}
-
-/**
- * Check if current user can access system user areas (non-clients)
- */
-function redirect_if_not_system_user() {
-    redirect_if_role_not_allowed([9, 8, 7]); // System Administrator, Account Manager, Uploader
-}
-
-/**
- * Allow access to all logged-in users (including clients)
- */
-function redirect_if_not_logged_in_user() {
-    redirect_if_role_not_allowed([9, 8, 7, 0]);
-}
-
-/**
- * Check if current user can access client-only areas
- */
-function redirect_if_not_client() {
-    redirect_if_role_not_allowed([0]);
-}
-
-/**
- * Enhanced access control that supports both roles and permissions
- * @param array $allowed_levels Legacy role levels (for backward compatibility)
+ * Enhanced access control based on permissions
  * @param array $required_permissions Array of permission names required
  * @param string $access_type Type of access required: 'any' (default) or 'all'
  */
-function check_access_enhanced($allowed_levels = null, $required_permissions = null, $access_type = 'any') {
-    // First check role-based access if provided
-    if (!empty($allowed_levels)) {
-        try {
-            redirect_if_role_not_allowed($allowed_levels);
-            return; // If we get here, role access was granted
-        } catch (Exception $e) {
-            // Role access denied, continue to permission check
-        }
-    }
-
+function check_access_enhanced($required_permissions = null, $access_type = 'any') {
     // Check permission-based access if provided
     if (!empty($required_permissions) && user_is_logged_in()) {
         $permissions = new \ProjectSend\Classes\Permissions($_SESSION['user_id']);
@@ -306,8 +256,8 @@ function check_access_enhanced($allowed_levels = null, $required_permissions = n
         return; // Permission access granted
     }
 
-    // If neither role nor permission access was granted
-    if (!empty($allowed_levels) || !empty($required_permissions)) {
+    // If no permission access was granted
+    if (!empty($required_permissions)) {
         exit_with_error_code(403);
     }
 }

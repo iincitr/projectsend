@@ -4,7 +4,7 @@
  *
  */
 require_once 'bootstrap.php';
-check_access_enhanced(null, ['create_assets', 'edit_assets', 'delete_assets'], 'any');
+check_access_enhanced(['create_assets', 'edit_assets', 'delete_assets'], 'any');
 
 $active_nav = 'tools';
 

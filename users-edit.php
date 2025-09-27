@@ -142,9 +142,19 @@ if ($_POST) {
     error_log("User arguments: " . print_r($user_arguments, true));
     error_log("POST data: " . print_r($_POST, true));
 
+    // Process custom fields
+    $custom_field_data = [];
+    foreach ($_POST as $key => $value) {
+        if (strpos($key, 'custom_field_') === 0) {
+            $field_id = str_replace('custom_field_', '', $key);
+            $custom_field_data[$field_id] = $value;
+        }
+    }
+
     // Validate the information from the posted form.
     $edit_user->set($user_arguments);
     $edit_user->setType("existing_user");
+    $edit_user->custom_field_data = $custom_field_data;
     $edit_response = $edit_user->edit();
 
 
