@@ -687,7 +687,7 @@ class Files
 	 * Original name: formatURL
 	 * John Magnolia / svick on StackOverflow
 	 *
-	 * @param string $unformatted
+	 * @param string $original_filename
 	 * @return string
 	 * @link http://stackoverflow.com/questions/2668854/sanitizing-strings-to-make-them-url-and-filename-safe
 	 */
@@ -781,8 +781,9 @@ class Files
     /**
      * Makes the change on the database to hide or show a file
      *
-     * @param [type] Group or client, changes the column on the query
-     * @param [type] ID of the group or client
+     * @param int $status Hide or show status (0 or 1)
+     * @param string $to_type Group or client, changes the column on the query
+     * @param int $to_id ID of the group or client
      * @return void
      */
 	private function changeHiddenStatus($status, $to_type, $to_id)

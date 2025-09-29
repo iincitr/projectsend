@@ -302,7 +302,7 @@ class Download
 	 * 
 	 * script-origin: https://www.media-division.com/php-download-script-with-resume-option/
      *
-     * @param string $filename absolute full path to the file on disk
+     * @param string $file_location absolute full path to the file on disk
      * @param string $save_as original filename
      * @return void
      */

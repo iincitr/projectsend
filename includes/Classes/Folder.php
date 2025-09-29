@@ -360,18 +360,17 @@ class Folder
 
     function getHierarchyFrom($folder_id = null, array $hierarchy = [])
     {
-        global $dbh;
         $folder_id = (int)$folder_id;
-    
+
         // Add current folder
         $folder = new \ProjectSend\Classes\Folder($folder_id);
         $hierarchy[] = $folder->getData();
-    
+
         // Parents
         if ($folder_id != null) {
             $query = "SELECT * FROM " . TABLE_FOLDERS . " WHERE id=:id";
             $params[':id'] = (int)$folder_id;
-            $statement = $dbh->prepare($query);
+            $statement = $this->dbh->prepare($query);
             $statement->execute($params);
             if ($statement->rowCount() > 0) {
                 $statement->setFetchMode(\PDO::FETCH_ASSOC);
@@ -388,18 +387,17 @@ class Folder
 
     function getAllDescendants($folder_id = null, array $descendants = [])
     {
-        global $dbh;
         $folder_id = (int)$folder_id;
 
         // Add current folder
         $folder = new \ProjectSend\Classes\Folder($folder_id);
         $descendants[] = $folder->getData();
-        
+
         // Children
         if ($folder_id != null) {
             $query = "SELECT * FROM " . TABLE_FOLDERS . " WHERE parent=:id";
             $params[':id'] = (int)$folder_id;
-            $statement = $dbh->prepare($query);
+            $statement = $this->dbh->prepare($query);
             $statement->execute($params);
             if ($statement->rowCount() > 0) {
                 $statement->setFetchMode(\PDO::FETCH_ASSOC);
