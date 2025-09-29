@@ -803,7 +803,6 @@ class Files
                 break;
             default:
                 throw new \Exception('Invalid status code');
-                return false;
         }
 
         switch ($to_type) {
@@ -819,7 +818,6 @@ class Files
                 break;
             default:
                 throw new \Exception('Invalid modify type');
-                return false;
         }
 
         /** Do a permissions check */
@@ -999,11 +997,6 @@ class Files
                 'message' => __('Failed to delete file.', 'cftp_admin')
             ];
         }
-
-        return [
-            'status' => 'error',
-            'message' => __('Failed to delete file.', 'cftp_admin')
-        ];
     }
     
     public function setDefaults()
@@ -1457,7 +1450,6 @@ class Files
                 break;
             default:
                 throw new \Exception('Invalid type');
-                return false;
         }
 
         $statement = $this->dbh->prepare("INSERT INTO " . TABLE_FILES_RELATIONS . " (file_id, $column, hidden)"
@@ -1503,7 +1495,6 @@ class Files
                 break;
             default:
                 throw new \Exception('Invalid modify type');
-                return false;
         }
 
         $sql = "DELETE FROM " . TABLE_FILES_RELATIONS . " WHERE file_id = :file_id AND " . $column . " = :from_id";

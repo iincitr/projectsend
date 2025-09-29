@@ -128,8 +128,6 @@ class Folder
         } catch (\Exception $e) {
             return false;
         }
-
-        return false;
     }
 
     public function getData()
