@@ -1,0 +1,20 @@
+parameters:
+    level: 5
+    paths:
+        - includes/Classes
+    excludePaths:
+        - */vendor/*
+        - */node_modules/*
+        - */cache/*
+        - */upload/*
+        - */my_files/*
+
+    ignoreErrors:
+        # Common legacy PHP patterns that are hard to fix immediately
+        - '#Variable \$.*might not be defined#'
+        - '#Undefined variable: \$.*#'
+        - '#Function .*\(\) should return.*but return statement is missing#'
+
+    # Bootstrap file to help PHPStan understand the application context
+    bootstrapFiles:
+        - phpstan-bootstrap.php
