@@ -11,14 +11,12 @@ use \PDO;
 class CustomFieldValues
 {
     private $dbh;
-    private $logger;
 
     public function __construct()
     {
         global $dbh;
 
         $this->dbh = $dbh;
-        $this->logger = new \ProjectSend\Classes\ActionsLog;
     }
 
     /**

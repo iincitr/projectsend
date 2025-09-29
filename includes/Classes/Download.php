@@ -181,7 +181,7 @@ class Download
                 ]);
             
                 if (file_exists($zip_file)) {
-                    setCookie("download_started", 1, time() + 20, '/', "", false, false);
+                    setCookie("download_started", "1", time() + 20, '/', "", false, false);
 
                     $save_as = 'files_'.generate_random_string().'.zip';
                     switch (get_option('download_method')) {

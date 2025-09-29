@@ -120,7 +120,7 @@ class AutoUpdate
                 'method' => 'HEAD'
             ]
         ]);
-        $headers = @get_headers(UPDATES_FEED_URI, 0, $context);
+        $headers = @get_headers(UPDATES_FEED_URI, false, $context);
         if ($headers && strpos($headers[0], '200')) {
             $can_connect = true;
         }

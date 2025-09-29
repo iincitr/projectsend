@@ -1600,7 +1600,7 @@ class Files
             return;
         }
 
-        $exif = exif_read_data($this->full_path, 0, true);
+        $exif = exif_read_data($this->full_path, null, true);
         $exif = $exif['IFD0'];
         if (!empty($exif)) {
             $exif_display = [
