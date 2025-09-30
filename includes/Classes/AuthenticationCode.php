@@ -5,7 +5,6 @@ use \PDO;
 class AuthenticationCode
 {
     private $dbh;
-    private $logger;
 
     public $id;
     public $user_id;
@@ -22,7 +21,6 @@ class AuthenticationCode
         global $dbh;
 
         $this->dbh = $dbh;
-        $this->logger = new \ProjectSend\Classes\ActionsLog;
 
         $this->minutes_between_attempts = 5;
 

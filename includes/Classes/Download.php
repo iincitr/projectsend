@@ -181,7 +181,7 @@ class Download
                 ]);
             
                 if (file_exists($zip_file)) {
-                    setCookie("download_started", 1, time() + 20, '/', "", false, false);
+                    setCookie("download_started", "1", time() + 20, '/', "", false, false);
 
                     $save_as = 'files_'.generate_random_string().'.zip';
                     switch (get_option('download_method')) {
@@ -302,7 +302,7 @@ class Download
 	 * 
 	 * script-origin: https://www.media-division.com/php-download-script-with-resume-option/
      *
-     * @param string $filename absolute full path to the file on disk
+     * @param string $file_location absolute full path to the file on disk
      * @param string $save_as original filename
      * @return void
      */

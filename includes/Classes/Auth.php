@@ -194,25 +194,15 @@ class Auth
             exit_with_error_code(404);
         }
 
-        //Attempt to authenticate users with a provider by name
-        switch ($provider) {
-            case 'google':
-            case 'facebook':
-            case 'linkedIn':
-            case 'twitter':
-            case 'windowslive':
-            case 'yahoo':
-            case 'openid':
-            case 'microsoftgraph':
-                break;
-            default:
-                exit_with_error_code(404);
-                break;
+        // Validate provider is in our supported list
+        $supported_providers = ['google', 'facebook', 'linkedin', 'twitter', 'windowslive', 'yahoo', 'openid', 'microsoftgraph'];
+        if (!in_array(strtolower($provider), $supported_providers)) {
+            exit_with_error_code(404);
         }
-            
+
         global $hybridauth;
         $adapter = $hybridauth->authenticate($provider);
-        if ($adapter->isConnected($provider)) {
+        if ($adapter->isConnected()) {
             $userProfile = $adapter->getUserProfile();
             Session::remove('SOCIAL_LOGIN_NETWORK');
         }
@@ -255,8 +245,6 @@ class Auth
             }
         } else {
             // User does not exist, create if self-registrations are allowed
-            //pax($userProfile);
-
             if (get_option('clients_can_register') == '0') {
                 $this->setError($this->error_strings['no_self_registration']);
                 ps_redirect(BASE_URI);
@@ -265,6 +253,10 @@ class Auth
             $email_parts = explode('@', $userProfile->email);
             $username = (!username_exists($email_parts[0])) ? $email_parts[0] : generate_username($email_parts[0]);
             $password = generate_random_password();
+
+            // Get social login settings
+            $auto_enable = get_option('social_login_auto_enable', null, 'true') == 'true';
+            $default_role = get_option('social_login_default_role', null, '0');
 
             /** Validate the information from the posted form. */
             /** Create the user if validation is correct. */
@@ -278,25 +270,26 @@ class Auth
                 'address' => null,
                 'phone' => null,
                 'contact' => null,
+                'role' => $default_role,
                 'max_file_size' => 0,
                 'notify_upload' => 1,
                 'notify_account' => 1,
-                'active' => (get_option('clients_auto_approve') == 0) ? 0 : 1,
-                'account_requested'	=> (get_option('clients_auto_approve') == 0) ? 1 : 0,
+                'active' => $auto_enable ? 1 : 0,
+                'account_requested'	=> $auto_enable ? 0 : 1,
                 'type' => 'new_client',
                 'recaptcha' => null,
             ]);
 
-            $new_client->create();
+            $new_response = $new_client->create();
             if (!empty($new_response['id'])) {
                 $new_client->triggerAfterSelfRegister();
 
-                // Save as metadata
+                // Save social network profile as metadata
                 $meta_name = 'social_network';
                 $meta_value = json_encode($userProfile);
                 $statement = $this->dbh->prepare("INSERT INTO " . TABLE_USER_META . " (user_id, name, value)"
                                 ."VALUES (:id, :name, :value)");
-                $statement->bindParam(':id', $this->user->id, PDO::PARAM_INT);
+                $statement->bindParam(':id', $new_response['id'], PDO::PARAM_INT);
                 $statement->bindParam(':name', $meta_name);
                 $statement->bindParam(':value', $meta_value);
                 $statement->execute();
@@ -311,7 +304,7 @@ class Auth
 
                 $redirect_to = BASE_URI.'register.php?success=1';
 
-                if (get_option('clients_auto_approve') == 1) {
+                if ($auto_enable) {
                     $this->authenticate($username, $password);
                     $redirect_to = 'my_files/index.php';
                 }
@@ -713,14 +706,8 @@ class Auth
             try {
                 $hybridauth->disconnectAllAdapters();
             } catch (\Exception $e) {
-                /*
-                $return = [
-                    'status' => 'error',
-                    'message' => sprintf(__("Logout error: %s", 'cftp_admin'), $e->getMessage())
-                ];
-    
-                return json_encode($return);
-                */
+                // Silently fail if disconnect fails - user is already logged out locally
+                error_log('HybridAuth disconnect error: ' . $e->getMessage());
             }
         }
 
@@ -732,10 +719,6 @@ class Auth
                 'affected_account_name' => CURRENT_USER_NAME
             ]);
         }
-
-		// if ( isset( $_GET['timeout'] ) ) {
-        //     $error_code = 'timeout';
-        // }
     }
 
     /**

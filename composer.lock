@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ddde3050891a47b204861360bd77549b",
+    "content-hash": "d3c8fe47c9728c541073df566695e0d5",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.356.26",
+            "version": "3.356.27",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "98d100ee08eb5340148cc6010c0443eb346a8486"
+                "reference": "6f6b8cfdc1a1555b7a749395a79bda51910646e0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/98d100ee08eb5340148cc6010c0443eb346a8486",
-                "reference": "98d100ee08eb5340148cc6010c0443eb346a8486",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/6f6b8cfdc1a1555b7a749395a79bda51910646e0",
+                "reference": "6f6b8cfdc1a1555b7a749395a79bda51910646e0",
                 "shasum": ""
             },
             "require": {
@@ -153,22 +153,22 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.356.26"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.356.27"
             },
-            "time": "2025-09-25T18:07:59+00:00"
+            "time": "2025-09-26T18:12:38+00:00"
         },
         {
             "name": "claviska/simpleimage",
-            "version": "3.6.5",
+            "version": "3.7.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/claviska/SimpleImage.git",
-                "reference": "00f90662686696b9b7157dbb176183aabe89700f"
+                "reference": "82dbef988e356baa5d73993a1351bcb6c0959269"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/claviska/SimpleImage/zipball/00f90662686696b9b7157dbb176183aabe89700f",
-                "reference": "00f90662686696b9b7157dbb176183aabe89700f",
+                "url": "https://api.github.com/repos/claviska/SimpleImage/zipball/82dbef988e356baa5d73993a1351bcb6c0959269",
+                "reference": "82dbef988e356baa5d73993a1351bcb6c0959269",
                 "shasum": ""
             },
             "require": {
@@ -196,7 +196,7 @@
             "description": "A PHP class that makes working with images as simple as possible.",
             "support": {
                 "issues": "https://github.com/claviska/SimpleImage/issues",
-                "source": "https://github.com/claviska/SimpleImage/tree/3.6.5"
+                "source": "https://github.com/claviska/SimpleImage/tree/3.7.2"
             },
             "funding": [
                 {
@@ -204,7 +204,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-12-01T12:42:55+00:00"
+            "time": "2022-12-12T14:31:53+00:00"
         },
         {
             "name": "cocur/slugify",
@@ -282,22 +282,22 @@
         },
         {
             "name": "enshrined/svg-sanitize",
-            "version": "0.22.0",
+            "version": "0.15.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/darylldoyle/svg-sanitizer.git",
-                "reference": "0afa95ea74be155a7bcd6c6fb60c276c39984500"
+                "reference": "e50b83a2f1f296ca61394fe88fbfe3e896a84cf4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/darylldoyle/svg-sanitizer/zipball/0afa95ea74be155a7bcd6c6fb60c276c39984500",
-                "reference": "0afa95ea74be155a7bcd6c6fb60c276c39984500",
+                "url": "https://api.github.com/repos/darylldoyle/svg-sanitizer/zipball/e50b83a2f1f296ca61394fe88fbfe3e896a84cf4",
+                "reference": "e50b83a2f1f296ca61394fe88fbfe3e896a84cf4",
                 "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
                 "ext-libxml": "*",
-                "php": "^7.1 || ^8.0"
+                "php": "^7.0 || ^8.0"
             },
             "require-dev": {
                 "phpunit/phpunit": "^6.5 || ^8.5"
@@ -321,9 +321,9 @@
             "description": "An SVG sanitizer for PHP",
             "support": {
                 "issues": "https://github.com/darylldoyle/svg-sanitizer/issues",
-                "source": "https://github.com/darylldoyle/svg-sanitizer/tree/0.22.0"
+                "source": "https://github.com/darylldoyle/svg-sanitizer/tree/0.15.4"
             },
-            "time": "2025-08-12T10:13:48+00:00"
+            "time": "2022-02-21T09:13:59+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -652,16 +652,16 @@
         },
         {
             "name": "hybridauth/hybridauth",
-            "version": "v3.8.0",
+            "version": "v3.12.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hybridauth/hybridauth.git",
-                "reference": "c76bea6638376394c74a52791dd637fef4deaf08"
+                "reference": "c6184bf92404394e918353a0ea0d35a97ac3b0fe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hybridauth/hybridauth/zipball/c76bea6638376394c74a52791dd637fef4deaf08",
-                "reference": "c76bea6638376394c74a52791dd637fef4deaf08",
+                "url": "https://api.github.com/repos/hybridauth/hybridauth/zipball/c6184bf92404394e918353a0ea0d35a97ac3b0fe",
+                "reference": "c6184bf92404394e918353a0ea0d35a97ac3b0fe",
                 "shasum": ""
             },
             "require": {
@@ -669,7 +669,7 @@
             },
             "require-dev": {
                 "ext-curl": "*",
-                "phpunit/phpunit": "^4.8.35 || ^6.5 || ^8.0"
+                "phpunit/phpunit": "^4.8.35 || ^6.5 || ^8.0 || ^12.0"
             },
             "suggest": {
                 "firebase/php-jwt": "Needed to support Apple provider",
@@ -708,9 +708,9 @@
             "support": {
                 "gitter": "https://gitter.im/hybridauth/hybridauth",
                 "issues": "https://github.com/hybridauth/hybridauth/issues",
-                "source": "https://github.com/hybridauth/hybridauth/tree/v3.8.0"
+                "source": "https://github.com/hybridauth/hybridauth/tree/v3.12.2"
             },
-            "time": "2022-04-08T09:49:25+00:00"
+            "time": "2025-06-18T11:58:48+00:00"
         },
         {
             "name": "league/color-extractor",
@@ -932,16 +932,16 @@
         },
         {
             "name": "phpmailer/phpmailer",
-            "version": "v6.6.0",
+            "version": "v6.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPMailer/PHPMailer.git",
-                "reference": "e43bac82edc26ca04b36143a48bde1c051cfd5b1"
+                "reference": "bf74d75a1fde6beaa34a0ddae2ec5fce0f72a144"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/e43bac82edc26ca04b36143a48bde1c051cfd5b1",
-                "reference": "e43bac82edc26ca04b36143a48bde1c051cfd5b1",
+                "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/bf74d75a1fde6beaa34a0ddae2ec5fce0f72a144",
+                "reference": "bf74d75a1fde6beaa34a0ddae2ec5fce0f72a144",
                 "shasum": ""
             },
             "require": {
@@ -951,22 +951,25 @@
                 "php": ">=5.5.0"
             },
             "require-dev": {
-                "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
-                "doctrine/annotations": "^1.2",
-                "php-parallel-lint/php-console-highlighter": "^0.5.0",
-                "php-parallel-lint/php-parallel-lint": "^1.3.1",
+                "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+                "doctrine/annotations": "^1.2.6 || ^1.13.3",
+                "php-parallel-lint/php-console-highlighter": "^1.0.0",
+                "php-parallel-lint/php-parallel-lint": "^1.3.2",
                 "phpcompatibility/php-compatibility": "^9.3.5",
                 "roave/security-advisories": "dev-latest",
-                "squizlabs/php_codesniffer": "^3.6.2",
-                "yoast/phpunit-polyfills": "^1.0.0"
+                "squizlabs/php_codesniffer": "^3.7.2",
+                "yoast/phpunit-polyfills": "^1.0.4"
             },
             "suggest": {
+                "decomplexity/SendOauth2": "Adapter for using XOAUTH2 authentication",
                 "ext-mbstring": "Needed to send email in multibyte encoding charset or decode encoded addresses",
+                "ext-openssl": "Needed for secure SMTP sending and DKIM signing",
+                "greew/oauth2-azure-provider": "Needed for Microsoft Azure XOAUTH2 authentication",
                 "hayageek/oauth2-yahoo": "Needed for Yahoo XOAUTH2 authentication",
                 "league/oauth2-google": "Needed for Google XOAUTH2 authentication",
                 "psr/log": "For optional PSR-3 debug logging",
-                "stevenmaguire/oauth2-microsoft": "Needed for Microsoft XOAUTH2 authentication",
-                "symfony/polyfill-mbstring": "To support UTF-8 if the Mbstring PHP extension is not enabled (^1.2)"
+                "symfony/polyfill-mbstring": "To support UTF-8 if the Mbstring PHP extension is not enabled (^1.2)",
+                "thenetworg/oauth2-azure": "Needed for Microsoft XOAUTH2 authentication"
             },
             "type": "library",
             "autoload": {
@@ -998,7 +1001,7 @@
             "description": "PHPMailer is a full-featured email creation and transfer class for PHP",
             "support": {
                 "issues": "https://github.com/PHPMailer/PHPMailer/issues",
-                "source": "https://github.com/PHPMailer/PHPMailer/tree/v6.6.0"
+                "source": "https://github.com/PHPMailer/PHPMailer/tree/v6.10.0"
             },
             "funding": [
                 {
@@ -1006,7 +1009,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-02-28T15:31:21+00:00"
+            "time": "2025-04-24T15:19:31+00:00"
         },
         {
             "name": "psr/http-client",
@@ -1388,10 +1391,10 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.0.x-dev",
-                    "1.2.x": "1.2.x-dev",
+                    "1.0.x": "1.0.x-dev",
                     "1.1.x": "1.1.x-dev",
-                    "1.0.x": "1.0.x-dev"
+                    "1.2.x": "1.2.x-dev",
+                    "dev-master": "2.0.x-dev"
                 }
             },
             "autoload": {
@@ -1428,7 +1431,66 @@
             "time": "2020-12-28T10:04:47+00:00"
         }
     ],
-    "packages-dev": [],
+    "packages-dev": [
+        {
+            "name": "phpstan/phpstan",
+            "version": "1.12.31",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/phpstan/phpstan-phar-composer-source.git",
+                "reference": "git1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/a7630bb5311a41d13a2364634c78c5f4da250d53",
+                "reference": "a7630bb5311a41d13a2364634c78c5f4da250d53",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2|^8.0"
+            },
+            "conflict": {
+                "phpstan/phpstan-shim": "*"
+            },
+            "bin": [
+                "phpstan",
+                "phpstan.phar"
+            ],
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "bootstrap.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "PHPStan - PHP Static Analysis Tool",
+            "keywords": [
+                "dev",
+                "static analysis"
+            ],
+            "support": {
+                "docs": "https://phpstan.org/user-guide/getting-started",
+                "forum": "https://github.com/phpstan/phpstan/discussions",
+                "issues": "https://github.com/phpstan/phpstan/issues",
+                "security": "https://github.com/phpstan/phpstan/security/policy",
+                "source": "https://github.com/phpstan/phpstan-src"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/ondrejmirtes",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/phpstan",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-09-24T15:58:55+00:00"
+        }
+    ],
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": [],

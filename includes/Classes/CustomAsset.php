@@ -339,7 +339,6 @@ class CustomAsset
                 break;
             default:
                 return false;
-                break;
         }
 
         /** Do a permissions check */

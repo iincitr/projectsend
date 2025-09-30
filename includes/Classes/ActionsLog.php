@@ -90,7 +90,6 @@ class ActionsLog
      */
     function addEntry($arguments)
     {
-        global $dbh;
 
         /** Define the account information */
         $default_user = (defined('CURRENT_USER_USERNAME')) ? CURRENT_USER_USERNAME : null;
@@ -165,7 +164,7 @@ class ActionsLog
 
         $lq .= ")";
 
-        $statement = $dbh->prepare($lq);
+        $statement = $this->dbh->prepare($lq);
         $statement->execute($params);
     }
 }
