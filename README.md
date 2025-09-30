@@ -30,7 +30,7 @@ Downloading a development version directly from the repository might give you un
 
 ## Documentation
 
-Docs are maintained at https://projectsend.gitbook.io.
+Docs are maintained at <https://docs.projectsend.org>.
 There you will find installation requirements, instructions, tutorials, and troubleshooting information.
 
 ## Developing
