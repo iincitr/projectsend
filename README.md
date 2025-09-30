@@ -2,6 +2,10 @@
 
 ![ProjectSend logo](https://www.projectsend.org/projectsend-logo-new.png)
 
+[![PHP Static Analysis](https://github.com/projectsend/projectsend/actions/workflows/php-static-analysis.yml/badge.svg)](https://github.com/projectsend/projectsend/actions/workflows/php-static-analysis.yml)
+[![Asset Build Check](https://github.com/projectsend/projectsend/actions/workflows/asset-build.yml/badge.svg)](https://github.com/projectsend/projectsend/actions/workflows/asset-build.yml)
+[![Dependency Security](https://github.com/projectsend/projectsend/actions/workflows/dependency-security.yml/badge.svg)](https://github.com/projectsend/projectsend/actions/workflows/dependency-security.yml)
+
 ## About
 
 ProjectSend is a free, clients-oriented, private file sharing web application.
