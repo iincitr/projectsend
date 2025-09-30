@@ -14,6 +14,7 @@ parameters:
         - my_files/
     scanDirectories:
         - includes/
+    reportUnmatchedIgnoredErrors: false
     ignoreErrors:
         # Common legacy PHP patterns that are hard to fix immediately
         - '#Variable \$.*might not be defined#'
