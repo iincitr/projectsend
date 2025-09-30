@@ -47,6 +47,11 @@ class Files
     public $external_path; // path/key in external storage
     public $bucket_name; // bucket/container name
     public $integration_id; // foreign key to tbl_integrations
+    public $encrypted; // 1 if file is encrypted, 0 otherwise
+    public $encryption_key_encrypted; // encrypted file key (base64)
+    public $encryption_iv; // IV for key encryption (base64)
+    public $encryption_algorithm; // encryption algorithm used
+    public $encryption_file_iv; // IV for file encryption (base64)
     private $dbh;
     private $logger;
     private $external_storage;
@@ -80,6 +85,13 @@ class Files
         $this->bucket_name = null;
         $this->integration_id = null;
         $this->external_storage = null;
+
+        // Initialize encryption properties
+        $this->encrypted = 0;
+        $this->encryption_key_encrypted = null;
+        $this->encryption_iv = null;
+        $this->encryption_algorithm = 'aes-256-gcm';
+        $this->encryption_file_iv = null;
 
         if (!empty($file_id)) {
             $this->get($file_id);
@@ -255,6 +267,13 @@ class Files
             $this->external_path = html_output($row['external_path'] ?? null);
             $this->bucket_name = html_output($row['bucket_name'] ?? null);
             $this->integration_id = html_output($row['integration_id'] ?? null);
+
+            // Load encryption properties
+            $this->encrypted = isset($row['encrypted']) ? (int)$row['encrypted'] : 0;
+            $this->encryption_key_encrypted = $row['encryption_key_encrypted'] ?? null;
+            $this->encryption_iv = $row['encryption_iv'] ?? null;
+            $this->encryption_algorithm = $row['encryption_algorithm'] ?? 'aes-256-gcm';
+            $this->encryption_file_iv = $row['encryption_file_iv'] ?? null;
         }
 
         $this->full_path = $this->getFilePath();
@@ -1071,8 +1090,8 @@ class Files
         $this->disk_folder_year = (isset($this->date_folder_year)) ? (int)$this->date_folder_year : null;
         $this->disk_folder_month = (isset($this->date_folder_month)) ? (int)$this->date_folder_month : null;
 		
-        $statement = $this->dbh->prepare("INSERT INTO " . TABLE_FILES . " (user_id, url, original_url, size, filename, description, uploader, expires, expiry_date, public_allow, public_token, folder_id, disk_folder_year, disk_folder_month, storage_type, external_path, bucket_name, integration_id)"
-                                        ."VALUES (:user_id, :url, :original_url, :size, :filename, :description, :uploader, :expires, :expiry_date, :public, :public_token, :folder_id, :disk_folder_year, :disk_folder_month, :storage_type, :external_path, :bucket_name, :integration_id)");
+        $statement = $this->dbh->prepare("INSERT INTO " . TABLE_FILES . " (user_id, url, original_url, size, filename, description, uploader, expires, expiry_date, public_allow, public_token, folder_id, disk_folder_year, disk_folder_month, storage_type, external_path, bucket_name, integration_id, encrypted, encryption_key_encrypted, encryption_iv, encryption_algorithm, encryption_file_iv)"
+                                        ."VALUES (:user_id, :url, :original_url, :size, :filename, :description, :uploader, :expires, :expiry_date, :public, :public_token, :folder_id, :disk_folder_year, :disk_folder_month, :storage_type, :external_path, :bucket_name, :integration_id, :encrypted, :encryption_key_encrypted, :encryption_iv, :encryption_algorithm, :encryption_file_iv)");
         $statement->bindParam(':user_id', $this->uploader_id, PDO::PARAM_INT);
         $statement->bindParam(':url', $this->filename_on_disk);
         $statement->bindParam(':original_url', $this->filename_original);
@@ -1091,6 +1110,11 @@ class Files
         $statement->bindParam(':external_path', $this->external_path);
         $statement->bindParam(':bucket_name', $this->bucket_name);
         $statement->bindParam(':integration_id', $this->integration_id, PDO::PARAM_INT);
+        $statement->bindParam(':encrypted', $this->encrypted, PDO::PARAM_INT);
+        $statement->bindParam(':encryption_key_encrypted', $this->encryption_key_encrypted);
+        $statement->bindParam(':encryption_iv', $this->encryption_iv);
+        $statement->bindParam(':encryption_algorithm', $this->encryption_algorithm);
+        $statement->bindParam(':encryption_file_iv', $this->encryption_file_iv);
         $statement->execute();
 
         $this->file_id = $this->dbh->lastInsertId();

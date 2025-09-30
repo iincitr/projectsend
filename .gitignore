@@ -84,3 +84,6 @@ reports/
 *.md
 !README.md
 !SECURITY.md
+
+# Documentation drafts
+docs_temp/

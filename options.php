@@ -299,9 +299,32 @@ if ($section == 'general' && get_option('uploads_organize_folders_by_date') == '
 
 
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';
+
+// Load form sections to get navigation data
+$form_file = FORMS_DIR . DS . 'options' . DS . $section . '.php';
+$form_sections_for_nav = [];
+if (file_exists($form_file)) {
+    // Include the file and capture output to prevent double rendering
+    ob_start();
+    include_once $form_file;
+    ob_end_clean();
+
+    // Check if $form_sections was defined in the included file
+    if (isset($form_sections)) {
+        $form_sections_for_nav = $form_sections;
+    }
+}
 ?>
 <div class="row">
-    <div class="col-12 col-sm-12 col-lg-6">
+    <?php if (!empty($form_sections_for_nav)): ?>
+    <!-- Sticky vertical navigation (hidden on mobile) -->
+    <div class="col-lg-2 d-none d-lg-block">
+        <?php render_options_section_navigation($form_sections_for_nav); ?>
+    </div>
+    <?php endif; ?>
+
+    <!-- Main content area -->
+    <div class="col-12 <?php echo !empty($form_sections_for_nav) ? 'col-lg-10' : 'col-lg-6'; ?>">
         <div class="ps-card">
             <div class="ps-card-body">
 
@@ -310,9 +333,14 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                     <input type="hidden" name="section" value="<?php echo $section; ?>">
 
                     <?php
-                    $form_file = FORMS_DIR . DS . 'options' . DS . $section . '.php';
-                    if (file_exists($form_file)) {
-                        include_once $form_file;
+                    // Render the form sections if using the new array-based system
+                    if (!empty($form_sections_for_nav)) {
+                        render_options_form_sections($form_sections_for_nav, false); // false = don't render nav inline
+                    } else {
+                        // Fallback: include the form file directly for legacy forms
+                        if (file_exists($form_file)) {
+                            include $form_file;
+                        }
                     }
                     ?>
 

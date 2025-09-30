@@ -6,11 +6,14 @@
     <input type="hidden" name="uploaded_files" id="uploaded_files" value="" />
     <input type="hidden" name="editor_type" value="new_files" />
     <input type="hidden" name="selected_storage" id="selected_storage" value="" />
+    <input type="hidden" name="encrypt_file" id="encrypt_file" value="0" />
 
     <?php
     // Storage selection for users with permission
     $can_select_storage = current_user_can('upload_storage_select');
     $default_storage = get_option('default_upload_storage', 'local');
+
+    // Encryption settings are defined in upload.php for use in JavaScript
     ?>
 
     <?php if ($can_select_storage): ?>
@@ -42,6 +45,37 @@
                                     ?>
                                 </select>
                                 <div class="form-text"><?php _e('Files will be stored in the selected destination. This can affect download speed and availability.', 'cftp_admin'); ?></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($show_encryption_option || $encryption_required): ?>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="ps-card">
+                    <div class="ps-card-body">
+                        <h4><?php _e('File Encryption', 'cftp_admin'); ?></h4>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <?php if ($encryption_required): ?>
+                                    <div class="alert alert-info">
+                                        <i class="fa fa-lock"></i> <?php _e('File encryption is required for all uploads. Your files will be automatically encrypted at rest on the server.', 'cftp_admin'); ?>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="encrypt_file_checkbox" id="encrypt_file_checkbox" value="1" <?php echo ($encryption_enabled) ? 'checked' : ''; ?>>
+                                        <label class="form-check-label" for="encrypt_file_checkbox">
+                                            <i class="fa fa-lock"></i> <?php _e('Encrypt files on server', 'cftp_admin'); ?>
+                                        </label>
+                                    </div>
+                                    <div class="form-text">
+                                        <?php _e('When enabled, files will be encrypted at rest using AES-256-GCM encryption and automatically decrypted when downloaded.', 'cftp_admin'); ?>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>

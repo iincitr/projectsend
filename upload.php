@@ -35,6 +35,11 @@ if (LOADED_LANG != 'en') {
     }
 }
 
+// Encryption settings (needed for JavaScript below)
+$encryption_enabled = \ProjectSend\Classes\Encryption::isEnabled();
+$encryption_required = \ProjectSend\Classes\Encryption::isRequired();
+$show_encryption_option = $encryption_enabled && !$encryption_required;
+
 message_no_clients();
 
 if (defined('UPLOAD_MAX_FILESIZE')) {
@@ -82,6 +87,10 @@ $chunk_size = get_option('upload_chunk_size');
                             var selectedStorage = $('#selected_storage').val();
                             up.settings.multipart_params = up.settings.multipart_params || {};
                             up.settings.multipart_params.storage_selection = selectedStorage;
+
+                            // Pass the encryption setting with each file upload
+                            var encryptFile = $('#encrypt_file').val();
+                            up.settings.multipart_params.encrypt_file = encryptFile;
                         }
                     }
                 });
@@ -103,6 +112,26 @@ $chunk_size = get_option('upload_chunk_size');
                 // Set default storage for users without permission
                 $(document).ready(function() {
                     $('#selected_storage').val('<?php echo get_option('default_upload_storage', 'local'); ?>');
+                });
+                <?php endif; ?>
+
+                // Handle encryption checkbox
+                <?php if ($show_encryption_option): ?>
+                $('#encrypt_file_checkbox').on('change', function() {
+                    var encryptEnabled = $(this).is(':checked') ? '1' : '0';
+                    $('#encrypt_file').val(encryptEnabled);
+                    console.log('Encryption enabled:', encryptEnabled);
+                });
+
+                // Set initial encryption value
+                $(document).ready(function() {
+                    var initialEncryption = $('#encrypt_file_checkbox').is(':checked') ? '1' : '0';
+                    $('#encrypt_file').val(initialEncryption);
+                });
+                <?php elseif ($encryption_required): ?>
+                // Encryption is required, always set to 1
+                $(document).ready(function() {
+                    $('#encrypt_file').val('1');
                 });
                 <?php endif; ?>
             });

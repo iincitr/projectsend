@@ -314,6 +314,10 @@ class CardList
                         $card_data['status'][] = $this->parseDownloadCount($cell['content']);
                         break;
 
+                    case 'encryption':
+                        // Skip encryption column in card view (already shown in title badge)
+                        break;
+
                     case 'status':
                         $card_data['status'][] = $this->parseVisibilityStatus($cell['content']);
                         break;
@@ -487,11 +491,15 @@ class CardList
      */
     private function parseExpiryStatus($content)
     {
-        $content_lower = strtolower(strip_tags($content));
+        $content_text = strip_tags($content);
+        $content_lower = strtolower($content_text);
+
         if (strpos($content_lower, 'expired') !== false) {
             return '<div class="status-icon expires-expired"><i class="fa fa-times-circle"></i> Expired</div>';
         } elseif (strpos($content_lower, 'expires') !== false) {
-            return '<div class="status-icon expires-soon"><i class="fa fa-clock-o"></i> Expires</div>';
+            // Extract the date from the content (everything after "Expires ")
+            $date_part = trim(str_ireplace('Expires', '', $content_text));
+            return '<div class="status-icon expires-soon"><i class="fa fa-clock-o"></i> Expires ' . $date_part . '</div>';
         } else {
             return '<div class="status-icon expires-never"><i class="fa fa-infinity"></i> No expiry</div>';
         }

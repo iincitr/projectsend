@@ -217,6 +217,11 @@ class Table
     {
         $continue = (!isset($attributes['condition']) || !empty($attributes['condition'])) ? true : false;
 
+        // Skip cell if hide_from_table is set
+        if (!empty($attributes['hide_from_table'])) {
+            return;
+        }
+
         if ($continue == true) {
             $this->attributes = (!empty($attributes['attributes'])) ? $attributes['attributes'] : array();
             $this->content = (!empty($attributes['content'])) ? $attributes['content'] : '';
