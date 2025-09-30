@@ -687,7 +687,7 @@ class Files
 	 * Original name: formatURL
 	 * John Magnolia / svick on StackOverflow
 	 *
-	 * @param string $unformatted
+	 * @param string $original_filename
 	 * @return string
 	 * @link http://stackoverflow.com/questions/2668854/sanitizing-strings-to-make-them-url-and-filename-safe
 	 */
@@ -781,8 +781,9 @@ class Files
     /**
      * Makes the change on the database to hide or show a file
      *
-     * @param [type] Group or client, changes the column on the query
-     * @param [type] ID of the group or client
+     * @param int $status Hide or show status (0 or 1)
+     * @param string $to_type Group or client, changes the column on the query
+     * @param int $to_id ID of the group or client
      * @return void
      */
 	private function changeHiddenStatus($status, $to_type, $to_id)
@@ -802,7 +803,6 @@ class Files
                 break;
             default:
                 throw new \Exception('Invalid status code');
-                return false;
         }
 
         switch ($to_type) {
@@ -818,7 +818,6 @@ class Files
                 break;
             default:
                 throw new \Exception('Invalid modify type');
-                return false;
         }
 
         /** Do a permissions check */
@@ -998,11 +997,6 @@ class Files
                 'message' => __('Failed to delete file.', 'cftp_admin')
             ];
         }
-
-        return [
-            'status' => 'error',
-            'message' => __('Failed to delete file.', 'cftp_admin')
-        ];
     }
     
     public function setDefaults()
@@ -1456,7 +1450,6 @@ class Files
                 break;
             default:
                 throw new \Exception('Invalid type');
-                return false;
         }
 
         $statement = $this->dbh->prepare("INSERT INTO " . TABLE_FILES_RELATIONS . " (file_id, $column, hidden)"
@@ -1502,7 +1495,6 @@ class Files
                 break;
             default:
                 throw new \Exception('Invalid modify type');
-                return false;
         }
 
         $sql = "DELETE FROM " . TABLE_FILES_RELATIONS . " WHERE file_id = :file_id AND " . $column . " = :from_id";
@@ -1599,7 +1591,7 @@ class Files
             return;
         }
 
-        $exif = exif_read_data($this->full_path, 0, true);
+        $exif = exif_read_data($this->full_path, null, true);
         $exif = $exif['IFD0'];
         if (!empty($exif)) {
             $exif_display = [

@@ -76,6 +76,9 @@ Thumbs.db
 # Test results
 test-results
 
+# Reports
+reports/
+
 # Misc
 .idea/
 *.md

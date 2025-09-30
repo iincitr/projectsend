@@ -19,11 +19,7 @@ class Categories
     private $created_date;
     public $created_by;
 
-    private $validation_passed;
     private $validation_errors;
-
-    // Permissions
-    private $allowed_actions_roles;
 
     public function __construct($category_id = null)
     {
@@ -32,7 +28,6 @@ class Categories
         $this->dbh = $dbh;
         $this->logger = new \ProjectSend\Classes\ActionsLog;
 
-        $this->allowed_actions_roles = ['System Administrator', 'Account Manager', 'Uploader'];
 
         if (!empty($category_id)) {
             $this->get($category_id);
@@ -128,11 +123,9 @@ class Categories
         ]);
 
         if ($validation->passed()) {
-            $this->validation_passed = true;
             return true;
 		}
 		else {
-            $this->validation_passed = false;
             $this->validation_errors = $validation->list_errors();
         }
 

@@ -104,7 +104,7 @@ $form_sections = [
                         $tenant_value = $tenant_option ? get_option($tenant_option) : '';
 
                         $has_callback = isset($item['callback']) && $item['callback'];
-                        $callback_url = $has_callback ? SYSTEM_URI . 'includes/oauth/callback.php' : '';
+                        $callback_url = $has_callback ? BASE_URI . 'login-callback.php' : '';
                         ?>
 
                         <h5><i class="fa fa-<?php echo $item['icon']; ?>"></i> <?php echo $item['name']; ?></h5>
