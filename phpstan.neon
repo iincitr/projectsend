@@ -15,9 +15,6 @@ parameters:
     scanDirectories:
         - includes/
     ignoreErrors:
-        # Ignore dynamic property access patterns common in ProjectSend
-        - '#Access to an undefined property#'
-        - '#Call to an undefined method PDO::#'
         # Common legacy PHP patterns that are hard to fix immediately
         - '#Variable \$.*might not be defined#'
         - '#Undefined variable: \$.*#'
