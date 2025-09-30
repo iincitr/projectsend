@@ -1,0 +1,761 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Property ProjectSend\\\\Classes\\\\ActionsLog\\:\\:\\$dbh is never read, only written\\.$#"
+			count: 1
+			path: includes/Classes/ActionsLog.php
+
+		-
+			message: "#^Call to method getMessage\\(\\) on an unknown class ProjectSend\\\\Classes\\\\Exception\\.$#"
+			count: 1
+			path: includes/Classes/Auth.php
+
+		-
+			message: "#^Caught class ProjectSend\\\\Classes\\\\Exception not found\\.$#"
+			count: 1
+			path: includes/Classes/Auth.php
+
+		-
+			message: "#^Comparison operation \"\\>\" between array\\|int and 0 results in an error\\.$#"
+			count: 2
+			path: includes/Classes/Auth.php
+
+		-
+			message: "#^Variable \\$new_response in empty\\(\\) is never defined\\.$#"
+			count: 1
+			path: includes/Classes/Auth.php
+
+		-
+			message: "#^Property ProjectSend\\\\Classes\\\\AuthenticationCode\\:\\:\\$logger is never read, only written\\.$#"
+			count: 1
+			path: includes/Classes/AuthenticationCode.php
+
+		-
+			message: "#^Parameter \\#2 \\$associative of function get_headers expects bool, int given\\.$#"
+			count: 1
+			path: includes/Classes/AutoUpdate.php
+
+		-
+			message: "#^Property ProjectSend\\\\Classes\\\\AutoUpdate\\:\\:\\$errors is never read, only written\\.$#"
+			count: 1
+			path: includes/Classes/AutoUpdate.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 1
+			path: includes/Classes/BruteForceBlock.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Categories\\:\\:getId\\(\\) should return int but returns false\\.$#"
+			count: 1
+			path: includes/Classes/Categories.php
+
+		-
+			message: "#^Property ProjectSend\\\\Classes\\\\Categories\\:\\:\\$allowed_actions_roles is never read, only written\\.$#"
+			count: 1
+			path: includes/Classes/Categories.php
+
+		-
+			message: "#^Property ProjectSend\\\\Classes\\\\Categories\\:\\:\\$created_date is unused\\.$#"
+			count: 1
+			path: includes/Classes/Categories.php
+
+		-
+			message: "#^Property ProjectSend\\\\Classes\\\\Categories\\:\\:\\$validation_passed is never read, only written\\.$#"
+			count: 1
+			path: includes/Classes/Categories.php
+
+		-
+			message: "#^Cannot access offset 'status' on bool\\.$#"
+			count: 1
+			path: includes/Classes/Cron.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\CustomAsset\\:\\:\\$row\\.$#"
+			count: 1
+			path: includes/Classes/CustomAsset.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\CustomAsset\\:\\:\\$sql\\.$#"
+			count: 2
+			path: includes/Classes/CustomAsset.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\CustomAsset\\:\\:\\$sql_query\\.$#"
+			count: 2
+			path: includes/Classes/CustomAsset.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\CustomAsset\\:\\:\\$statement\\.$#"
+			count: 1
+			path: includes/Classes/CustomAsset.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\CustomAsset\\:\\:getId\\(\\) should return int but returns false\\.$#"
+			count: 1
+			path: includes/Classes/CustomAsset.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 1
+			path: includes/Classes/CustomAsset.php
+
+		-
+			message: "#^Property ProjectSend\\\\Classes\\\\CustomFieldValues\\:\\:\\$logger is never read, only written\\.$#"
+			count: 1
+			path: includes/Classes/CustomFieldValues.php
+
+		-
+			message: "#^Property ProjectSend\\\\Classes\\\\DatabaseUpgrade\\:\\:\\$current_version is never read, only written\\.$#"
+			count: 1
+			path: includes/Classes/DatabaseUpgrade.php
+
+		-
+			message: "#^Comparison operation \"\\>\" between int\\<1, max\\> and 0 is always true\\.$#"
+			count: 1
+			path: includes/Classes/Download.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Download\\:\\:getAlias\\(\\) should return string but returns null\\.$#"
+			count: 1
+			path: includes/Classes/Download.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Download\\:\\:returnFilesIds\\(\\) should return string but return statement is missing\\.$#"
+			count: 1
+			path: includes/Classes/Download.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Download\\:\\:returnFilesIds\\(\\) should return string but returns false\\.$#"
+			count: 2
+			path: includes/Classes/Download.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$filename$#"
+			count: 1
+			path: includes/Classes/Download.php
+
+		-
+			message: "#^Parameter \\#2 \\$value of function setcookie expects string, int given\\.$#"
+			count: 1
+			path: includes/Classes/Download.php
+
+		-
+			message: "#^Property ProjectSend\\\\Classes\\\\Download\\:\\:\\$dbh is never read, only written\\.$#"
+			count: 1
+			path: includes/Classes/Download.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\Emails\\:\\:\\$client_id\\.$#"
+			count: 1
+			path: includes/Classes/Emails.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Emails\\:\\:email_2fa_code\\(\\) is unused\\.$#"
+			count: 1
+			path: includes/Classes/Emails.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Emails\\:\\:email_account_approve\\(\\) is unused\\.$#"
+			count: 1
+			path: includes/Classes/Emails.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Emails\\:\\:email_account_deny\\(\\) is unused\\.$#"
+			count: 1
+			path: includes/Classes/Emails.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Emails\\:\\:email_client_edited\\(\\) is unused\\.$#"
+			count: 1
+			path: includes/Classes/Emails.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Emails\\:\\:email_generic\\(\\) is unused\\.$#"
+			count: 1
+			path: includes/Classes/Emails.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Emails\\:\\:email_new_client\\(\\) is unused\\.$#"
+			count: 1
+			path: includes/Classes/Emails.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Emails\\:\\:email_new_client_self\\(\\) is unused\\.$#"
+			count: 1
+			path: includes/Classes/Emails.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Emails\\:\\:email_new_files_by_client\\(\\) is unused\\.$#"
+			count: 1
+			path: includes/Classes/Emails.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Emails\\:\\:email_new_files_by_user\\(\\) is unused\\.$#"
+			count: 1
+			path: includes/Classes/Emails.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Emails\\:\\:email_new_user\\(\\) is unused\\.$#"
+			count: 1
+			path: includes/Classes/Emails.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Emails\\:\\:email_password_reset\\(\\) is unused\\.$#"
+			count: 1
+			path: includes/Classes/Emails.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Emails\\:\\:email_test_settings\\(\\) is unused\\.$#"
+			count: 1
+			path: includes/Classes/Emails.php
+
+		-
+			message: "#^Property ProjectSend\\\\Classes\\\\Emails\\:\\:\\$add_bcc is never written, only read\\.$#"
+			count: 1
+			path: includes/Classes/Emails.php
+
+		-
+			message: "#^Property ProjectSend\\\\Classes\\\\Emails\\:\\:\\$set_bcc is never written, only read\\.$#"
+			count: 1
+			path: includes/Classes/Emails.php
+
+		-
+			message: "#^Access to an undefined property \\$this\\(ProjectSend\\\\Classes\\\\Files\\)\\:\\:\\$action_type\\.$#"
+			count: 3
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\Files\\:\\:\\$check_level\\.$#"
+			count: 3
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\Files\\:\\:\\$file_id\\.$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\Files\\:\\:\\$find_thumbnails\\.$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\Files\\:\\:\\$hidden\\.$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\Files\\:\\:\\$is_public\\.$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\Files\\:\\:\\$makehash\\.$#"
+			count: 3
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\Files\\:\\:\\$name\\.$#"
+			count: 2
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\Files\\:\\:\\$path\\.$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\Files\\:\\:\\$thumbnails_pattern\\.$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\Files\\:\\:\\$uid\\.$#"
+			count: 3
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\Files\\:\\:\\$uploader\\.$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\Files\\:\\:\\$uploader_id\\.$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\Files\\:\\:\\$uploader_type\\.$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\Files\\:\\:\\$username\\.$#"
+			count: 3
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Call to an undefined method ProjectSend\\\\Classes\\\\ExternalStorage\\:\\:getBucketName\\(\\)\\.$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Call to protected method generateFileKey\\(\\) of class ProjectSend\\\\Classes\\\\ExternalStorage\\.$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Files\\:\\:changeHiddenStatus\\(\\) with return type void returns false but should not return anything\\.$#"
+			count: 2
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Files\\:\\:changeHiddenStatus\\(\\) with return type void returns true but should not return anything\\.$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Files\\:\\:deleteFiles\\(\\) should return bool but returns array\\<string, string\\>\\.$#"
+			count: 3
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Files\\:\\:generateSafeFilename\\(\\) should return string but returns false\\.$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Files\\:\\:getId\\(\\) should return int but returns false\\.$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Files\\:\\:getSize\\(\\) with return type void returns false but should not return anything\\.$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Files\\:\\:setFullPath\\(\\) with return type void returns string but should not return anything\\.$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\[type\\] Group or client, changes the column on the query\\)\\: Unexpected token \"\\[\", expected type at offset 88$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\[type\\] ID of the group or client\\)\\: Unexpected token \"\\[\", expected type at offset 158$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$unformatted$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Parameter \\#1 \\$integration_id of method ProjectSend\\\\Classes\\\\Files\\:\\:updateExternalStorageInfo\\(\\) expects int, null given\\.$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Parameter \\#2 \\$external_path of method ProjectSend\\\\Classes\\\\Files\\:\\:updateExternalStorageInfo\\(\\) expects string, null given\\.$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Parameter \\#2 \\$required_sections of function exif_read_data expects string\\|null, int given\\.$#"
+			count: 1
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 5
+			path: includes/Classes/Files.php
+
+		-
+			message: "#^Cannot access offset 'status' on bool\\.$#"
+			count: 1
+			path: includes/Classes/Folder.php
+
+		-
+			message: "#^If condition is always true\\.$#"
+			count: 1
+			path: includes/Classes/Folder.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Folder\\:\\:get\\(\\) should return bool but return statement is missing\\.$#"
+			count: 1
+			path: includes/Classes/Folder.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Folder\\:\\:getId\\(\\) should return int but returns false\\.$#"
+			count: 1
+			path: includes/Classes/Folder.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 1
+			path: includes/Classes/Folder.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Groups\\:\\:getId\\(\\) should return int but returns false\\.$#"
+			count: 1
+			path: includes/Classes/Groups.php
+
+		-
+			message: "#^Property ProjectSend\\\\Classes\\\\Groups\\:\\:\\$allowed_actions_roles is never read, only written\\.$#"
+			count: 1
+			path: includes/Classes/Groups.php
+
+		-
+			message: "#^Property ProjectSend\\\\Classes\\\\Groups\\:\\:\\$validation_passed is never read, only written\\.$#"
+			count: 1
+			path: includes/Classes/Groups.php
+
+		-
+			message: "#^Property ProjectSend\\\\Classes\\\\Integrations\\:\\:\\$logger is unused\\.$#"
+			count: 1
+			path: includes/Classes/Integrations.php
+
+		-
+			message: "#^Caught class ProjectSend\\\\Classes\\\\Layout\\\\Exception not found\\.$#"
+			count: 1
+			path: includes/Classes/Layout/CardList.php
+
+		-
+			message: "#^Left side of && is always true\\.$#"
+			count: 1
+			path: includes/Classes/Layout/CardList.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Layout\\\\CardList\\:\\:enhancePreviewContent\\(\\) is unused\\.$#"
+			count: 1
+			path: includes/Classes/Layout/CardList.php
+
+		-
+			message: "#^Property ProjectSend\\\\Classes\\\\Layout\\\\CardList\\:\\:\\$attributes is unused\\.$#"
+			count: 1
+			path: includes/Classes/Layout/CardList.php
+
+		-
+			message: "#^Property ProjectSend\\\\Classes\\\\Layout\\\\CardList\\:\\:\\$sort_columns is never read, only written\\.$#"
+			count: 1
+			path: includes/Classes/Layout/CardList.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$attributes\\.$#"
+			count: 1
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$button\\.$#"
+			count: 1
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$button_arguments\\.$#"
+			count: 1
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$check_var\\.$#"
+			count: 1
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$checkbox_group_class\\.$#"
+			count: 1
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$checkbox_wrap\\.$#"
+			count: 2
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$close\\.$#"
+			count: 2
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$content\\.$#"
+			count: 1
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$contents\\.$#"
+			count: 3
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$dbh\\.$#"
+			count: 1
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$field\\.$#"
+			count: 8
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$field_class\\.$#"
+			count: 2
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$format\\.$#"
+			count: 1
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$group_class\\.$#"
+			count: 2
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$ignore_field_class\\.$#"
+			count: 2
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$ignore_layout\\.$#"
+			count: 2
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$label\\.$#"
+			count: 2
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$label_class\\.$#"
+			count: 2
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$label_location\\.$#"
+			count: 1
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$layout\\.$#"
+			count: 2
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$option\\.$#"
+			count: 2
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$option_properties\\.$#"
+			count: 1
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$options\\.$#"
+			count: 1
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$output\\.$#"
+			count: 2
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$produce\\.$#"
+			count: 1
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$properties\\.$#"
+			count: 1
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$required\\.$#"
+			count: 1
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$result\\.$#"
+			count: 1
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$selected\\.$#"
+			count: 1
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$use_layout\\.$#"
+			count: 1
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$value\\.$#"
+			count: 1
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$wrap_class\\.$#"
+			count: 2
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\FormGenerate\\:\\:\\$wrap_group\\.$#"
+			count: 2
+			path: includes/Classes/Layout/FormGenerate.php
+
+		-
+			message: "#^Access to an undefined property ProjectSend\\\\Classes\\\\Layout\\\\Pagination\\:\\:\\$query\\.$#"
+			count: 1
+			path: includes/Classes/Layout/Pagination.php
+
+		-
+			message: "#^Property ProjectSend\\\\Classes\\\\OrphanFiles\\:\\:\\$logger is never read, only written\\.$#"
+			count: 1
+			path: includes/Classes/OrphanFiles.php
+
+		-
+			message: "#^Property ProjectSend\\\\Classes\\\\PasswordReset\\:\\:\\$logger is never read, only written\\.$#"
+			count: 1
+			path: includes/Classes/PasswordReset.php
+
+		-
+			message: "#^Property ProjectSend\\\\Classes\\\\PasswordReset\\:\\:\\$token is never read, only written\\.$#"
+			count: 1
+			path: includes/Classes/PasswordReset.php
+
+		-
+			message: "#^Call to method getMessage\\(\\) on an unknown class ProjectSend\\\\Classes\\\\Exception\\.$#"
+			count: 1
+			path: includes/Classes/Permissions.php
+
+		-
+			message: "#^Caught class ProjectSend\\\\Classes\\\\Exception not found\\.$#"
+			count: 2
+			path: includes/Classes/Permissions.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Permissions\\:\\:setPermissionsFromHardcodedRoles\\(\\) is unused\\.$#"
+			count: 1
+			path: includes/Classes/Permissions.php
+
+		-
+			message: "#^Call to method getMessage\\(\\) on an unknown class ProjectSend\\\\Classes\\\\Exception\\.$#"
+			count: 1
+			path: includes/Classes/Roles.php
+
+		-
+			message: "#^Caught class ProjectSend\\\\Classes\\\\Exception not found\\.$#"
+			count: 2
+			path: includes/Classes/Roles.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Session\\:\\:add\\(\\) with return type void returns mixed but should not return anything\\.$#"
+			count: 1
+			path: includes/Classes/Session.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Session\\:\\:get\\(\\) with return type void returns mixed but should not return anything\\.$#"
+			count: 1
+			path: includes/Classes/Session.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\[type\\] \\$name\\)\\: Unexpected token \"\\[\", expected type at offset 47$#"
+			count: 1
+			path: includes/Classes/Session.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\[type\\] \\$name\\)\\: Unexpected token \"\\[\", expected type at offset 49$#"
+			count: 1
+			path: includes/Classes/Session.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\[type\\] \\$name\\)\\: Unexpected token \"\\[\", expected type at offset 55$#"
+			count: 1
+			path: includes/Classes/Session.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\[type\\] \\$name\\)\\: Unexpected token \"\\[\", expected type at offset 56$#"
+			count: 1
+			path: includes/Classes/Session.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\[type\\] \\$name\\)\\: Unexpected token \"\\[\", expected type at offset 76$#"
+			count: 1
+			path: includes/Classes/Session.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\[type\\] \\$value\\)\\: Unexpected token \"\\[\", expected type at offset 103$#"
+			count: 1
+			path: includes/Classes/Session.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\[type\\] \\$value\\)\\: Unexpected token \"\\[\", expected type at offset 76$#"
+			count: 1
+			path: includes/Classes/Session.php
+
+		-
+			message: "#^Result of static method ProjectSend\\\\Classes\\\\Session\\:\\:get\\(\\) \\(void\\) is used\\.$#"
+			count: 1
+			path: includes/Classes/Session.php
+
+		-
+			message: "#^Call to method getMessage\\(\\) on an unknown class ProjectSend\\\\Classes\\\\Exception\\.$#"
+			count: 1
+			path: includes/Classes/Users.php
+
+		-
+			message: "#^Caught class ProjectSend\\\\Classes\\\\Exception not found\\.$#"
+			count: 3
+			path: includes/Classes/Users.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\Users\\:\\:getId\\(\\) should return int but returns false\\.$#"
+			count: 1
+			path: includes/Classes/Users.php
+
+		-
+			message: "#^Property ProjectSend\\\\Classes\\\\Users\\:\\:\\$validation_passed is never read, only written\\.$#"
+			count: 1
+			path: includes/Classes/Users.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 1
+			path: includes/Classes/Users.php
+
+		-
+			message: "#^Variable \\$execute_requests in empty\\(\\) is never defined\\.$#"
+			count: 1
+			path: includes/Classes/Users.php
+
+		-
+			message: "#^Comparison operation \"\\>\\=\" between 0\\|1 and 2 is always false\\.$#"
+			count: 1
+			path: includes/Classes/i18n.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\I18n\\:\\:GetPluralFunc\\(\\) has invalid return type ProjectSend\\\\Classes\\\\Unique\\.$#"
+			count: 1
+			path: includes/Classes/i18n.php
+
+		-
+			message: "#^Method ProjectSend\\\\Classes\\\\I18n\\:\\:Translate\\(\\) has invalid return type ProjectSend\\\\Classes\\\\Strint\\.$#"
+			count: 1
+			path: includes/Classes/i18n.php
+
+		-
+			message: "#^Static property ProjectSend\\\\Classes\\\\I18n\\:\\:\\$pluralFunc \\(string\\) does not accept ProjectSend\\\\Classes\\\\Unique\\.$#"
+			count: 1
+			path: includes/Classes/i18n.php
+
+		-
+			message: "#^Static property ProjectSend\\\\Classes\\\\I18n\\:\\:\\$pluralFunc \\(string\\) does not accept default value of type array\\.$#"
+			count: 1
+			path: includes/Classes/i18n.php

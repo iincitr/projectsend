@@ -7,6 +7,7 @@ on:
       - '**.php'
       - 'composer.json'
       - 'composer.lock'
+      - 'phpstan.neon'
       - 'phpstan-baseline.neon'
       - '.github/workflows/php-static-analysis.yml'
   pull_request:
@@ -15,6 +16,7 @@ on:
       - '**.php'
       - 'composer.json'
       - 'composer.lock'
+      - 'phpstan.neon'
       - 'phpstan-baseline.neon'
 
 jobs:
@@ -55,7 +57,7 @@ jobs:
       run: composer install --prefer-dist --no-progress --no-interaction
 
     - name: Run PHPStan
-      run: vendor/bin/phpstan analyse --configuration=phpstan-baseline.neon --error-format=github
+      run: vendor/bin/phpstan analyse --error-format=github
 
     - name: Check for new errors (no baseline)
       if: github.event_name == 'pull_request'
