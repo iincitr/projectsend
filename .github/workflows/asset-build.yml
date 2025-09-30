@@ -30,13 +30,23 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: pdo, json
+        coverage: none
+
+    - name: Install Composer dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-req=ext-gd
+
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
 
-    - name: Install dependencies
+    - name: Install npm dependencies
       run: npm ci
 
     - name: Verify Gulp installation
@@ -78,13 +88,23 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: pdo, json
+        coverage: none
+
+    - name: Install Composer dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-req=ext-gd
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18.x'
         cache: 'npm'
 
-    - name: Install dependencies
+    - name: Install npm dependencies
       run: npm ci
 
     - name: Check SCSS syntax
@@ -103,13 +123,23 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: pdo, json
+        coverage: none
+
+    - name: Install Composer dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-req=ext-gd
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18.x'
         cache: 'npm'
 
-    - name: Install dependencies
+    - name: Install npm dependencies
       run: npm ci
 
     - name: Check JavaScript syntax
