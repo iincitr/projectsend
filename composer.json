@@ -27,7 +27,7 @@
     "php": ">=7.1",
     "claviska/simpleimage": "~3",
     "enshrined/svg-sanitize": "^0.22.0",
-    "moxiecode/plupload": "3.1.5",
+    "moxiecode/plupload": "^3.1.5",
     "paragonie/random_compat": "^2.0",
     "phpmailer/phpmailer": "~6.1",
     "tamtamchik/simple-flash": "^2.0",
