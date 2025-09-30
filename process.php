@@ -22,11 +22,13 @@ if (!isset($_GET['do'])) {
 
 switch ($_GET['do']) {
     case 'social_login':
+        // Store provider in session for callback
         if (Session::has('SOCIAL_LOGIN_NETWORK')) {
             Session::remove('SOCIAL_LOGIN_NETWORK');
         }
         Session::add('SOCIAL_LOGIN_NETWORK', $_GET['provider']);
 
+        // HybridAuth handles CSRF state parameter internally
         $login = $auth->socialLogin($_GET['provider']);
         break;
     case 'login_ldap':
