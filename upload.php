@@ -50,9 +50,7 @@ if (defined('UPLOAD_MAX_FILESIZE')) {
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 $chunk_size = get_option('upload_chunk_size');
 ?>
-<div class="row">
-    <div class="col-12">
-        <script type="text/javascript">
+<script type="text/javascript">
             $(function() {
                 $("#uploader").pluploadQueue({
                     runtimes: 'html5',
@@ -135,10 +133,32 @@ $chunk_size = get_option('upload_chunk_size');
                 });
                 <?php endif; ?>
             });
-        </script>
+</script>
 
+<div class="row">
+    <div class="col-12 col-lg-7">
         <?php include_once FORMS_DIR . DS . 'upload.php'; ?>
     </div>
+
+    <div class="col-12 col-lg-5">
+        <div id="upload-sidebar">
+            <?php include_once FORMS_DIR . DS . 'upload-sidebar.php'; ?>
+        </div>
+    </div>
 </div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="after_form_buttons">
+            <button type="submit" name="Submit" class="btn btn-wide btn-primary" id="btn-submit"><?php _e('Upload files','cftp_admin'); ?></button>
+        </div>
+        <div class="message message_info message_uploading">
+            <p><?php _e("Your files are being uploaded! Progress indicators may take a while to update, but work is still being done behind the scenes.",'cftp_admin'); ?></p>
+        </div>
+    </div>
+</div>
+
+</form>
+
 <?php
 include_once ADMIN_VIEWS_DIR . DS . 'footer.php';

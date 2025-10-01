@@ -73,6 +73,11 @@ switch ($section) {
             'recaptcha_enabled',
             'authentication_require_email_code',
             'remember_me_enabled',
+        );
+        break;
+    case 'encryption':
+        $section_title = __('File Encryption', 'cftp_admin');
+        $checkboxes = array(
             'files_encryption_enabled',
             'files_encryption_required',
         );

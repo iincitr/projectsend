@@ -279,32 +279,6 @@ $form_sections = [
         ]
     ],
     [
-        'title' => __('File Encryption', 'cftp_admin'),
-        'description' => __('Enable server-side encryption for uploaded files. Files are encrypted at rest using AES-256-GCM and automatically decrypted when downloaded.', 'cftp_admin'),
-        'fields' => [
-            [
-                'type' => 'checkbox',
-                'name' => 'files_encryption_enabled',
-                'label' => __('Enable file encryption feature', 'cftp_admin'),
-                'note' => __('When enabled, the encryption feature becomes available. Files can be encrypted based on the setting below.', 'cftp_admin')
-            ],
-            [
-                'type' => 'checkbox',
-                'name' => 'files_encryption_required',
-                'label' => __('Make encryption mandatory', 'cftp_admin'),
-                'note' => __('When enabled, ALL uploaded files will be automatically encrypted. When disabled, users can choose whether to encrypt each file during upload.', 'cftp_admin')
-            ],
-            [
-                'type' => 'number',
-                'name' => 'files_encryption_max_file_size',
-                'label' => __('Maximum file size for encryption (MB)', 'cftp_admin'),
-                'min' => 0,
-                'note' => __('Maximum file size that can be encrypted. Set to 0 for no limit. Note: Very large files may take longer to encrypt/decrypt.', 'cftp_admin'),
-                'required' => true
-            ]
-        ]
-    ],
-    [
         'title' => __('Log in throttle', 'cftp_admin'),
         'description' => __('Multiple failed log in attempts will increase timeouts for the originating IP address. Helps prevent brute force attacks.', 'cftp_admin'),
         'fields' => [

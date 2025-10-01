@@ -297,6 +297,10 @@ if (!current_role_in(['Client'])) {
                 'link' => 'options.php?section=security',
             ),
             array(
+                'label' => __('File Encryption', 'cftp_admin'),
+                'link' => 'options.php?section=encryption',
+            ),
+            array(
                 'label' => __('Branding', 'cftp_admin'),
                 'link' => 'options.php?section=branding',
             ),
