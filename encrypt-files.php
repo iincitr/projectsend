@@ -11,7 +11,11 @@ $page_id = 'encrypt_files';
 
 // Check if encryption is enabled
 if (!\ProjectSend\Classes\Encryption::isEnabled()) {
-    $flash->warning(__('File encryption is not enabled. Please enable it in Options → Security before encrypting files.', 'cftp_admin'));
+    $message = __('File encryption is not enabled.', 'cftp_admin') . ' ';
+    $message .= '<a href="' . BASE_URI . 'options.php?section=encryption" class="btn btn-sm btn-primary ms-2">';
+    $message .= '<i class="fa fa-cog"></i> ' . __('Enable Encryption', 'cftp_admin');
+    $message .= '</a>';
+    $flash->warning($message);
 }
 
 // Get all unencrypted files with pagination
@@ -25,7 +29,8 @@ $total_files = $count_statement->fetchColumn();
 
 // Pagination setup
 $pagination_page = (isset($_GET["page"])) ? (int)$_GET["page"] : 1;
-$pagination_results_per_page = 20; // Fixed at 20 items per page
+$allowed_per_page = [5, 10, 20, 50];
+$pagination_results_per_page = (isset($_GET["per_page"]) && in_array((int)$_GET["per_page"], $allowed_per_page)) ? (int)$_GET["per_page"] : 20;
 $pagination_start = ($pagination_page - 1) * $pagination_results_per_page;
 
 // Get paginated results
@@ -61,107 +66,161 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
         </div>
 
         <?php if ($total_files > 0): ?>
-        <div class="ps-card">
-            <div class="ps-card-body">
-                <h3>
-                    <?php echo sprintf(__('%d unencrypted files found', 'cftp_admin'), $total_files); ?>
+        <div class="row mt-4 form_actions_count">
+            <div class="col-12 col-md-6">
+                <p>
+                    <?php echo sprintf(__('Found %d elements', 'cftp_admin'), $total_files); ?>
                     <?php if ($total_files > $pagination_results_per_page): ?>
                         <small class="text-muted">(<?php echo sprintf(__('showing %d on this page', 'cftp_admin'), $count); ?>)</small>
                     <?php endif; ?>
-                </h3>
-
-                <div class="mb-4">
-                    <button type="button" id="start-encryption" class="btn btn-primary">
-                        <i class="fa fa-lock"></i>
-                        <?php if ($total_files > $pagination_results_per_page): ?>
-                            <?php echo sprintf(__('Encrypt Files on This Page (%d)', 'cftp_admin'), $count); ?>
-                        <?php else: ?>
-                            <?php _e('Start Encrypting Files', 'cftp_admin'); ?>
-                        <?php endif; ?>
-                    </button>
-                    <button type="button" id="stop-encryption" class="btn btn-danger" style="display: none;">
-                        <i class="fa fa-stop"></i> <?php _e('Stop', 'cftp_admin'); ?>
-                    </button>
-                </div>
-
-                <!-- Progress Section -->
-                <div id="encryption-progress" style="display: none;">
-                    <div class="mb-3">
-                        <div class="progress" style="height: 30px;">
-                            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
-                                 role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                                <span id="progress-text">0%</span>
-                            </div>
-                        </div>
+                </p>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="row row-cols-lg-auto g-3 justify-content-end align-content-end">
+                    <div class="col">
+                        <label for="per-page-selector" class="form-label"><?php _e('Show:', 'cftp_admin'); ?></label>
                     </div>
-                    <div id="current-file-status" class="alert alert-info">
-                        <span id="status-message"><?php _e('Preparing...', 'cftp_admin'); ?></span>
-                    </div>
-                </div>
-
-                <!-- Results Section -->
-                <div id="encryption-results" style="display: none;">
-                    <h4><?php _e('Results', 'cftp_admin'); ?></h4>
-                    <div class="alert alert-success">
-                        <i class="fa fa-check"></i>
-                        <strong><?php _e('Success:', 'cftp_admin'); ?></strong>
-                        <span id="success-count">0</span> <?php _e('files encrypted', 'cftp_admin'); ?>
-                    </div>
-                    <div class="alert alert-danger" id="error-section" style="display: none;">
-                        <i class="fa fa-times"></i>
-                        <strong><?php _e('Errors:', 'cftp_admin'); ?></strong>
-                        <span id="error-count">0</span> <?php _e('files failed', 'cftp_admin'); ?>
-                        <ul id="error-list" class="mt-2"></ul>
-                    </div>
-                </div>
-
-                <!-- File List Table -->
-                <div class="table-responsive mt-4">
-                    <table class="table table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th><?php _e('File Name', 'cftp_admin'); ?></th>
-                                <th><?php _e('Size', 'cftp_admin'); ?></th>
-                                <th><?php _e('Status', 'cftp_admin'); ?></th>
-                            </tr>
-                        </thead>
-                        <tbody id="files-table-body">
-                            <?php foreach ($unencrypted_files as $file): ?>
-                            <tr data-file-id="<?php echo $file['id']; ?>">
-                                <td><?php echo html_output($file['filename']); ?></td>
-                                <td><?php echo format_file_size($file['size']); ?></td>
-                                <td class="file-status">
-                                    <span class="badge bg-secondary"><?php _e('Pending', 'cftp_admin'); ?></span>
-                                </td>
-                            </tr>
+                    <div class="col">
+                        <select id="per-page-selector" class="form-select form-select-sm">
+                            <?php foreach ($allowed_per_page as $option): ?>
+                                <option value="<?php echo $option; ?>" <?php echo ($pagination_results_per_page == $option) ? 'selected' : ''; ?>>
+                                    <?php echo $option; ?>
+                                </option>
                             <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
-        <?php else: ?>
-        <div class="ps-card">
-            <div class="ps-card-body">
-                <div class="alert alert-success">
-                    <i class="fa fa-check-circle"></i>
-                    <?php _e('All files are already encrypted. No action needed.', 'cftp_admin'); ?>
+
+        <!-- Progress Section -->
+        <div id="encryption-progress" style="display: none;">
+            <div class="mb-3">
+                <div class="progress" style="height: 30px;">
+                    <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
+                         role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        <span id="progress-text">0%</span>
+                    </div>
                 </div>
             </div>
+            <div id="current-file-status" class="alert alert-info">
+                <span id="status-message"><?php _e('Preparing...', 'cftp_admin'); ?></span>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="encryption-results" style="display: none;">
+            <h4><?php _e('Results', 'cftp_admin'); ?></h4>
+            <div class="alert alert-success">
+                <i class="fa fa-check"></i>
+                <strong><?php _e('Success:', 'cftp_admin'); ?></strong>
+                <span id="success-count">0</span> <?php _e('files encrypted', 'cftp_admin'); ?>
+            </div>
+            <div class="alert alert-danger" id="error-section" style="display: none;">
+                <i class="fa fa-times"></i>
+                <strong><?php _e('Errors:', 'cftp_admin'); ?></strong>
+                <span id="error-count">0</span> <?php _e('files failed', 'cftp_admin'); ?>
+                <ul id="error-list" class="mt-2"></ul>
+            </div>
+        </div>
+
+        <!-- File List Table -->
+                <?php
+                // Generate the table using the Table class
+                $table = new \ProjectSend\Classes\Layout\Table([
+                    'id' => 'encrypt_files_tbl',
+                    'class' => 'footable table',
+                    'origin' => basename(__FILE__),
+                ]);
+
+                $thead_columns = array(
+                    array(
+                        'content' => __('File Name', 'cftp_admin'),
+                    ),
+                    array(
+                        'content' => __('Size', 'cftp_admin'),
+                        'hide' => 'phone',
+                    ),
+                    array(
+                        'content' => __('Status', 'cftp_admin'),
+                    ),
+                    array(
+                        'content' => __('Actions', 'cftp_admin'),
+                        'hide' => 'phone',
+                    ),
+                );
+                $table->thead($thead_columns);
+
+                foreach ($unencrypted_files as $file) {
+                    $table->addRow([
+                        'data-file-id' => $file['id']
+                    ]);
+
+                    // File name
+                    $table->addCell([
+                        'content' => html_output($file['filename'])
+                    ]);
+
+                    // Size - handle NULL or invalid values
+                    $size_display = ($file['size'] && is_numeric($file['size']))
+                        ? format_file_size($file['size'])
+                        : '<span class="text-muted">' . __('Unknown', 'cftp_admin') . '</span>';
+                    $table->addCell([
+                        'content' => $size_display
+                    ]);
+
+                    // Status
+                    $table->addCell([
+                        'content' => '<span class="badge bg-secondary file-status">' . __('Pending', 'cftp_admin') . '</span>',
+                        'attributes' => ['class' => 'file-status-cell']
+                    ]);
+
+                    // Actions
+                    $table->addCell([
+                        'actions' => true,
+                        'content' => '<button type="button" class="btn btn-sm btn-primary encrypt-single-btn" data-file-id="' . $file['id'] . '">
+                            <i class="fa fa-lock"></i> <span class="button_label">' . __('Encrypt', 'cftp_admin') . '</span>
+                        </button>'
+                    ]);
+
+                    $table->end_row();
+                }
+
+                echo $table->render();
+                ?>
+
+        <!-- Batch Encryption Buttons -->
+        <div class="mt-3 mb-4">
+            <button type="button" id="start-encryption" class="btn btn-primary">
+                <i class="fa fa-lock"></i>
+                <?php if ($total_files > $pagination_results_per_page): ?>
+                    <?php echo sprintf(__('Encrypt Files on This Page (%d)', 'cftp_admin'), $count); ?>
+                <?php else: ?>
+                    <?php _e('Start Encrypting Files', 'cftp_admin'); ?>
+                <?php endif; ?>
+            </button>
+            <button type="button" id="stop-encryption" class="btn btn-danger" style="display: none;">
+                <i class="fa fa-stop"></i> <?php _e('Stop', 'cftp_admin'); ?>
+            </button>
         </div>
 
         <?php
         // Pagination
-        if ($total_files > 0) {
+        if ($total_files > $pagination_results_per_page) {
             $pagination = new \ProjectSend\Classes\Layout\Pagination;
             echo $pagination->make([
-                'link' => 'encrypt-files.php',
+                'link' => 'encrypt-files.php?per_page=' . $pagination_results_per_page,
                 'current' => $pagination_page,
                 'item_count' => $total_files,
                 'items_per_page' => $pagination_results_per_page,
             ]);
         }
         ?>
+        <?php else: ?>
+        <div class="alert alert-success">
+            <i class="fa fa-check-circle"></i>
+            <?php _e('All files are already encrypted. No action needed.', 'cftp_admin'); ?>
+        </div>
         <?php endif; ?>
     </div>
 </div>
@@ -173,6 +232,68 @@ $(document).ready(function() {
     let successCount = 0;
     let errorCount = 0;
     let isStopped = false;
+
+    // Per-page selector
+    $('#per-page-selector').on('change', function() {
+        const perPage = $(this).val();
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('per_page', perPage);
+        currentUrl.searchParams.set('page', 1); // Reset to first page
+        window.location.href = currentUrl.toString();
+    });
+
+    // Individual encrypt button
+    $('.encrypt-single-btn').on('click', function() {
+        const $btn = $(this);
+        const fileId = $btn.data('file-id');
+        const $row = $btn.closest('tr');
+        const fileName = $row.find('td:first').text();
+
+        if (!confirm('<?php _e('Are you sure you want to encrypt this file? This operation cannot be undone.', 'cftp_admin'); ?>')) {
+            return;
+        }
+
+        // Disable button and show loading
+        $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> <span class="button_label"><?php _e('Encrypting...', 'cftp_admin'); ?></span>');
+        $row.find('.file-status-cell').html('<span class="badge bg-warning file-status"><i class="fa fa-spinner fa-spin"></i> <?php _e('Encrypting...', 'cftp_admin'); ?></span>');
+
+        // Make AJAX call to encrypt this file
+        $.ajax({
+            url: 'process.php?do=encrypt_single_file',
+            type: 'POST',
+            data: {
+                csrf_token: $('input[name="csrf_token"]').val(),
+                file_id: fileId
+            },
+            success: function(response) {
+                try {
+                    let result = JSON.parse(response);
+                    if (result.status === 'success') {
+                        $row.find('.file-status-cell').html('<span class="badge bg-success file-status"><i class="fa fa-check"></i> <?php _e('Encrypted', 'cftp_admin'); ?></span>');
+                        $btn.html('<i class="fa fa-check"></i> <span class="button_label"><?php _e('Done', 'cftp_admin'); ?></span>');
+
+                        // Reload page after short delay to show updated list
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        $row.find('.file-status-cell').html('<span class="badge bg-danger file-status"><i class="fa fa-times"></i> <?php _e('Failed', 'cftp_admin'); ?></span>');
+                        $btn.prop('disabled', false).html('<i class="fa fa-lock"></i> <span class="button_label"><?php _e('Encrypt', 'cftp_admin'); ?></span>');
+                        alert('<?php _e('Error:', 'cftp_admin'); ?> ' + result.message);
+                    }
+                } catch (e) {
+                    $row.find('.file-status-cell').html('<span class="badge bg-danger file-status"><i class="fa fa-times"></i> <?php _e('Failed', 'cftp_admin'); ?></span>');
+                    $btn.prop('disabled', false).html('<i class="fa fa-lock"></i> <span class="button_label"><?php _e('Encrypt', 'cftp_admin'); ?></span>');
+                    alert('<?php _e('Error: Invalid response', 'cftp_admin'); ?>');
+                }
+            },
+            error: function() {
+                $row.find('.file-status-cell').html('<span class="badge bg-danger file-status"><i class="fa fa-times"></i> <?php _e('Failed', 'cftp_admin'); ?></span>');
+                $btn.prop('disabled', false).html('<i class="fa fa-lock"></i> <span class="button_label"><?php _e('Encrypt', 'cftp_admin'); ?></span>');
+                alert('<?php _e('AJAX error occurred', 'cftp_admin'); ?>');
+            }
+        });
+    });
 
     $('#start-encryption').click(function() {
         <?php if ($total_files > $pagination_results_per_page): ?>
@@ -199,8 +320,11 @@ $(document).ready(function() {
         $('#error-section').hide();
         $('#error-list').empty();
 
+        // Disable individual encrypt buttons during batch operation
+        $('.encrypt-single-btn').prop('disabled', true);
+
         // Reset all file statuses
-        $('.file-status').html('<span class="badge bg-secondary"><?php _e('Pending', 'cftp_admin'); ?></span>');
+        $('.file-status-cell').html('<span class="badge bg-secondary file-status"><?php _e('Pending', 'cftp_admin'); ?></span>');
 
         // Start encryption
         encryptNextFile();
@@ -232,7 +356,7 @@ $(document).ready(function() {
         $('#status-message').html('<?php _e('Encrypting:', 'cftp_admin'); ?> <strong>' + fileName + '</strong>');
 
         // Update row status
-        $row.find('.file-status').html('<span class="badge bg-warning"><i class="fa fa-spinner fa-spin"></i> <?php _e('Encrypting...', 'cftp_admin'); ?></span>');
+        $row.find('.file-status-cell').html('<span class="badge bg-warning file-status"><i class="fa fa-spinner fa-spin"></i> <?php _e('Encrypting...', 'cftp_admin'); ?></span>');
 
         // Make AJAX call to encrypt this file
         $.ajax({
@@ -247,15 +371,15 @@ $(document).ready(function() {
                     let result = JSON.parse(response);
                     if (result.status === 'success') {
                         successCount++;
-                        $row.find('.file-status').html('<span class="badge bg-success"><i class="fa fa-check"></i> <?php _e('Encrypted', 'cftp_admin'); ?></span>');
+                        $row.find('.file-status-cell').html('<span class="badge bg-success file-status"><i class="fa fa-check"></i> <?php _e('Encrypted', 'cftp_admin'); ?></span>');
                     } else {
                         errorCount++;
-                        $row.find('.file-status').html('<span class="badge bg-danger"><i class="fa fa-times"></i> <?php _e('Failed', 'cftp_admin'); ?></span>');
+                        $row.find('.file-status-cell').html('<span class="badge bg-danger file-status"><i class="fa fa-times"></i> <?php _e('Failed', 'cftp_admin'); ?></span>');
                         $('#error-list').append('<li>' + fileName + ': ' + result.message + '</li>');
                     }
                 } catch (e) {
                     errorCount++;
-                    $row.find('.file-status').html('<span class="badge bg-danger"><i class="fa fa-times"></i> <?php _e('Failed', 'cftp_admin'); ?></span>');
+                    $row.find('.file-status-cell').html('<span class="badge bg-danger file-status"><i class="fa fa-times"></i> <?php _e('Failed', 'cftp_admin'); ?></span>');
                     $('#error-list').append('<li>' + fileName + ': Invalid response</li>');
                 }
 
@@ -265,7 +389,7 @@ $(document).ready(function() {
             },
             error: function() {
                 errorCount++;
-                $row.find('.file-status').html('<span class="badge bg-danger"><i class="fa fa-times"></i> <?php _e('Failed', 'cftp_admin'); ?></span>');
+                $row.find('.file-status-cell').html('<span class="badge bg-danger file-status"><i class="fa fa-times"></i> <?php _e('Failed', 'cftp_admin'); ?></span>');
                 $('#error-list').append('<li>' + fileName + ': AJAX error</li>');
 
                 // Move to next file
@@ -293,6 +417,9 @@ $(document).ready(function() {
         // Hide stop button, show start button
         $('#stop-encryption').hide();
         $('#start-encryption').show();
+
+        // Re-enable individual encrypt buttons
+        $('.encrypt-single-btn').prop('disabled', false);
 
         // If this was a paginated view and we successfully encrypted files, suggest reload
         <?php if ($total_files > $pagination_results_per_page): ?>
