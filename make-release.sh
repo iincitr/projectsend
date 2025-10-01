@@ -12,16 +12,51 @@ echo "=============================="
 echo ""
 
 # Prompt for version number
-read -p "Enter version number (e.g., 1720): " VERSION_NUMBER
-if [ -z "$VERSION_NUMBER" ]; then
-    echo -e "${RED}Error: Version number cannot be empty${NC}"
-    exit 1
-fi
+read -p "Enter version number (or press Enter to auto-calculate): " VERSION_NUMBER
 
-# Validate version number (only digits)
-if ! [[ "$VERSION_NUMBER" =~ ^[0-9]+$ ]]; then
-    echo -e "${RED}Error: Version number must contain only digits${NC}"
-    exit 1
+# Auto-calculate version if empty
+if [ -z "$VERSION_NUMBER" ]; then
+    echo -e "${YELLOW}Auto-calculating version from git history...${NC}"
+
+    # Get latest release tag
+    LATEST_TAG=$(git describe --tags --abbrev=0 --match="r*" 2>/dev/null)
+
+    if [ -z "$LATEST_TAG" ]; then
+        echo -e "${RED}Error: No release tags found in git history${NC}"
+        echo "Please enter a version number manually"
+        exit 1
+    fi
+
+    # Extract version number from tag (r1720 -> 1720)
+    LATEST_VERSION=${LATEST_TAG#r}
+
+    # Validate it's a number
+    if ! [[ "$LATEST_VERSION" =~ ^[0-9]+$ ]]; then
+        echo -e "${RED}Error: Latest tag '$LATEST_TAG' doesn't follow r{number} format${NC}"
+        exit 1
+    fi
+
+    # Count commits since that tag
+    COMMITS_SINCE=$(git rev-list ${LATEST_TAG}..HEAD --count)
+
+    # Calculate new version
+    VERSION_NUMBER=$((LATEST_VERSION + COMMITS_SINCE))
+
+    echo -e "${GREEN}Latest release: ${LATEST_TAG} (version ${LATEST_VERSION})${NC}"
+    echo -e "${GREEN}Commits since then: ${COMMITS_SINCE}${NC}"
+    echo -e "${GREEN}Calculated version: r${VERSION_NUMBER}${NC}"
+    echo ""
+    read -p "Use this version? (y/n): " CONFIRM
+    if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
+        echo -e "${YELLOW}Cancelled by user${NC}"
+        exit 0
+    fi
+else
+    # Validate manually entered version number (only digits)
+    if ! [[ "$VERSION_NUMBER" =~ ^[0-9]+$ ]]; then
+        echo -e "${RED}Error: Version number must contain only digits${NC}"
+        exit 1
+    fi
 fi
 
 VERSION="r${VERSION_NUMBER}"
@@ -108,8 +143,8 @@ rm -f phpstan.neon phpstan-baseline.neon phpstan-bootstrap.php
 # Remove development directories
 rm -rf docs_temp results reports
 
-# Remove make-release.sh itself
-rm -f make-release.sh
+# Remove build scripts
+rm -f make-release.sh gulpfile.js package.json package-lock.json
 
 echo -e "${GREEN}Step 9: Cleaning upload directories${NC}"
 
