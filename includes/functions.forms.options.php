@@ -41,9 +41,8 @@ function render_options_section_navigation($sections) {
         foreach ($sections as $index => $section) {
             if (!empty($section['title'])) {
                 $section_id = 'section-' . sanitize_title($section['title']);
-                $active_class = ($index === 0) ? ' active' : '';
                 echo '<li class="nav-item">';
-                echo '<a class="nav-link' . $active_class . '" href="#' . $section_id . '">' . $section['title'] . '</a>';
+                echo '<a class="nav-link" href="#' . $section_id . '">' . $section['title'] . '</a>';
                 echo '</li>';
             }
         }

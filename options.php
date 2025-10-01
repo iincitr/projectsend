@@ -73,6 +73,8 @@ switch ($section) {
             'recaptcha_enabled',
             'authentication_require_email_code',
             'remember_me_enabled',
+            'files_encryption_enabled',
+            'files_encryption_required',
         );
         break;
     case 'branding':

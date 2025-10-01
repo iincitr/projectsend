@@ -285,14 +285,14 @@ $form_sections = [
             [
                 'type' => 'checkbox',
                 'name' => 'files_encryption_enabled',
-                'label' => __('Enable file encryption', 'cftp_admin'),
-                'note' => __('When enabled, all newly uploaded files will be encrypted at rest on the server.', 'cftp_admin')
+                'label' => __('Enable file encryption feature', 'cftp_admin'),
+                'note' => __('When enabled, the encryption feature becomes available. Files can be encrypted based on the setting below.', 'cftp_admin')
             ],
             [
                 'type' => 'checkbox',
                 'name' => 'files_encryption_required',
-                'label' => __('Require encryption for all uploads', 'cftp_admin'),
-                'note' => __('When enabled, all file uploads will be encrypted regardless of user preference. Users cannot opt-out.', 'cftp_admin')
+                'label' => __('Make encryption mandatory', 'cftp_admin'),
+                'note' => __('When enabled, ALL uploaded files will be automatically encrypted. When disabled, users can choose whether to encrypt each file during upload.', 'cftp_admin')
             ],
             [
                 'type' => 'number',

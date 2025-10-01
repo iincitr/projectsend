@@ -204,5 +204,101 @@
                 }
             });
         }
+
+        // Options section navigation - scroll tracking and active state
+        const optionsNav = document.querySelector('.options-section-nav');
+        if (elementExists(optionsNav)) {
+            const navLinks = optionsNav.querySelectorAll('.nav-link');
+            const sections = [];
+
+            // Build sections array from nav links
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && href.startsWith('#')) {
+                    const sectionId = href.substring(1);
+                    const sectionElement = document.getElementById(sectionId);
+                    if (sectionElement) {
+                        sections.push({
+                            id: sectionId,
+                            element: sectionElement,
+                            navLink: link
+                        });
+                    }
+                }
+            });
+
+            // Function to update active nav item based on scroll position
+            function updateActiveNav() {
+                // Get current scroll position with offset for sticky nav (90px from top + nav height)
+                const scrollPosition = window.scrollY + 120;
+
+                let activeSection = null;
+
+                // Find which section is currently in view
+                sections.forEach(section => {
+                    const sectionTop = section.element.offsetTop;
+                    const sectionBottom = sectionTop + section.element.offsetHeight;
+
+                    if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+                        activeSection = section;
+                    }
+                });
+
+                // If we're at the top of the page, activate first section
+                if (!activeSection && window.scrollY < 200) {
+                    activeSection = sections[0];
+                }
+
+                // Update active classes
+                if (activeSection) {
+                    sections.forEach(section => {
+                        if (section.id === activeSection.id) {
+                            section.navLink.classList.add('active');
+                        } else {
+                            section.navLink.classList.remove('active');
+                        }
+                    });
+                }
+            }
+
+            // Throttle scroll event for performance
+            let scrollTimeout;
+            window.addEventListener('scroll', function() {
+                if (scrollTimeout) {
+                    window.cancelAnimationFrame(scrollTimeout);
+                }
+                scrollTimeout = window.requestAnimationFrame(function() {
+                    updateActiveNav();
+                });
+            });
+
+            // Handle nav link clicks
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+                    if (href && href.startsWith('#')) {
+                        const targetId = href.substring(1);
+                        const targetElement = document.getElementById(targetId);
+                        if (targetElement) {
+                            // Scroll to section with offset for sticky nav
+                            const offset = 100;
+                            const elementPosition = targetElement.offsetTop - offset;
+                            window.scrollTo({
+                                top: elementPosition,
+                                behavior: 'smooth'
+                            });
+
+                            // Update active state immediately
+                            navLinks.forEach(l => l.classList.remove('active'));
+                            this.classList.add('active');
+                        }
+                    }
+                });
+            });
+
+            // Initialize active state on page load
+            updateActiveNav();
+        }
     };
 })();
