@@ -412,11 +412,17 @@ class Encryption
 
     /**
      * Check if encryption is required globally
+     * Note: Encryption can only be required if it's enabled
      *
      * @return bool
      */
     public static function isRequired()
     {
+        // Encryption can't be required if it's not enabled
+        if (!self::isEnabled()) {
+            return false;
+        }
+
         return get_option('files_encryption_required', null, '0') === '1';
     }
 

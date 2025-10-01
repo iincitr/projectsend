@@ -19,7 +19,7 @@ $form_sections = [
                 'type' => 'checkbox',
                 'name' => 'files_encryption_required',
                 'label' => __('Make encryption mandatory', 'cftp_admin'),
-                'note' => __('When enabled, ALL uploaded files will be automatically encrypted. When disabled, users can choose whether to encrypt each file during upload.', 'cftp_admin')
+                'note' => __('When enabled, ALL uploaded files will be automatically encrypted. When disabled, users can choose whether to encrypt each file during upload. Note: The encryption feature must be enabled above for this option to work.', 'cftp_admin')
             ],
             [
                 'type' => 'number',

@@ -300,5 +300,35 @@
             // Initialize active state on page load
             updateActiveNav();
         }
+
+        // Encryption settings - handle dependency between enabled and required
+        const encryptionEnabledCheckbox = document.getElementById('files_encryption_enabled');
+        const encryptionRequiredCheckbox = document.getElementById('files_encryption_required');
+
+        if (elementExists(encryptionEnabledCheckbox) && elementExists(encryptionRequiredCheckbox)) {
+            function toggleEncryptionRequired() {
+                if (!encryptionEnabledCheckbox.checked) {
+                    encryptionRequiredCheckbox.checked = false;
+                    encryptionRequiredCheckbox.disabled = true;
+                    // Add visual feedback
+                    const label = encryptionRequiredCheckbox.closest('.col-sm-8');
+                    if (label) {
+                        label.style.opacity = '0.5';
+                    }
+                } else {
+                    encryptionRequiredCheckbox.disabled = false;
+                    const label = encryptionRequiredCheckbox.closest('.col-sm-8');
+                    if (label) {
+                        label.style.opacity = '1';
+                    }
+                }
+            }
+
+            // Set initial state
+            toggleEncryptionRequired();
+
+            // Listen for changes
+            encryptionEnabledCheckbox.addEventListener('change', toggleEncryptionRequired);
+        }
     };
 })();
