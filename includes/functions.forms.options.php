@@ -29,12 +29,12 @@ function sanitize_title($title) {
  * @return void Outputs HTML directly
  */
 function render_options_section_navigation($sections) {
-    // Generate navigation pills if there are multiple sections with titles
+    // Generate navigation pills if there are sections with titles
     $sections_with_titles = array_filter($sections, function($section) {
         return !empty($section['title']);
     });
 
-    if (count($sections_with_titles) > 1) {
+    if (count($sections_with_titles) > 0) {
         echo '<nav class="options-section-nav mb-3">';
         echo '<ul class="nav nav-pills">';
 

@@ -7,7 +7,7 @@
 // Define the form sections and fields
 $form_sections = [
     [
-        'title' => __('LDAP Authentication', 'cftp_admin'),
+        'title' => __('Authentication Settings', 'cftp_admin'),
         'description' => sprintf(__('Configure LDAP/Active Directory authentication settings. Note: %s requires all accounts to be available locally. When a user connects via LDAP, a local account will be created automatically.', 'cftp_admin'), SYSTEM_NAME),
         'html_before' => '<div class="options_column">',
         'fields' => [
@@ -129,7 +129,15 @@ $form_sections = [
                     </div>
                     <?php
                 }
-            ],
+            ]
+        ],
+        'html_after' => '</div>'
+    ],
+    [
+        'title' => __('New Accounts', 'cftp_admin'),
+        'description' => __('Configure settings for automatically created LDAP user accounts.', 'cftp_admin'),
+        'html_before' => '<div class="options_column">',
+        'fields' => [
             [
                 'type' => 'custom',
                 'name' => 'ldap_auto_create_users',
@@ -191,48 +199,46 @@ $form_sections = [
                 }
             ]
         ],
-        'html_after' => '</div>',
+        'html_after' => '</div>
+<script>
+$(document).ready(function() {
+    $("#test_ldap_connection").click(function() {
+        var button = $(this);
+        var originalText = button.text();
+        var resultDiv = $("#ldap_test_result");
+
+        button.prop("disabled", true);
+        button.html(\'<i class="fa fa-cog fa-spin fa-fw"></i> <?php _e("Testing...", "cftp_admin"); ?>\');
+        resultDiv.html("").removeClass("alert-success alert-danger");
+
+        $.ajax({
+            url: json_strings.uri.base + "process.php?do=test_ldap_connection",
+            type: "POST",
+            data: {
+                csrf_token: document.getElementById("csrf_token").value
+            },
+            success: function(response) {
+                var result = JSON.parse(response);
+                if (result.status === "success") {
+                    resultDiv.addClass("alert alert-success").html(\'<i class="fa fa-check"></i> \' + result.message);
+                } else {
+                    resultDiv.addClass("alert alert-danger").html(\'<i class="fa fa-times"></i> \' + result.message);
+                }
+            },
+            error: function() {
+                resultDiv.addClass("alert alert-danger").html(\'<i class="fa fa-times"></i> <?php _e("Connection test failed", "cftp_admin"); ?>\');
+            },
+            complete: function() {
+                button.prop("disabled", false);
+                button.html(originalText);
+            }
+        });
+    });
+});
+</script>',
         'divider' => false // No divider at the end
     ]
 ];
 
 // Render the form sections
 render_options_form_sections($form_sections);
-?>
-
-<script>
-$(document).ready(function() {
-    $('#test_ldap_connection').click(function() {
-        var button = $(this);
-        var originalText = button.text();
-        var resultDiv = $('#ldap_test_result');
-
-        button.prop('disabled', true);
-        button.html('<i class="fa fa-cog fa-spin fa-fw"></i> ' + '<?php _e("Testing...", "cftp_admin"); ?>');
-        resultDiv.html('').removeClass('alert-success alert-danger');
-
-        $.ajax({
-            url: json_strings.uri.base + 'process.php?do=test_ldap_connection',
-            type: 'POST',
-            data: {
-                csrf_token: document.getElementById('csrf_token').value
-            },
-            success: function(response) {
-                var result = JSON.parse(response);
-                if (result.status === 'success') {
-                    resultDiv.addClass('alert alert-success').html('<i class="fa fa-check"></i> ' + result.message);
-                } else {
-                    resultDiv.addClass('alert alert-danger').html('<i class="fa fa-times"></i> ' + result.message);
-                }
-            },
-            error: function() {
-                resultDiv.addClass('alert alert-danger').html('<i class="fa fa-times"></i> ' + '<?php _e("Connection test failed", "cftp_admin"); ?>');
-            },
-            complete: function() {
-                button.prop('disabled', false);
-                button.html(originalText);
-            }
-        });
-    });
-});
-</script>

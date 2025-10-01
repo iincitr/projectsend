@@ -324,7 +324,7 @@ if (file_exists($form_file)) {
     <?php endif; ?>
 
     <!-- Main content area -->
-    <div class="col-12 <?php echo !empty($form_sections_for_nav) ? 'col-lg-10' : 'col-lg-6'; ?>">
+    <div class="col-12 col-lg-7">
         <div class="ps-card">
             <div class="ps-card-body">
 
@@ -333,11 +333,22 @@ if (file_exists($form_file)) {
                     <input type="hidden" name="section" value="<?php echo $section; ?>">
 
                     <?php
-                    // Render the form sections if using the new array-based system
+                    // Check if sections have actual fields or are just navigation stubs
+                    $has_fields = false;
                     if (!empty($form_sections_for_nav)) {
+                        foreach ($form_sections_for_nav as $section) {
+                            if (!empty($section['fields'])) {
+                                $has_fields = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    // Render the form sections if using the new array-based system with fields
+                    if ($has_fields) {
                         render_options_form_sections($form_sections_for_nav, false); // false = don't render nav inline
                     } else {
-                        // Fallback: include the form file directly for legacy forms
+                        // Include the form file directly for legacy forms or navigation-only stubs
                         if (file_exists($form_file)) {
                             include $form_file;
                         }
