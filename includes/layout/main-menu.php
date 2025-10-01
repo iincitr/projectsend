@@ -297,6 +297,10 @@ if (!current_role_in(['Client'])) {
                 'link' => 'options.php?section=security',
             ),
             array(
+                'label' => __('File Encryption', 'cftp_admin'),
+                'link' => 'options.php?section=encryption',
+            ),
+            array(
                 'label' => __('Branding', 'cftp_admin'),
                 'link' => 'options.php?section=branding',
             ),
@@ -315,14 +319,16 @@ if (!current_role_in(['Client'])) {
                 'label' => __('LDAP Authentication', 'cftp_admin'),
                 'link' => 'options.php?section=ldap',
             ),
-            array(
-                'divider' => true,
-            ),
-            array(
-                'label' => __('External Storage', 'cftp_admin'),
-                'link' => 'integrations.php',
-                'permission' => 'edit_settings',
-            ),
+        ),
+    );
+
+    $items['integrations'] = array(
+        'nav' => 'integrations',
+        'permission' => 'edit_settings',
+        'main' => array(
+            'label' => __('Integrations', 'cftp_admin'),
+            'icon' => 'plug',
+            'link' => 'integrations.php',
         ),
     );
 
@@ -364,6 +370,11 @@ if (!current_role_in(['Client'])) {
             array(
                 'label' => __('Regenerate thumbnails', 'cftp_admin'),
                 'link' => 'thumbnails-regenerate.php',
+                'permission' => 'edit_settings',
+            ),
+            array(
+                'label' => __('Encrypt Files', 'cftp_admin'),
+                'link' => 'encrypt-files.php',
                 'permission' => 'edit_settings',
             ),
         ),

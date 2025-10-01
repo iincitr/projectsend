@@ -93,7 +93,7 @@ class Download
 
             // Serve the temporary file
             $alias = $this->getAlias($file);
-            $this->serveFile($temp_file, $file->filename_original, $alias);
+            $this->serveFile($temp_file, $file->filename_original, $alias, $file);
 
             // Clean up temporary file
             unlink($temp_file);
@@ -204,6 +204,27 @@ class Download
     }
 
     /**
+     * Decrypt file key if file is encrypted
+     *
+     * @param object $file File object
+     * @return string|false Binary file key or false if not encrypted or decryption fails
+     */
+    private function getDecryptedFileKey($file)
+    {
+        if (!$file->encrypted || empty($file->encryption_key_encrypted) || empty($file->encryption_iv)) {
+            return false;
+        }
+
+        try {
+            $encryption = new \ProjectSend\Classes\Encryption();
+            return $encryption->decryptFileKey($file->encryption_key_encrypted, $file->encryption_iv);
+        } catch (\Exception $e) {
+            error_log('Failed to decrypt file key for file ID ' . $file->id . ': ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Sends the file to the browser
      *
      * @return void
@@ -233,7 +254,7 @@ class Download
             $save_file_as = UPLOADED_FILES_DIR . DS . $save_as;
 
             $alias=$this->getAlias($file);
-            $this->serveFile($file_location, $save_file_as, $alias);
+            $this->serveFile($file_location, $save_file_as, $alias, $file);
             exit;
         }
         else {
@@ -264,29 +285,63 @@ class Download
      *
      * @param string $file_location absolute full path to the file on disk
      * @param string $save_as original filename
+     * @param string $xaccel optional xaccel path
+     * @param object $file optional file object (for encryption metadata)
      * @return void
      */
-    public function serveFile($file_location, $save_as, $xaccel = null)
+    public function serveFile($file_location, $save_as, $xaccel = null, $file = null)
     {
         if (file_exists($file_location)) {
             session_write_close();
             while (ob_get_level()) ob_end_clean();
             $save_as = sanitize_filename_for_download($save_as);
 
+            // Check if file is encrypted
+            $file_key = false;
+            if ($file && $file->encrypted) {
+                $file_key = $this->getDecryptedFileKey($file);
+                if ($file_key === false) {
+                    error_log('Failed to decrypt file key for download');
+                    exit_with_error_code(500);
+                }
+            }
+
             switch (get_option('download_method')) {
                 default:
                 case 'php':
-					$this->downloadPHP($file_location, $save_as);
+					$this->downloadPHP($file_location, $save_as, $file_key);
                 break;
                 case 'apache_xsendfile':
-                    header("X-Sendfile: $file_location");
-                    header('Content-Type: application/octet-stream');
-                    header('Content-Disposition: attachment; filename='.basename($save_as));
-                break;
                 case 'nginx_xaccel':
-                    header("X-Accel-Redirect: $xaccel");
-                    header('Content-Type: application/octet-stream');
-                    header('Content-Disposition: attachment; filename='.basename($save_as));
+                    // For XSendFile and X-Accel, we need to decrypt to a temp file first if encrypted
+                    if ($file_key) {
+                        $temp_file = tempnam(UPLOADS_TEMP_DIR, 'ps_decrypt_');
+                        $encryption = new \ProjectSend\Classes\Encryption();
+                        $decrypt_result = $encryption->decryptFileToPath($file_location, $temp_file, $file_key);
+
+                        if (!$decrypt_result['success']) {
+                            error_log('Failed to decrypt file for XSendFile/X-Accel: ' . $decrypt_result['error']);
+                            exit_with_error_code(500);
+                        }
+
+                        $file_location = $temp_file;
+                        // Note: temp file will be deleted after download by register_shutdown_function
+                        register_shutdown_function(function() use ($temp_file) {
+                            if (file_exists($temp_file)) {
+                                unlink($temp_file);
+                            }
+                        });
+                    }
+
+                    if (get_option('download_method') == 'apache_xsendfile') {
+                        header("X-Sendfile: $file_location");
+                        header('Content-Type: application/octet-stream');
+                        header('Content-Disposition: attachment; filename='.basename($save_as));
+                    } else {
+                        header("X-Accel-Redirect: $xaccel");
+                        header('Content-Type: application/octet-stream');
+                        header('Content-Disposition: attachment; filename='.basename($save_as));
+                    }
                 break;
             }
 
@@ -299,14 +354,15 @@ class Download
 	
     /**
      * handles the filedownload in pure PHP
-	 * 
+	 *
 	 * script-origin: https://www.media-division.com/php-download-script-with-resume-option/
      *
      * @param string $file_location absolute full path to the file on disk
      * @param string $save_as original filename
+     * @param string|false $file_key optional binary file key for decryption
      * @return void
      */
-	public function downloadPHP($file_location, $save_as)
+	public function downloadPHP($file_location, $save_as, $file_key = false)
 	{
 		$path_parts = pathinfo($file_location);
 		$file_name = $path_parts['basename'];
@@ -318,6 +374,41 @@ class Download
 		// make sure the file exists
 		if (is_file($file_location))
 		{
+            // If file is encrypted, use streaming decryption
+            if ($file_key !== false) {
+                try {
+                    $encryption = new \ProjectSend\Classes\Encryption();
+
+                    // Set headers for encrypted file download
+                    header("Pragma: public");
+                    header("Expires: -1");
+                    header("Cache-Control: public, must-revalidate, post-check=0, pre-check=0");
+                    header('Content-Disposition: attachment; filename='.basename($save_as));
+                    header('Content-Type: application/octet-stream');
+
+                    // Note: We cannot provide accurate Content-Length for encrypted files without decrypting first
+                    // Also, range requests are not supported for encrypted files
+                    header('Accept-Ranges: none');
+
+                    set_time_limit(0);
+
+                    // Stream decrypted content
+                    $success = $encryption->decryptFileStream($file_location, $file_key);
+
+                    if (!$success) {
+                        error_log('Failed to decrypt and stream file');
+                        exit_with_error_code(500);
+                    }
+
+                    exit;
+
+                } catch (\Exception $e) {
+                    error_log('Decryption error during download: ' . $e->getMessage());
+                    exit_with_error_code(500);
+                }
+            }
+
+            // Standard unencrypted file download with range support
 			$file_size  = get_real_size($file_location);
 			$file = @fopen($file_location,"rb");
 			if ($file)

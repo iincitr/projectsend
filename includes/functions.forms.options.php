@@ -5,16 +5,72 @@
  */
 
 /**
- * Renders a complete options form section from configuration array
+ * Sanitize a title for use as an HTML ID
+ *
+ * @param string $title The title to sanitize
+ * @return string Sanitized title suitable for use as HTML ID
+ */
+function sanitize_title($title) {
+    // Convert to lowercase
+    $sanitized = strtolower($title);
+    // Remove HTML tags
+    $sanitized = strip_tags($sanitized);
+    // Replace spaces and special chars with hyphens
+    $sanitized = preg_replace('/[^a-z0-9]+/', '-', $sanitized);
+    // Remove leading/trailing hyphens
+    $sanitized = trim($sanitized, '-');
+    return $sanitized;
+}
+
+/**
+ * Renders navigation pills for option sections
  *
  * @param array $sections Array of section configurations
  * @return void Outputs HTML directly
  */
-function render_options_form_sections($sections) {
+function render_options_section_navigation($sections) {
+    // Generate navigation pills if there are sections with titles
+    $sections_with_titles = array_filter($sections, function($section) {
+        return !empty($section['title']);
+    });
+
+    if (count($sections_with_titles) > 0) {
+        echo '<nav class="options-section-nav mb-3">';
+        echo '<ul class="nav nav-pills">';
+
+        foreach ($sections as $index => $section) {
+            if (!empty($section['title'])) {
+                $section_id = 'section-' . sanitize_title($section['title']);
+                echo '<li class="nav-item">';
+                echo '<a class="nav-link" href="#' . $section_id . '">' . $section['title'] . '</a>';
+                echo '</li>';
+            }
+        }
+
+        echo '</ul>';
+        echo '</nav>';
+    }
+}
+
+/**
+ * Renders a complete options form section from configuration array
+ *
+ * @param array $sections Array of section configurations
+ * @param bool $render_nav Whether to render navigation inline (default true for backward compatibility)
+ * @return void Outputs HTML directly
+ */
+function render_options_form_sections($sections, $render_nav = true) {
+    // Render navigation pills first if requested (for backward compatibility)
+    if ($render_nav) {
+        render_options_section_navigation($sections);
+    }
+
+    // Render sections
     foreach ($sections as $section) {
         // Section header
         if (!empty($section['title'])) {
-            echo '<h3>' . $section['title'] . '</h3>';
+            $section_id = 'section-' . sanitize_title($section['title']);
+            echo '<h3 id="' . $section_id . '">' . $section['title'] . '</h3>';
         }
 
         if (!empty($section['description'])) {

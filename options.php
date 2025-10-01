@@ -75,6 +75,13 @@ switch ($section) {
             'remember_me_enabled',
         );
         break;
+    case 'encryption':
+        $section_title = __('File Encryption', 'cftp_admin');
+        $checkboxes = array(
+            'files_encryption_enabled',
+            'files_encryption_required',
+        );
+        break;
     case 'branding':
         $section_title = __('Branding', 'cftp_admin');
         $checkboxes = array();
@@ -299,9 +306,32 @@ if ($section == 'general' && get_option('uploads_organize_folders_by_date') == '
 
 
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';
+
+// Load form sections to get navigation data
+$form_file = FORMS_DIR . DS . 'options' . DS . $section . '.php';
+$form_sections_for_nav = [];
+if (file_exists($form_file)) {
+    // Include the file and capture output to prevent double rendering
+    ob_start();
+    include_once $form_file;
+    ob_end_clean();
+
+    // Check if $form_sections was defined in the included file
+    if (isset($form_sections)) {
+        $form_sections_for_nav = $form_sections;
+    }
+}
 ?>
 <div class="row">
-    <div class="col-12 col-sm-12 col-lg-6">
+    <?php if (!empty($form_sections_for_nav)): ?>
+    <!-- Sticky vertical navigation (hidden on mobile) -->
+    <div class="col-lg-2 d-none d-lg-block">
+        <?php render_options_section_navigation($form_sections_for_nav); ?>
+    </div>
+    <?php endif; ?>
+
+    <!-- Main content area -->
+    <div class="col-12 col-lg-7">
         <div class="ps-card">
             <div class="ps-card-body">
 
@@ -310,9 +340,25 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
                     <input type="hidden" name="section" value="<?php echo $section; ?>">
 
                     <?php
-                    $form_file = FORMS_DIR . DS . 'options' . DS . $section . '.php';
-                    if (file_exists($form_file)) {
-                        include_once $form_file;
+                    // Check if sections have actual fields or are just navigation stubs
+                    $has_fields = false;
+                    if (!empty($form_sections_for_nav)) {
+                        foreach ($form_sections_for_nav as $section) {
+                            if (!empty($section['fields'])) {
+                                $has_fields = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    // Render the form sections if using the new array-based system with fields
+                    if ($has_fields) {
+                        render_options_form_sections($form_sections_for_nav, false); // false = don't render nav inline
+                    } else {
+                        // Include the form file directly for legacy forms or navigation-only stubs
+                        if (file_exists($form_file)) {
+                            include $form_file;
+                        }
                     }
                     ?>
 

@@ -7,7 +7,7 @@
 // Define the form sections and fields
 $form_sections = [
     [
-        'title' => __('General', 'cftp_admin'),
+        'title' => __('Site Information', 'cftp_admin'),
         'description' => __('Basic information to be shown around the site. The time format and zones values affect how the clients see the dates on their files lists.', 'cftp_admin'),
         'fields' => [
             [

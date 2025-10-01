@@ -153,15 +153,80 @@ if (strpos($contentType, "multipart") !== false) {
 
 // Check if file has been uploaded
 if (!$chunks || $chunk == $chunks - 1) {
-	// Strip the temp .part suffix off 
+	// Strip the temp .part suffix off
 	rename("{$filePath}.part", $filePath);
 
     // Get storage selection from request or use default
     $storage_selection = isset($_REQUEST['storage_selection']) ? $_REQUEST['storage_selection'] : get_option('default_upload_storage', 'local');
 
+    // Check if encryption is requested
+    $encrypt_file = false;
+    if (isset($_REQUEST['encrypt_file']) && $_REQUEST['encrypt_file'] === '1') {
+        $encrypt_file = true;
+    } elseif (\ProjectSend\Classes\Encryption::isRequired()) {
+        // Encryption is required globally
+        $encrypt_file = true;
+    } elseif (\ProjectSend\Classes\Encryption::isEnabled()) {
+        // Encryption is enabled by default but not required
+        $encrypt_file = true;
+    }
+
+    // Encrypt file if requested/required
+    if ($encrypt_file) {
+        try {
+            $encryption = new \ProjectSend\Classes\Encryption();
+
+            // Generate unique file key
+            $file_key = $encryption->generateFileKey();
+
+            // Encrypt the file
+            $encrypted_path = $filePath . '.encrypted';
+            $encrypt_result = $encryption->encryptFile($filePath, $encrypted_path, $file_key);
+
+            if (!$encrypt_result['success']) {
+                dieWithError('Encryption failed: ' . $encrypt_result['error']);
+            }
+
+            // Encrypt the file key with master key
+            $encrypted_key_data = $encryption->encryptFileKey($file_key);
+
+            // Replace original file with encrypted version
+            unlink($filePath);
+            rename($encrypted_path, $filePath);
+
+            // Store encryption metadata for later use
+            $encryption_metadata = [
+                'encrypted' => 1,
+                'encryption_key_encrypted' => $encrypted_key_data['encrypted_key'],
+                'encryption_iv' => $encrypted_key_data['iv'],
+                'encryption_algorithm' => $encryption->getAlgorithm(),
+                'encryption_file_iv' => $encrypt_result['iv']
+            ];
+
+        } catch (\Exception $e) {
+            error_log('File encryption error: ' . $e->getMessage());
+            dieWithError('File encryption failed');
+        }
+    } else {
+        $encryption_metadata = [
+            'encrypted' => 0,
+            'encryption_key_encrypted' => null,
+            'encryption_iv' => null,
+            'encryption_algorithm' => null,
+            'encryption_file_iv' => null
+        ];
+    }
+
     // Add to database
     $file = new \ProjectSend\Classes\Files;
     $file->setDefaults();
+
+    // Set encryption metadata
+    $file->encrypted = $encryption_metadata['encrypted'];
+    $file->encryption_key_encrypted = $encryption_metadata['encryption_key_encrypted'];
+    $file->encryption_iv = $encryption_metadata['encryption_iv'];
+    $file->encryption_algorithm = $encryption_metadata['encryption_algorithm'];
+    $file->encryption_file_iv = $encryption_metadata['encryption_file_iv'];
 
     // Route to appropriate storage based on selection
     $route_result = $file->routeToStorage($filePath, $storage_selection, $fileName);
@@ -181,7 +246,8 @@ if (!$chunks || $chunk == $chunks - 1) {
             'OK' => 1,
             'info' => [
                 'id' => $file->getId(),
-                'NewFileName' => $fileName
+                'NewFileName' => $fileName,
+                'encrypted' => $encryption_metadata['encrypted']
             ]
         ];
 

@@ -489,6 +489,101 @@ switch ($_GET['do']) {
             ]);
         }
     break;
+
+    case 'encrypt_single_file':
+        // Check permissions
+        if (!current_user_can('edit_settings')) {
+            echo json_encode(['status' => 'error', 'message' => __('Permission denied', 'cftp_admin')]);
+            exit;
+        }
+
+        if (!isset($_POST['file_id']) || empty($_POST['file_id'])) {
+            echo json_encode(['status' => 'error', 'message' => __('File ID is required', 'cftp_admin')]);
+            exit;
+        }
+
+        $file_id = (int)$_POST['file_id'];
+        $file = new \ProjectSend\Classes\Files($file_id);
+
+        if (!$file->id) {
+            echo json_encode(['status' => 'error', 'message' => __('File not found', 'cftp_admin')]);
+            exit;
+        }
+
+        // Check if file is already encrypted
+        if ($file->encrypted) {
+            echo json_encode(['status' => 'error', 'message' => __('File is already encrypted', 'cftp_admin')]);
+            exit;
+        }
+
+        // Check if encryption is enabled
+        if (!\ProjectSend\Classes\Encryption::isEnabled()) {
+            echo json_encode(['status' => 'error', 'message' => __('File encryption is not enabled', 'cftp_admin')]);
+            exit;
+        }
+
+        // Get file path
+        $file_path = $file->full_path;
+
+        if (!file_exists($file_path)) {
+            echo json_encode(['status' => 'error', 'message' => __('Physical file not found', 'cftp_admin')]);
+            exit;
+        }
+
+        // Encrypt the file
+        try {
+            $encryption = new \ProjectSend\Classes\Encryption();
+
+            // Generate unique file key
+            $file_key = $encryption->generateFileKey();
+
+            // Encrypt the file
+            $encrypted_path = $file_path . '.encrypted';
+            $encrypt_result = $encryption->encryptFile($file_path, $encrypted_path, $file_key);
+
+            if (!$encrypt_result['success']) {
+                throw new \Exception($encrypt_result['error']);
+            }
+
+            // Encrypt the file key with master key
+            $encrypted_key_data = $encryption->encryptFileKey($file_key);
+
+            // Replace original file with encrypted version
+            unlink($file_path);
+            rename($encrypted_path, $file_path);
+
+            // Update database with encryption metadata
+            global $dbh;
+            $update_query = "UPDATE " . TABLE_FILES . " SET
+                encrypted = 1,
+                encryption_key_encrypted = :key,
+                encryption_iv = :iv,
+                encryption_algorithm = :algo,
+                encryption_file_iv = :file_iv
+                WHERE id = :id";
+
+            $stmt = $dbh->prepare($update_query);
+            $stmt->execute([
+                ':key' => $encrypted_key_data['encrypted_key'],
+                ':iv' => $encrypted_key_data['iv'],
+                ':algo' => $encryption->getAlgorithm(),
+                ':file_iv' => $encrypt_result['iv'],
+                ':id' => $file_id
+            ]);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => __('File encrypted successfully', 'cftp_admin')
+            ]);
+        } catch (\Exception $e) {
+            error_log('File encryption error: ' . $e->getMessage());
+            echo json_encode([
+                'status' => 'error',
+                'message' => __('Error encrypting file: ', 'cftp_admin') . $e->getMessage()
+            ]);
+        }
+        exit;
+    break;
 }
 
 exit;

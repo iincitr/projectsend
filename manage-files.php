@@ -790,6 +790,12 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                             'condition' => $conditions['total_downloads'],
                         ),
                         array(
+                            'sortable' => true,
+                            'sort_url' => 'encrypted',
+                            'content' => __('Encryption', 'cftp_admin'),
+                            'hide' => 'phone',
+                        ),
+                        array(
                             'content' => __('Actions', 'cftp_admin'),
                             'hide' => 'phone',
                             'actions' => true, // Mark this as actions column for CardList
@@ -871,10 +877,10 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
 
                             if ($file->expired == true) {
                                 $expires_button = 'danger';
-                                $expires_label = __('Expired on', 'cftp_admin') . ' ' . $expires_date;
+                                $expires_label = __('Expired', 'cftp_admin');
                             } else {
                                 $expires_button = 'info';
-                                $expires_label = __('Expires on', 'cftp_admin') . ' ' . $expires_date;
+                                $expires_label = __('Expires', 'cftp_admin') . ' ' . $expires_date;
                             }
                         }
 
@@ -935,7 +941,11 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                         }
 
                         // Title content for table view (includes extra info)
-                        $title_content_table = '<a href="' . $file->download_link . '" target="_blank">' . $file->title . '</a>';
+                        $encryption_badge = '';
+                        if ($file->encrypted) {
+                            $encryption_badge = ' <span class="badge bg-success" title="' . __('This file is encrypted at rest', 'cftp_admin') . '"><i class="fa fa-lock"></i> ' . __('Encrypted', 'cftp_admin') . '</span>';
+                        }
+                        $title_content_table = '<a href="' . $file->download_link . '" target="_blank">' . $file->title . '</a>' . $encryption_badge;
                         if ($file->title != $file->filename_original) {
                             $title_content_table .= '<br><small>'.$file->filename_original.'</small>';
                         }
@@ -948,6 +958,9 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
 
                         // Simple title content for card view (title + link only)
                         $title_content = '<a href="' . $file->download_link . '" target="_blank">' . $file->title . '</a>';
+                        if ($file->encrypted) {
+                            $title_content .= '<br><span class="badge bg-success"><i class="fa fa-lock"></i> ' . __('Encrypted', 'cftp_admin') . '</span>';
+                        }
 
                         //* Add the cells to the row
                         $tbody_cells = array(
@@ -994,7 +1007,7 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                                 'condition' => $conditions['can_set_public'],
                             ),
                             array(
-                                'content' => '<a href="javascript:void(0);" class="btn btn-' . $expires_button . ' disabled btn-sm" rel="" title="">' . $expires_label . '</a>',
+                                'content' => '<span class="badge bg-' . $expires_button . '">' . $expires_label . '</span>',
                                 'condition' => $conditions['can_set_expiration'],
                             ),
                             array(
@@ -1016,8 +1029,17 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                             array(
                                 'content' => $row['download_count'] . ' ' . __('downloads', 'cftp_admin'),
                                 'condition' => true, // Always include for card view
+                                'hide_from_table' => true, // Hide from table view
                                 'attributes' => array(
                                     'column_name' => 'card_download_count', // Custom identifier for card processing
+                                ),
+                            ),
+                            array(
+                                'content' => $file->encrypted
+                                    ? '<i class="fa fa-lock text-success" title="' . __('Encrypted', 'cftp_admin') . '"></i>'
+                                    : '<i class="fa fa-unlock text-muted" style="opacity: 0.3;" title="' . __('Not encrypted', 'cftp_admin') . '"></i>',
+                                'attributes' => array(
+                                    'column_name' => 'encryption', // Identify this as encryption column
                                 ),
                             ),
                             array(

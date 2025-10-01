@@ -35,6 +35,11 @@ if (LOADED_LANG != 'en') {
     }
 }
 
+// Encryption settings (needed for JavaScript below)
+$encryption_enabled = \ProjectSend\Classes\Encryption::isEnabled();
+$encryption_required = \ProjectSend\Classes\Encryption::isRequired();
+$show_encryption_option = $encryption_enabled && !$encryption_required;
+
 message_no_clients();
 
 if (defined('UPLOAD_MAX_FILESIZE')) {
@@ -45,9 +50,7 @@ if (defined('UPLOAD_MAX_FILESIZE')) {
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 $chunk_size = get_option('upload_chunk_size');
 ?>
-<div class="row">
-    <div class="col-12">
-        <script type="text/javascript">
+<script type="text/javascript">
             $(function() {
                 $("#uploader").pluploadQueue({
                     runtimes: 'html5',
@@ -82,6 +85,10 @@ $chunk_size = get_option('upload_chunk_size');
                             var selectedStorage = $('#selected_storage').val();
                             up.settings.multipart_params = up.settings.multipart_params || {};
                             up.settings.multipart_params.storage_selection = selectedStorage;
+
+                            // Pass the encryption setting with each file upload
+                            var encryptFile = $('#encrypt_file').val();
+                            up.settings.multipart_params.encrypt_file = encryptFile;
                         }
                     }
                 });
@@ -105,11 +112,53 @@ $chunk_size = get_option('upload_chunk_size');
                     $('#selected_storage').val('<?php echo get_option('default_upload_storage', 'local'); ?>');
                 });
                 <?php endif; ?>
-            });
-        </script>
 
+                // Handle encryption checkbox
+                <?php if ($show_encryption_option): ?>
+                $('#encrypt_file_checkbox').on('change', function() {
+                    var encryptEnabled = $(this).is(':checked') ? '1' : '0';
+                    $('#encrypt_file').val(encryptEnabled);
+                    console.log('Encryption enabled:', encryptEnabled);
+                });
+
+                // Set initial encryption value
+                $(document).ready(function() {
+                    var initialEncryption = $('#encrypt_file_checkbox').is(':checked') ? '1' : '0';
+                    $('#encrypt_file').val(initialEncryption);
+                });
+                <?php elseif ($encryption_required): ?>
+                // Encryption is required, always set to 1
+                $(document).ready(function() {
+                    $('#encrypt_file').val('1');
+                });
+                <?php endif; ?>
+            });
+</script>
+
+<div class="row">
+    <div class="col-12 col-lg-7">
         <?php include_once FORMS_DIR . DS . 'upload.php'; ?>
     </div>
+
+    <div class="col-12 col-lg-5">
+        <div id="upload-sidebar">
+            <?php include_once FORMS_DIR . DS . 'upload-sidebar.php'; ?>
+        </div>
+    </div>
 </div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="after_form_buttons">
+            <button type="submit" name="Submit" class="btn btn-wide btn-primary" id="btn-submit"><?php _e('Upload files','cftp_admin'); ?></button>
+        </div>
+        <div class="message message_info message_uploading">
+            <p><?php _e("Your files are being uploaded! Progress indicators may take a while to update, but work is still being done behind the scenes.",'cftp_admin'); ?></p>
+        </div>
+    </div>
+</div>
+
+</form>
+
 <?php
 include_once ADMIN_VIEWS_DIR . DS . 'footer.php';

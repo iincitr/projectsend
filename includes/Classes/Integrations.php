@@ -227,29 +227,31 @@ class Integrations
             ];
         }
 
-        // Validate required fields
-        $validation = new Validation;
-        $validation->validate_items([
-            $data['name'] => [
-                'required' => ['error' => __('Integration name is required.', 'cftp_admin')],
-            ],
-        ]);
+        // Validate name only if it's being updated
+        if (isset($data['name'])) {
+            $validation = new Validation;
+            $validation->validate_items([
+                $data['name'] => [
+                    'required' => ['error' => __('Integration name is required.', 'cftp_admin')],
+                ],
+            ]);
 
-        if (!$validation->passed()) {
-            return [
-                'status' => 'error',
-                'message' => __('Please complete all required fields.', 'cftp_admin'),
-                'errors' => $validation->list_errors(false)
-            ];
-        }
+            if (!$validation->passed()) {
+                return [
+                    'status' => 'error',
+                    'message' => __('Please complete all required fields.', 'cftp_admin'),
+                    'errors' => $validation->list_errors(false)
+                ];
+            }
 
-        // Check if name already exists (excluding current integration)
-        $name_check = $this->getByName($data['name']);
-        if ($name_check && $name_check['id'] != $id) {
-            return [
-                'status' => 'error',
-                'message' => __('Integration name already exists.', 'cftp_admin')
-            ];
+            // Check if name already exists (excluding current integration)
+            $name_check = $this->getByName($data['name']);
+            if ($name_check && $name_check['id'] != $id) {
+                return [
+                    'status' => 'error',
+                    'message' => __('Integration name already exists.', 'cftp_admin')
+                ];
+            }
         }
 
         try {

@@ -1653,6 +1653,9 @@ function make_thumbnail($file, $type = 'thumbnail', $width = THUMBS_MAX_WIDTH, $
             $thumbnail['original']['url'] = $file;
             $thumbnail['thumbnail']['location'] = THUMBNAILS_FILES_DIR . DS . $thumbnail_file;
             $thumbnail['thumbnail']['url'] = THUMBNAILS_FILES_URL . '/' . $thumbnail_file;
+        } else {
+            // File exists but is not an image - cannot create thumbnail
+            return $thumbnail;
         }
     }
 
