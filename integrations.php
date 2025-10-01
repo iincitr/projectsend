@@ -11,7 +11,7 @@ if (!current_user_can('edit_settings')) {
     exit_with_error_code(403);
 }
 
-$active_nav = 'options';
+$active_nav = 'integrations';
 $page_title = __('External Storage Integrations', 'cftp_admin');
 $page_id = 'integrations';
 
