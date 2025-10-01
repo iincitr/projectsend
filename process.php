@@ -489,6 +489,62 @@ switch ($_GET['do']) {
             ]);
         }
     break;
+
+    case 'encrypt_single_file':
+        // Check permissions
+        if (!current_user_can('edit_settings')) {
+            echo json_encode(['status' => 'error', 'message' => __('Permission denied', 'cftp_admin')]);
+            exit;
+        }
+
+        if (!isset($_POST['file_id']) || empty($_POST['file_id'])) {
+            echo json_encode(['status' => 'error', 'message' => __('File ID is required', 'cftp_admin')]);
+            exit;
+        }
+
+        $file_id = (int)$_POST['file_id'];
+        $file = new \ProjectSend\Classes\Files($file_id);
+
+        if (!$file->id) {
+            echo json_encode(['status' => 'error', 'message' => __('File not found', 'cftp_admin')]);
+            exit;
+        }
+
+        // Check if file is already encrypted
+        if ($file->encrypted) {
+            echo json_encode(['status' => 'error', 'message' => __('File is already encrypted', 'cftp_admin')]);
+            exit;
+        }
+
+        // Check if encryption is enabled
+        if (!\ProjectSend\Classes\Encryption::isEnabled()) {
+            echo json_encode(['status' => 'error', 'message' => __('File encryption is not enabled', 'cftp_admin')]);
+            exit;
+        }
+
+        // Encrypt the file
+        try {
+            $result = $file->encryptFile();
+
+            if ($result) {
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => __('File encrypted successfully', 'cftp_admin')
+                ]);
+            } else {
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => __('Failed to encrypt file', 'cftp_admin')
+                ]);
+            }
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => __('Error encrypting file: ', 'cftp_admin') . $e->getMessage()
+            ]);
+        }
+        exit;
+    break;
 }
 
 exit;

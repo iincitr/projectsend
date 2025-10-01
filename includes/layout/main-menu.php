@@ -368,6 +368,11 @@ if (!current_role_in(['Client'])) {
                 'link' => 'thumbnails-regenerate.php',
                 'permission' => 'edit_settings',
             ),
+            array(
+                'label' => __('Encrypt Files', 'cftp_admin'),
+                'link' => 'encrypt-files.php',
+                'permission' => 'edit_settings',
+            ),
         ),
     );
 }
