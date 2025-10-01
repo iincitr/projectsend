@@ -30,7 +30,7 @@ $total_files = $count_statement->fetchColumn();
 // Pagination setup
 $pagination_page = (isset($_GET["page"])) ? (int)$_GET["page"] : 1;
 $allowed_per_page = [5, 10, 20, 50];
-$pagination_results_per_page = (isset($_GET["per_page"]) && in_array((int)$_GET["per_page"], $allowed_per_page)) ? (int)$_GET["per_page"] : 20;
+$pagination_results_per_page = (isset($_GET["per_page"]) && in_array((int)$_GET["per_page"], $allowed_per_page)) ? (int)$_GET["per_page"] : 10;
 $pagination_start = ($pagination_page - 1) * $pagination_results_per_page;
 
 // Get paginated results
