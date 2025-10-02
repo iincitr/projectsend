@@ -317,6 +317,8 @@ if (!current_role_in(['Client'])) {
         ),
     );
 
+    $items[] = 'separator';
+
     $items['roles'] = array(
         'nav' => 'roles',
         'permission' => 'edit_settings',

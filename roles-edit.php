@@ -93,25 +93,23 @@ if ($_POST && !$is_client_role) {
 // Get user count for this role
 $user_count = $role->getUserCount();
 
+// Header buttons
+$header_action_buttons = [
+    [
+        'url' => 'role-permissions.php?role='.$role->id,
+        'label' => __('Manage permissions', 'cftp_admin'),
+        'icon' => 'fa fa-key'
+    ],
+    [
+        'url' => 'roles.php',
+        'label' => __('Back to Roles', 'cftp_admin'),
+        'type' => 'light',
+        'icon' => 'fa fa-arrow-left',
+    ],
+];
+
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 ?>
-
-<div class="row">
-    <div class="col-12">
-        <div class="row">
-            <div class="col-xs-12 col-sm-12 col-lg-6">
-            </div>
-            <div class="col-xs-12 col-sm-12 col-lg-6 text-end">
-                <a href="roles.php" class="btn btn-secondary">
-                    <i class="fa fa-arrow-left"></i> <?php _e('Back to Roles', 'cftp_admin'); ?>
-                </a>
-                <a href="role-permissions.php?role=<?php echo $role->id; ?>" class="btn btn-primary">
-                    <i class="fa fa-key"></i> <?php _e('Manage Permissions', 'cftp_admin'); ?>
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
 
 <div class="row">
     <div class="col-12 col-lg-8">
@@ -243,22 +241,20 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
             </div>
         </div>
 
-        <div class="ps-card mt-3">
-            <div class="ps-card-body">
-                <h5><?php _e('Quick Actions', 'cftp_admin'); ?></h5>
-                <div class="d-grid gap-2">
-                    <a href="role-permissions.php?role=<?php echo $role->id; ?>" class="btn btn-primary">
-                        <i class="fa fa-key"></i> <?php _e('Manage Permissions', 'cftp_admin'); ?>
-                    </a>
-
-                    <?php if (!$role->is_system_role && $user_count == 0): ?>
-                        <button type="button" class="btn btn-danger" id="delete-role">
-                            <i class="fa fa-trash"></i> <?php _e('Delete Role', 'cftp_admin'); ?>
-                        </button>
-                    <?php endif; ?>
+        <?php if (!$role->is_system_role && $user_count == 0): ?>
+            <div class="ps-card mt-3">
+                <div class="ps-card-body">
+                    <h5><?php _e('Quick Actions', 'cftp_admin'); ?></h5>
+                    <div class="d-grid gap-2">
+                        <?php if (!$role->is_system_role && $user_count == 0): ?>
+                            <button type="button" class="btn btn-danger" id="delete-role">
+                                <i class="fa fa-trash"></i> <?php _e('Delete Role', 'cftp_admin'); ?>
+                            </button>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
-        </div>
+        <?php endif; ?>
 
         <?php if ($role->is_system_role): ?>
             <div class="ps-card mt-3">
