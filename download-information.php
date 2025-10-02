@@ -5,8 +5,8 @@
 require_once 'bootstrap.php';
 redirect_if_not_logged_in();
 
-// Check for view statistics permission
-if (!current_user_can('view_statistics')) {
+// Check for view downloads details permission
+if (!current_user_can('view_downloads_details')) {
     exit_with_error_code(403);
 }
 
