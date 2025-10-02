@@ -142,8 +142,12 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
             $table->thead($thead_columns);
 
             foreach ($custom_fields as $field) {
+                // Add class for disabled fields
+                $row_class = !$field['active'] ? 'table-secondary text-muted' : '';
+
                 $table->addRow([
                     'data-field-id' => $field['id'],
+                    'class' => $row_class,
                 ]);
 
                 // Label column
@@ -171,7 +175,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 
                 // Required column
                 $required_content = $field['is_required']
-                    ? '<span class="badge bg-warning">' . __('Yes', 'cftp_admin') . '</span>'
+                    ? '<span class="badge bg-danger">' . __('Yes', 'cftp_admin') . '</span>'
                     : '<span class="text-muted">' . __('No', 'cftp_admin') . '</span>';
 
                 // Visible column
