@@ -285,6 +285,12 @@ include_once LAYOUT_DIR . DS . 'search-filters-bar.php';
                     'hide' => 'phone',
                 ),
                 array(
+                    'sortable' => true,
+                    'sort_url' => 'max_disk_quota',
+                    'content' => __('Disk quota', 'cftp_admin'),
+                    'hide' => 'phone',
+                ),
+                array(
                     'content' => __('Actions', 'cftp_admin'),
                     'hide' => 'phone',
                 ),
@@ -335,7 +341,10 @@ include_once LAYOUT_DIR . DS . 'search-filters-bar.php';
                         'content' => '<span class="badge bg-' . $badge_class . '">' . $badge_label . '</span>',
                     ),
                     array(
-                        'content' => ($user->max_file_size == '0') ? __('Default', 'cftp_admin') : $user->max_file_size . ' ' . 'MB',
+                        'content' => (empty($user->max_file_size) || $user->max_file_size == 0) ? '<span class="badge bg-success-subtle text-success">' . __('No limit', 'cftp_admin') . '</span>' : '<span class="badge bg-warning-subtle text-warning">' . $user->max_file_size . ' MB</span>',
+                    ),
+                    array(
+                        'content' => (empty($user->max_disk_quota) || $user->max_disk_quota == 0) ? '<span class="badge bg-success-subtle text-success">' . __('No limit', 'cftp_admin') . '</span>' : '<span class="badge bg-warning-subtle text-warning">' . $user->max_disk_quota . ' MB</span>',
                     ),
                     array(
                         'actions' => true,

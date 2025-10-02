@@ -771,6 +771,11 @@ class Files
 
             @chmod($this->full_path, 0644);
 
+            // Get file size after moving
+            if (file_exists($this->full_path)) {
+                $this->size = get_real_size($this->full_path);
+            }
+
             $return = array(
                 'filename_original' => $this->filename_original,
                 'filename_disk' => $this->filename_on_disk,
@@ -1079,6 +1084,20 @@ class Files
             return [
                 'status' => 'error',
                 'message' => __('You do not have permission to upload files.', 'cftp_admin')
+            ];
+        }
+
+        // Check disk quota
+        $quota_check = user_can_upload_file(CURRENT_USER_ID, $this->size);
+        if (!$quota_check['allowed']) {
+            // Delete the file from disk since quota exceeded
+            if (file_exists($this->full_path)) {
+                unlink($this->full_path);
+            }
+
+            return [
+                'status' => 'error',
+                'message' => $quota_check['message']
             ];
         }
 

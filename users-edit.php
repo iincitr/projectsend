@@ -107,6 +107,7 @@ if ($_POST) {
         'email' => $_POST['email'],
         'role_id' => $user_arguments['role_id'],
         'max_file_size' => $user_arguments['max_file_size'],
+        'max_disk_quota' => $user_arguments['max_disk_quota'],
         'active' => $user_arguments['active'],
         'type' => 'edit_user',
         'limit_upload_to' => (isset($_POST["limit_upload_to"])) ? $_POST["limit_upload_to"] : null,
@@ -114,6 +115,7 @@ if ($_POST) {
 
     if ($ignore_size == false) {
         $user_arguments['max_file_size'] = (isset($_POST["max_file_size"])) ? $_POST["max_file_size"] : '';
+        $user_arguments['max_disk_quota'] = (isset($_POST["max_disk_quota"])) ? $_POST["max_disk_quota"] : '';
     }
 
     // If the password field send an empty value to prevent notices.

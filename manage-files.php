@@ -901,8 +901,10 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                                     break;
                                 case 'group':
                                 case 'category':
-                                    $download_count_class = ($row['download_count'] > 0) ? 'downloaders btn-primary' : 'btn-pslight disabled';
-                                    $download_count_content = '<a href="' . BASE_URI . 'download-information.php?id=' . $file->id . '" class="' . $download_count_class . ' btn btn-sm" title="' . html_output($row['filename']) . '">' . $download_count_content . '</a>';
+                                    if (current_user_can('view_downloads_details')) {
+                                        $download_count_class = ($row['download_count'] > 0) ? 'downloaders btn-primary' : 'btn-pslight disabled';
+                                        $download_count_content = '<a href="' . BASE_URI . 'download-information.php?id=' . $file->id . '" class="' . $download_count_class . ' btn btn-sm" title="' . html_output($row['filename']) . '">' . $download_count_content . '</a>';
+                                    }
                                     break;
                             }
                         }
@@ -929,7 +931,7 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
 
                         // Download count and link on the unfiltered files table no specific client or group selected)
                         if (!isset($search_on)) {
-                            if (!current_role_in(['Client'])) {
+                            if (!current_role_in(['Client']) && current_user_can('view_downloads_details')) {
                                 if ($row["download_count"] > 0) {
                                     $btn_class = 'downloaders btn-primary';
                                 } else {
@@ -937,6 +939,9 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                                 }
 
                                 $downloads_table_link = '<a href="' . BASE_URI . 'download-information.php?id=' . $file->id . '" class="' . $btn_class . ' btn btn-sm" title="' . html_output($row['filename']) . '">' . $row["download_count"] . ' ' . __('downloads', 'cftp_admin') . '</a>';
+                            } else if (!isset($downloads_table_link)) {
+                                // Show count without link if no permission
+                                $downloads_table_link = '<span class="btn btn-sm btn-pslight disabled">' . $row["download_count"] . ' ' . __('downloads', 'cftp_admin') . '</span>';
                             }
                         }
 
@@ -1027,7 +1032,9 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                                 'condition' => $conditions['total_downloads'],
                             ),
                             array(
-                                'content' => $row['download_count'] . ' ' . __('downloads', 'cftp_admin'),
+                                'content' => current_user_can('view_downloads_details')
+                                    ? '<a href="' . BASE_URI . 'download-information.php?id=' . $file->id . '" class="btn btn-sm ' . (($row['download_count'] > 0) ? 'downloaders btn-primary' : 'btn-pslight disabled') . '">' . $row['download_count'] . ' ' . __('downloads', 'cftp_admin') . '</a>'
+                                    : '<span class="btn btn-sm btn-pslight disabled">' . $row['download_count'] . ' ' . __('downloads', 'cftp_admin') . '</span>',
                                 'condition' => true, // Always include for card view
                                 'hide_from_table' => true, // Hide from table view
                                 'attributes' => array(

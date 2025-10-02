@@ -34,6 +34,7 @@ if ($_POST) {
         'email' => $_POST['email'],
         'role' => $_POST['role_id'],
         'max_file_size' => (isset($_POST["max_file_size"])) ? $_POST['max_file_size'] : '',
+        'max_disk_quota' => (isset($_POST["max_disk_quota"])) ? $_POST['max_disk_quota'] : '',
         'notify_account' => (isset($_POST["notify_account"])) ? 1 : 0,
         'active' => (isset($_POST["active"])) ? 1 : 0,
         'require_password_change' => (isset($_POST["require_password_change"])) ? true : false,

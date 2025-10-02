@@ -116,6 +116,17 @@ switch ($user_form_type) {
 				</div>
 			</div>
 
+			<div class="form-group row">
+				<label for="max_disk_quota" class="col-sm-4 control-label"><?php _e('Max. disk quota','cftp_admin'); ?></label>
+				<div class="col-sm-8">
+					<div class="input-group">
+						<input type="text" name="max_disk_quota" id="max_disk_quota" class="form-control" value="<?php echo (isset($user_arguments['max_disk_quota'])) ? format_form_value($user_arguments['max_disk_quota']) : '0'; ?>" />
+						<span class="input-group-text">MB</span>
+					</div>
+					<p class="field_note form-text"><?php _e("Set to 0 for unlimited disk space",'cftp_admin'); ?></p>
+				</div>
+			</div>
+
             <div class="form-group row <?php echo $limit_field_class; ?>" id="limit_upload_to_container">
                 <label for="limit_upload_to" class="col-sm-4 control-label"><?php _e('Limit account to this clients only','cftp_admin'); ?></label>
                 <div class="col-sm-8">

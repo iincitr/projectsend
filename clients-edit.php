@@ -79,6 +79,7 @@ if ($_POST) {
         'contact' => (isset($_POST["contact"])) ? $_POST['contact'] : null,
         'notify_upload' => (isset($_POST["notify_upload"])) ? 1 : 0,
         'max_file_size' => $client_arguments['max_file_size'],
+        'max_disk_quota' => $client_arguments['max_disk_quota'],
         'can_upload_public' => $client_arguments['can_upload_public'],
         'active' => $client_arguments['active'],
         'type' => 'edit_client',
@@ -86,6 +87,7 @@ if ($_POST) {
 
     if ($ignore_size == false) {
         $client_arguments['max_file_size'] = (isset($_POST["max_file_size"])) ? $_POST["max_file_size"] : null;
+        $client_arguments['max_disk_quota'] = (isset($_POST["max_disk_quota"])) ? $_POST["max_disk_quota"] : null;
     }
 
     if (!current_role_in(['Client'])) {

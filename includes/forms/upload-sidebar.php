@@ -5,7 +5,49 @@ $can_select_storage = current_user_can('upload_storage_select');
 $default_storage = get_option('default_upload_storage', 'local');
 
 // Encryption settings are defined in upload.php for use in JavaScript
+
+// Disk quota information
+$user_disk_quota = CURRENT_USER_DISK_QUOTA; // In MB, 0 = unlimited
+$user_disk_usage = CURRENT_USER_DISK_USAGE; // In bytes
+$quota_unlimited = ($user_disk_quota == 0);
+
+if (!$quota_unlimited) {
+    $quota_bytes = $user_disk_quota * 1048576; // Convert MB to bytes
+    $quota_available_bytes = $quota_bytes - $user_disk_usage;
+    // Don't allow negative available space
+    if ($quota_available_bytes < 0) {
+        $quota_available_bytes = 0;
+    }
+    $quota_percentage = ($quota_bytes > 0) ? round(($user_disk_usage / $quota_bytes) * 100, 1) : 0;
+    // Cap percentage at 100%
+    if ($quota_percentage > 100) {
+        $quota_percentage = 100;
+    }
+}
 ?>
+
+<?php if (!$quota_unlimited): ?>
+    <div class="ps-card mb-3">
+        <div class="ps-card-body">
+            <h4><?php _e('Disk Quota', 'cftp_admin'); ?></h4>
+            <div class="mb-2">
+                <div class="d-flex justify-content-between mb-1">
+                    <span><?php echo format_file_size($user_disk_usage); ?> <?php _e('of', 'cftp_admin'); ?> <?php echo format_file_size($quota_bytes); ?></span>
+                    <span><?php echo $quota_percentage; ?>%</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar <?php echo ($quota_percentage > 90) ? 'bg-danger' : (($quota_percentage > 75) ? 'bg-warning' : 'bg-primary'); ?>"
+                         role="progressbar"
+                         style="width: <?php echo $quota_percentage; ?>%">
+                    </div>
+                </div>
+            </div>
+            <small class="text-muted">
+                <?php echo format_file_size($quota_available_bytes); ?> <?php _e('available', 'cftp_admin'); ?>
+            </small>
+        </div>
+    </div>
+<?php endif; ?>
 
 <?php if ($can_select_storage): ?>
     <div class="ps-card mb-3">

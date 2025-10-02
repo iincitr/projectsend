@@ -37,6 +37,7 @@ if ($_POST) {
         'phone' => (isset($_POST["phone"])) ? $_POST['phone'] : '',
         'contact' => (isset($_POST["contact"])) ? $_POST['contact'] : '',
         'max_file_size' => (isset($_POST["max_file_size"])) ? $_POST['max_file_size'] : '',
+        'max_disk_quota' => (isset($_POST["max_disk_quota"])) ? $_POST['max_disk_quota'] : '',
         'notify_upload' => (isset($_POST["notify_upload"])) ? 1 : 0,
         'notify_account' => (isset($_POST["notify_account"])) ? 1 : 0,
         'active' => (isset($_POST["active"])) ? 1 : 0,

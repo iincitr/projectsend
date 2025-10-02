@@ -49,9 +49,30 @@ if (defined('UPLOAD_MAX_FILESIZE')) {
 
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 $chunk_size = get_option('upload_chunk_size');
+
+// Calculate available disk quota
+$user_disk_quota = CURRENT_USER_DISK_QUOTA; // In MB, 0 = unlimited
+$user_disk_usage = CURRENT_USER_DISK_USAGE; // In bytes
+$quota_available_bytes = 0;
+$quota_unlimited = ($user_disk_quota == 0);
+
+if (!$quota_unlimited) {
+    $quota_bytes = $user_disk_quota * 1048576; // Convert MB to bytes
+    $quota_available_bytes = $quota_bytes - $user_disk_usage;
+    // Don't allow negative available space
+    if ($quota_available_bytes < 0) {
+        $quota_available_bytes = 0;
+    }
+}
 ?>
 <script type="text/javascript">
             $(function() {
+                // Disk quota information
+                var quotaUnlimited = <?php echo $quota_unlimited ? 'true' : 'false'; ?>;
+                var quotaAvailableBytes = <?php echo $quota_available_bytes; ?>;
+                var quotaTotalBytes = <?php echo $quota_unlimited ? 0 : ($user_disk_quota * 1048576); ?>;
+                var quotaUsedBytes = <?php echo $user_disk_usage; ?>;
+
                 $("#uploader").pluploadQueue({
                     runtimes: 'html5',
                     url: 'includes/upload.process.php',
@@ -80,6 +101,35 @@ $chunk_size = get_option('upload_chunk_size');
                         }
                     },
                     init: {
+                        FilesAdded: function(up, files) {
+                            // Check disk quota before allowing files to be added
+                            if (!quotaUnlimited) {
+                                var totalSize = 0;
+                                $.each(up.files, function(i, file) {
+                                    totalSize += file.size;
+                                });
+
+                                if (totalSize > quotaAvailableBytes) {
+                                    // Remove the newly added files
+                                    $.each(files, function(i, file) {
+                                        up.removeFile(file);
+                                    });
+
+                                    // Show error message
+                                    var quotaAvailableMB = (quotaAvailableBytes / 1048576).toFixed(2);
+                                    var quotaTotalMB = (quotaTotalBytes / 1048576).toFixed(2);
+                                    var quotaUsedMB = (quotaUsedBytes / 1048576).toFixed(2);
+
+                                    alert('<?php _e("Disk quota exceeded!", "cftp_admin"); ?>\n\n' +
+                                          '<?php _e("Your quota:", "cftp_admin"); ?> ' + quotaTotalMB + ' MB\n' +
+                                          '<?php _e("Current usage:", "cftp_admin"); ?> ' + quotaUsedMB + ' MB\n' +
+                                          '<?php _e("Available:", "cftp_admin"); ?> ' + quotaAvailableMB + ' MB\n\n' +
+                                          '<?php _e("Please remove some files before uploading more.", "cftp_admin"); ?>');
+
+                                    return false;
+                                }
+                            }
+                        },
                         BeforeUpload: function(up, file) {
                             // Pass the storage selection with each file upload
                             var selectedStorage = $('#selected_storage').val();

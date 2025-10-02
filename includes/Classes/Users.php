@@ -34,6 +34,7 @@ class Users
     public $active;
     public $notify_account;
     public $max_file_size;
+    public $max_disk_quota;
     public $can_upload_public;
     public $created_by;
     public $created_date;
@@ -193,6 +194,7 @@ class Users
         $this->active = (!empty($arguments['active'])) ? (int)$arguments['active'] : 0;
         $this->notify_account = (!empty($arguments['notify_account'])) ? (int)$arguments['notify_account'] : 0;
         $this->max_file_size = (!empty($arguments['max_file_size'])) ? (int)$arguments['max_file_size'] : 0;
+        $this->max_disk_quota = (!empty($arguments['max_disk_quota'])) ? (int)$arguments['max_disk_quota'] : 0;
         $this->can_upload_public = (!empty($arguments['can_upload_public'])) ? (int)$arguments['can_upload_public'] : 0;
         $this->require_password_change = (!empty($arguments['require_password_change'])) ? $arguments['require_password_change'] : false;
         $this->limit_upload_to = (!empty($arguments['limit_upload_to'])) ? $arguments['limit_upload_to'] : null;
@@ -238,6 +240,7 @@ class Users
             $this->account_type = $this->isClient() ? 'client' : 'user';
             $this->active = html_output($row['active']);
             $this->max_file_size = html_output($row['max_file_size']);
+            $this->max_disk_quota = html_output($row['max_disk_quota']);
             $this->created_date = html_output($row['timestamp']);
             $this->created_by = html_output($row['created_by']);
 
@@ -306,6 +309,7 @@ class Users
             'role_id' => (int)$this->role_id,
             'active' => $this->active,
             'max_file_size' => $this->max_file_size,
+            'max_disk_quota' => $this->max_disk_quota,
             'can_upload_public' => $this->can_upload_public,
             'created_date' => $this->created_date,
             'address' => $this->address,
@@ -434,6 +438,9 @@ class Users
             $this->max_file_size => [
                 'number' => ['error' => $json_strings['validation']['file_size']],
             ],
+            $this->max_disk_quota => [
+                'number' => ['error' => $json_strings['validation']['disk_quota']],
+            ],
         ];
 
         if ($this->validation_type == 'new_user' || $this->validation_type == 'new_client') {
@@ -542,10 +549,10 @@ class Users
             /** Insert the client information into the database */
             $statement = $this->dbh->prepare(
                 "INSERT INTO " . TABLE_USERS . " (
-                    name, user, password, role_id, address, phone, email, notify, contact, created_by, active, account_requested, max_file_size, can_upload_public
+                    name, user, password, role_id, address, phone, email, notify, contact, created_by, active, account_requested, max_file_size, max_disk_quota, can_upload_public
                 )
                 VALUES (
-                    :name, :username, :password, :role_id, :address, :phone, :email, :notify_upload, :contact, :created_by, :active, :request, :max_file_size, :can_upload_public
+                    :name, :username, :password, :role_id, :address, :phone, :email, :notify_upload, :contact, :created_by, :active, :request, :max_file_size, :max_disk_quota, :can_upload_public
                 )"
             );
             $statement->bindParam(':name', $this->name);
@@ -561,6 +568,7 @@ class Users
             $statement->bindParam(':active', $this->active, PDO::PARAM_INT);
             $statement->bindParam(':request', $this->account_request, PDO::PARAM_INT);
             $statement->bindParam(':max_file_size', $this->max_file_size, PDO::PARAM_INT);
+            $statement->bindParam(':max_disk_quota', $this->max_disk_quota, PDO::PARAM_INT);
             $statement->bindParam(':can_upload_public', $this->can_upload_public, PDO::PARAM_INT);
             $statement->execute();
 
@@ -737,6 +745,7 @@ class Users
                                     contact = :contact,
                                     notify = :notify_upload,
                                     max_file_size = :max_file_size,
+                                    max_disk_quota = :max_disk_quota,
                                     can_upload_public = :can_upload_public
                                     ";
 
@@ -756,6 +765,7 @@ class Users
         $statement->bindParam(':contact', $this->contact);
         $statement->bindParam(':notify_upload', $this->notify_upload, PDO::PARAM_INT);
         $statement->bindParam(':max_file_size', $this->max_file_size, PDO::PARAM_INT);
+        $statement->bindParam(':max_disk_quota', $this->max_disk_quota, PDO::PARAM_INT);
         $statement->bindParam(':can_upload_public', $this->can_upload_public, PDO::PARAM_INT);
         $statement->bindParam(':id', $this->id, PDO::PARAM_INT);
         if (!empty($this->password)) {
@@ -1179,6 +1189,7 @@ class Users
             'phone' => $this->extractLdapAttribute($ldap_attributes, ['telephoneNumber', 'mobile']),
             'contact' => null,
             'max_file_size' => get_option('ldap_default_max_file_size', null, '0'),
+            'max_disk_quota' => get_option('ldap_default_disk_quota', null, '0'),
             'notify' => 1, // Use 'notify' column instead of 'notify_upload'
             'active' => 1, // LDAP users are auto-approved
             'can_upload_public' => get_option('ldap_default_can_upload_public', null, '0'),

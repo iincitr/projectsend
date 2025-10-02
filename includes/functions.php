@@ -1429,6 +1429,89 @@ function format_file_size($file)
     return $formatted;
 }
 
+/**
+ * Get total disk usage for a user (sum of all their uploaded files)
+ *
+ * @param int $user_id The user ID
+ * @return int Total disk usage in bytes
+ */
+function get_user_disk_usage($user_id)
+{
+    global $dbh;
+
+    $query = "SELECT SUM(size) as total_size FROM " . TABLE_FILES . " WHERE user_id = :user_id";
+    $statement = $dbh->prepare($query);
+    $statement->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $statement->execute();
+    $result = $statement->fetch(PDO::FETCH_ASSOC);
+
+    return (int)($result['total_size'] ?? 0);
+}
+
+/**
+ * Check if user can upload a file based on their disk quota
+ *
+ * @param int $user_id The user ID
+ * @param int $file_size Size of the file to upload in bytes
+ * @return array Array with 'allowed' (bool) and 'message' (string)
+ */
+function user_can_upload_file($user_id, $file_size)
+{
+    global $dbh;
+
+    // Get user's disk quota
+    $query = "SELECT max_disk_quota FROM " . TABLE_USERS . " WHERE id = :user_id";
+    $statement = $dbh->prepare($query);
+    $statement->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $statement->execute();
+    $user = $statement->fetch(PDO::FETCH_ASSOC);
+
+    if (!$user) {
+        return [
+            'allowed' => false,
+            'message' => __('User not found', 'cftp_admin')
+        ];
+    }
+
+    $max_disk_quota = (int)$user['max_disk_quota'];
+
+    // 0 means unlimited
+    if ($max_disk_quota == 0) {
+        return [
+            'allowed' => true,
+            'message' => ''
+        ];
+    }
+
+    // Convert quota from MB to bytes
+    $quota_bytes = $max_disk_quota * 1048576;
+
+    // Get current usage
+    $current_usage = get_user_disk_usage($user_id);
+
+    // Check if adding this file would exceed quota
+    if (($current_usage + $file_size) > $quota_bytes) {
+        $quota_formatted = format_file_size($quota_bytes);
+        $usage_formatted = format_file_size($current_usage);
+        $remaining_formatted = format_file_size($quota_bytes - $current_usage);
+
+        return [
+            'allowed' => false,
+            'message' => sprintf(
+                __('Disk quota exceeded. Your quota: %s, Current usage: %s, Available: %s', 'cftp_admin'),
+                $quota_formatted,
+                $usage_formatted,
+                $remaining_formatted
+            )
+        ];
+    }
+
+    return [
+        'allowed' => true,
+        'message' => ''
+    ];
+}
+
 
 /**
  * Since filesize() was giving trouble with files larger

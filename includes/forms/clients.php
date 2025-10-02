@@ -134,6 +134,17 @@ switch ($clients_form_type) {
                 <p class="field_note form-text"><?php _e("Set to 0 to use the default system limit", 'cftp_admin'); ?> (<?php echo MAX_FILESIZE; ?> MB)</p>
             </div>
         </div>
+
+        <div class="form-group row">
+            <label for="max_disk_quota" class="col-sm-4 control-label"><?php _e('Max. disk quota', 'cftp_admin'); ?></label>
+            <div class="col-sm-8">
+                <div class="input-group">
+                    <input type="text" name="max_disk_quota" id="max_disk_quota" class="form-control" value="<?php echo (isset($client_arguments['max_disk_quota'])) ? format_form_value($client_arguments['max_disk_quota']) : get_option('clients_default_disk_quota', null, '0'); ?>" />
+                    <span class="input-group-text">MB</span>
+                </div>
+                <p class="field_note form-text"><?php _e("Set to 0 for unlimited disk space", 'cftp_admin'); ?></p>
+            </div>
+        </div>
         <?php
     }
 

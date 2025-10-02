@@ -73,6 +73,14 @@ $form_sections = [
         'title' => __('Files', 'cftp_admin'),
         'fields' => [
             [
+                'type' => 'number',
+                'name' => 'clients_default_disk_quota',
+                'label' => __('Default disk quota for new clients', 'cftp_admin'),
+                'default' => '0',
+                'note' => __('Applied to new client accounts. Set to 0 for unlimited disk space. Value in MB.', 'cftp_admin'),
+                'suffix' => 'MB'
+            ],
+            [
                 'type' => 'custom',
                 'name' => 'client_permissions_notice',
                 'render_callback' => function($field) {
