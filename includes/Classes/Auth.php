@@ -49,6 +49,9 @@ class Auth
 
         session_regenerate_id(true);
 
+        // Initialize session timestamp to prevent immediate expiration
+        extend_session();
+
         // Record the action log
         $logger = new \ProjectSend\Classes\ActionsLog;
         $logger->addEntry([
