@@ -6,7 +6,7 @@
 require_once 'bootstrap.php';
 check_access_enhanced(['edit_settings']);
 
-$active_nav = 'users';
+$active_nav = 'roles';
 $page_title = __('User Roles Management', 'cftp_admin');
 $page_id = 'roles';
 
@@ -17,23 +17,23 @@ $roles = get_all_roles();
 $elements_found_count = count($roles);
 $bulk_actions_items = []; // No bulk actions for roles
 
+// Header buttons
+$header_action_buttons = [];
+if (custom_roles_enabled()) {
+    $header_action_buttons = [
+        [
+            'url' => 'roles-add.php',
+            'label' => __('Add new role', 'cftp_admin'),
+        ],
+    ];
+}
+
 include_once ADMIN_VIEWS_DIR . DS . 'header.php';
 ?>
 
 <div class="row">
     <div class="col-12">
         <?php include_once LAYOUT_DIR . DS . 'form-counts-actions.php'; ?>
-        <div class="row">
-            <div class="col-xs-12 col-sm-12 col-lg-6">
-            </div>
-            <div class="col-xs-12 col-sm-12 col-lg-6 text-end">
-                <?php if (custom_roles_enabled()): ?>
-                    <a href="roles-add.php" class="btn btn-primary">
-                        <i class="fa fa-plus"></i> <?php _e('Add new role', 'cftp_admin'); ?>
-                    </a>
-                <?php endif; ?>
-            </div>
-        </div>
     </div>
 </div>
 

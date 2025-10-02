@@ -6,7 +6,7 @@
 require_once 'bootstrap.php';
 check_access_enhanced(['edit_settings']);
 
-$active_nav = 'users';
+$active_nav = 'roles';
 
 // Get role from URL
 if (empty($_GET['role'])) {

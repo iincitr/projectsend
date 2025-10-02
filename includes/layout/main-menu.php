@@ -158,11 +158,6 @@ if (!current_role_in(['Client'])) {
                 'divider' => true,
             ),
             array(
-                'label' => __('User Roles', 'cftp_admin'),
-                'link' => 'roles.php',
-                'permission' => 'edit_settings',
-            ),
-            array(
                 'label' => __('Custom Fields', 'cftp_admin'),
                 'link' => 'custom-fields.php',
                 'permission' => 'manage_custom_fields',
@@ -319,6 +314,16 @@ if (!current_role_in(['Client'])) {
                 'label' => __('LDAP Authentication', 'cftp_admin'),
                 'link' => 'options.php?section=ldap',
             ),
+        ),
+    );
+
+    $items['roles'] = array(
+        'nav' => 'roles',
+        'permission' => 'edit_settings',
+        'main' => array(
+            'label' => __('User Roles', 'cftp_admin'),
+            'icon' => 'id-badge',
+            'link' => 'roles.php',
         ),
     );
 

@@ -12,7 +12,7 @@ if (!custom_roles_enabled()) {
     ps_redirect('roles.php');
 }
 
-$active_nav = 'users';
+$active_nav = 'roles';
 $page_title = __('Add New Role', 'cftp_admin');
 $page_id = 'roles_add';
 
