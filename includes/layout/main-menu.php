@@ -398,7 +398,6 @@ else {
     if (count_user_uploads(CURRENT_USER_ID) > 0 || current_user_can('upload')) {
         $items['manage_files'] = array(
             'nav' => 'manage',
-            'permission' => 'manage_files',
             'main' => array(
                 'label' => __('Manage files', 'cftp_admin'),
                 'link' => 'manage-files.php',
