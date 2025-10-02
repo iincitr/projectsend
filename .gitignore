@@ -11,6 +11,7 @@ assets/dist
 assets/css
 assets/fonts
 assets/js
+assets/lib/codemirror
 
 # Cache
 cache/*

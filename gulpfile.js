@@ -106,6 +106,8 @@ gulp.task('copy', (done) => {
         .pipe(gulp.dest(dest + 'lib/jquery/'));
     gulp.src('node_modules/jquery-migrate/dist/jquery-migrate.min.js')
         .pipe(gulp.dest(dest + 'lib/jquery-migrate/'));
+    gulp.src('node_modules/codemirror-minified/**/*')
+        .pipe(gulp.dest(dest + 'lib/codemirror/'));
     done();
 });
 

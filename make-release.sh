@@ -46,8 +46,8 @@ if [ -z "$VERSION_NUMBER" ]; then
     echo -e "${GREEN}Commits since then: ${COMMITS_SINCE}${NC}"
     echo -e "${GREEN}Calculated version: r${VERSION_NUMBER}${NC}"
     echo ""
-    read -p "Use this version? (y/n): " CONFIRM
-    if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
+    read -p "Use this version? (Y/n): " CONFIRM
+    if [[ "$CONFIRM" =~ ^[Nn]$ ]]; then
         echo -e "${YELLOW}Cancelled by user${NC}"
         exit 0
     fi
@@ -176,20 +176,25 @@ rm -rf ./*
 mv ../tmp/* .
 rm -rf ../tmp
 
-echo -e "${GREEN}Step 10: Creating ZIP archive${NC}"
+# Return to release directory
 cd ../../
+
+echo -e "${GREEN}Step 10: Removing node_modules${NC}"
+rm -rf node_modules
+
+echo -e "${GREEN}Step 11: Creating ZIP archive${NC}"
 ZIPFILE="projectsend-${VERSION}.zip"
 zip -r -q "$ZIPFILE" *
 
-echo -e "${GREEN}Step 11: Generating SHA256 hash${NC}"
+echo -e "${GREEN}Step 12: Generating SHA256 hash${NC}"
 SHA256=$(sha256sum "$ZIPFILE" | cut -d' ' -f1)
 
-echo -e "${GREEN}Step 12: Moving release file${NC}"
+echo -e "${GREEN}Step 13: Moving release file${NC}"
 OUTPUT_DIR="$(dirname "$RELEASE_DIR")"
 mv "$ZIPFILE" "$OUTPUT_DIR/"
 OUTPUT_FILE="$OUTPUT_DIR/$ZIPFILE"
 
-echo -e "${GREEN}Step 13: Cleaning up temporary files${NC}"
+echo -e "${GREEN}Step 14: Cleaning up temporary files${NC}"
 rm -rf "$RELEASE_DIR"
 
 echo ""
