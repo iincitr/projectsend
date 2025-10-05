@@ -790,6 +790,10 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                             'condition' => $conditions['total_downloads'],
                         ),
                         array(
+                            'content' => __('Download Limit', 'cftp_admin'),
+                            'hide' => 'phone',
+                        ),
+                        array(
                             'sortable' => true,
                             'sort_url' => 'encrypted',
                             'content' => __('Encryption', 'cftp_admin'),
@@ -945,6 +949,33 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                             }
                         }
 
+                        // Download limit badge (calculate before title content)
+                        $download_limit_badge = '';
+                        $download_limit_icon = '';
+                        if ($file->download_limit_enabled) {
+                            $current_count = (int)$row['download_count'];
+                            $max_count = (int)$file->download_limit_count;
+                            $limit_type_text = ($file->download_limit_type == 'per_user') ? __('per user', 'cftp_admin') : __('total', 'cftp_admin');
+
+                            // Determine badge color based on usage
+                            $usage_percent = ($max_count > 0) ? ($current_count / $max_count) * 100 : 0;
+                            if ($current_count >= $max_count) {
+                                $badge_color = 'danger';
+                            } elseif ($usage_percent >= 80) {
+                                $badge_color = 'warning';
+                            } else {
+                                $badge_color = 'info';
+                            }
+
+                            $download_limit_badge = ' <span class="badge bg-' . $badge_color . '" title="' . __('Download limit', 'cftp_admin') . ': ' . $current_count . '/' . $max_count . ' (' . $limit_type_text . ')">';
+                            $download_limit_badge .= '<i class="fa fa-download"></i> ' . $current_count . '/' . $max_count;
+                            $download_limit_badge .= '</span>';
+
+                            $download_limit_icon = '<i class="fa fa-download text-' . $badge_color . '" title="' . __('Download limit', 'cftp_admin') . ': ' . $current_count . '/' . $max_count . ' (' . $limit_type_text . ')"></i>';
+                        } else {
+                            $download_limit_icon = '<i class="fa fa-download text-muted" style="opacity: 0.3;" title="' . __('No download limit', 'cftp_admin') . '"></i>';
+                        }
+
                         // Title content for table view (includes extra info)
                         $encryption_badge = '';
                         if ($file->encrypted) {
@@ -965,6 +996,20 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                         $title_content = '<a href="' . $file->download_link . '" target="_blank">' . $file->title . '</a>';
                         if ($file->encrypted) {
                             $title_content .= '<br><span class="badge bg-success"><i class="fa fa-lock"></i> ' . __('Encrypted', 'cftp_admin') . '</span>';
+                        }
+                        if ($file->download_limit_enabled) {
+                            $current_count = (int)$row['download_count'];
+                            $max_count = (int)$file->download_limit_count;
+                            $limit_type_text = ($file->download_limit_type == 'per_user') ? __('per user', 'cftp_admin') : __('total', 'cftp_admin');
+                            $usage_percent = ($max_count > 0) ? ($current_count / $max_count) * 100 : 0;
+                            if ($current_count >= $max_count) {
+                                $badge_color = 'danger';
+                            } elseif ($usage_percent >= 80) {
+                                $badge_color = 'warning';
+                            } else {
+                                $badge_color = 'info';
+                            }
+                            $title_content .= '<br><span class="badge bg-' . $badge_color . '"><i class="fa fa-download"></i> ' . $current_count . '/' . $max_count . ' (' . $limit_type_text . ')</span>';
                         }
 
                         //* Add the cells to the row
@@ -1040,6 +1085,9 @@ include_once LAYOUT_DIR . DS . 'folders-nav.php';
                                 'attributes' => array(
                                     'column_name' => 'card_download_count', // Custom identifier for card processing
                                 ),
+                            ),
+                            array(
+                                'content' => !empty($download_limit_badge) ? $download_limit_badge : '-',
                             ),
                             array(
                                 'content' => $file->encrypted

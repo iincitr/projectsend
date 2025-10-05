@@ -112,6 +112,49 @@
                                         <?php
                                             }
 
+                                            // Download limits are available to users with limit_downloads permission
+                                            if (current_user_can('limit_downloads')) {
+                                        ?>
+                                                <div class="col">
+                                                    <div class="file_data">
+                                                        <h3><?php _e('Download limits', 'cftp_admin');?></h3>
+
+                                                        <div class="checkbox">
+                                                            <label for="dl_limit_checkbox_<?php echo $i; ?>">
+                                                                <input type="checkbox" class="checkbox_download_limit_enabled" id="dl_limit_checkbox_<?php echo $i; ?>" name="file[<?php echo $i; ?>][download_limit_enabled]" value="1" <?php if ($file->download_limit_enabled) { ?>checked="checked"<?php } ?> /> <?php _e('Enable download limit', 'cftp_admin');?>
+                                                            </label>
+                                                        </div>
+
+                                                        <div class="download_limit_settings mt-4" <?php if (!$file->download_limit_enabled) { ?>style="display:none;"<?php } ?>>
+                                                            <div class="form-group">
+                                                                <label class="mb-3"><?php _e('Limit type', 'cftp_admin');?></label>
+                                                                <div class="form-check mb-3">
+                                                                    <input class="form-check-input" type="radio" name="file[<?php echo $i; ?>][download_limit_type]" id="dl_type_per_user_<?php echo $i; ?>" value="per_user" <?php if ($file->download_limit_type == 'per_user') { ?>checked="checked"<?php } ?>>
+                                                                    <label class="form-check-label" for="dl_type_per_user_<?php echo $i; ?>">
+                                                                        <?php _e('Per user', 'cftp_admin');?>
+                                                                    </label>
+                                                                    <small class="form-text text-muted d-block"><?php _e('Each user can download this file a limited number of times', 'cftp_admin');?></small>
+                                                                </div>
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="radio" name="file[<?php echo $i; ?>][download_limit_type]" id="dl_type_total_<?php echo $i; ?>" value="total" <?php if ($file->download_limit_type == 'total' || empty($file->download_limit_type)) { ?>checked="checked"<?php } ?>>
+                                                                    <label class="form-check-label" for="dl_type_total_<?php echo $i; ?>">
+                                                                        <?php _e('Total downloads', 'cftp_admin');?>
+                                                                    </label>
+                                                                    <small class="form-text text-muted d-block"><?php _e('File can only be downloaded a limited number of times in total', 'cftp_admin');?></small>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                <label for="download_limit_count_<?php echo $i; ?>"><?php _e('Maximum downloads', 'cftp_admin');?></label>
+                                                                <input type="number" class="form-control" id="download_limit_count_<?php echo $i; ?>" name="file[<?php echo $i; ?>][download_limit_count]" value="<?php echo (!empty($file->download_limit_count)) ? $file->download_limit_count : 0; ?>" min="0" />
+                                                                <small class="form-text text-muted"><?php _e('Your own downloads do not count toward the limit', 'cftp_admin');?></small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                        <?php
+                                            }
+
                                             // Public downloading options are available to users with upload_public permission (separate from expiration)
                                             if (current_user_can('upload_public')) {
                                         ?>
@@ -285,6 +328,16 @@ EOL;
                                                     'data' => [
                                                         'copy-from' => 'exp_checkbox_'.$i,
                                                         'copy-date-from' => 'file_expiry_date_'.$i,
+                                                    ],
+                                                ];
+                                            }
+                                            // Download limit settings
+                                            if (current_user_can('limit_downloads')) {
+                                                $copy_buttons['download_limits'] = [
+                                                    'label' => __('Download limit settings','cftp_admin'),
+                                                    'class' => 'copy-download-limit-settings',
+                                                    'data' => [
+                                                        'copy-from' => 'dl_limit_checkbox_'.$i,
                                                     ],
                                                 ];
                                             }

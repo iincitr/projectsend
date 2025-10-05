@@ -52,6 +52,9 @@ class Files
     public $encryption_iv; // IV for key encryption (base64)
     public $encryption_algorithm; // encryption algorithm used
     public $encryption_file_iv; // IV for file encryption (base64)
+    public $download_limit_enabled; // 1 if download limits are enabled, 0 otherwise
+    public $download_limit_type; // 'per_user' or 'total'
+    public $download_limit_count; // maximum number of downloads allowed
     private $dbh;
     private $logger;
     private $external_storage;
@@ -92,6 +95,11 @@ class Files
         $this->encryption_iv = null;
         $this->encryption_algorithm = 'aes-256-gcm';
         $this->encryption_file_iv = null;
+
+        // Initialize download limit properties
+        $this->download_limit_enabled = 0;
+        $this->download_limit_type = 'total';
+        $this->download_limit_count = 0;
 
         if (!empty($file_id)) {
             $this->get($file_id);
@@ -206,6 +214,11 @@ class Files
 
         $this->categories = !empty( $arguments['categories'] ) ? to_array_if_not($arguments['categories']) : null;
 
+        // Download limits
+        $this->download_limit_enabled = (!empty($arguments['download_limit_enabled'])) ? (int)$arguments['download_limit_enabled'] : 0;
+        $this->download_limit_type = (!empty($arguments['download_limit_type'])) ? $arguments['download_limit_type'] : 'total';
+        $this->download_limit_count = (!empty($arguments['download_limit_count'])) ? (int)$arguments['download_limit_count'] : 0;
+
         $this->setFullPath();
         $this->setExtension();
         $this->isFiletypeAllowed();
@@ -274,6 +287,11 @@ class Files
             $this->encryption_iv = $row['encryption_iv'] ?? null;
             $this->encryption_algorithm = $row['encryption_algorithm'] ?? 'aes-256-gcm';
             $this->encryption_file_iv = $row['encryption_file_iv'] ?? null;
+
+            // Load download limit properties
+            $this->download_limit_enabled = isset($row['download_limit_enabled']) ? (int)$row['download_limit_enabled'] : 0;
+            $this->download_limit_type = $row['download_limit_type'] ?? 'total';
+            $this->download_limit_count = isset($row['download_limit_count']) ? (int)$row['download_limit_count'] : 0;
         }
 
         $this->full_path = $this->getFilePath();
@@ -1109,8 +1127,8 @@ class Files
         $this->disk_folder_year = (isset($this->date_folder_year)) ? (int)$this->date_folder_year : null;
         $this->disk_folder_month = (isset($this->date_folder_month)) ? (int)$this->date_folder_month : null;
 		
-        $statement = $this->dbh->prepare("INSERT INTO " . TABLE_FILES . " (user_id, url, original_url, size, filename, description, uploader, expires, expiry_date, public_allow, public_token, folder_id, disk_folder_year, disk_folder_month, storage_type, external_path, bucket_name, integration_id, encrypted, encryption_key_encrypted, encryption_iv, encryption_algorithm, encryption_file_iv)"
-                                        ."VALUES (:user_id, :url, :original_url, :size, :filename, :description, :uploader, :expires, :expiry_date, :public, :public_token, :folder_id, :disk_folder_year, :disk_folder_month, :storage_type, :external_path, :bucket_name, :integration_id, :encrypted, :encryption_key_encrypted, :encryption_iv, :encryption_algorithm, :encryption_file_iv)");
+        $statement = $this->dbh->prepare("INSERT INTO " . TABLE_FILES . " (user_id, url, original_url, size, filename, description, uploader, expires, expiry_date, public_allow, public_token, folder_id, disk_folder_year, disk_folder_month, storage_type, external_path, bucket_name, integration_id, encrypted, encryption_key_encrypted, encryption_iv, encryption_algorithm, encryption_file_iv, download_limit_enabled, download_limit_type, download_limit_count)"
+                                        ."VALUES (:user_id, :url, :original_url, :size, :filename, :description, :uploader, :expires, :expiry_date, :public, :public_token, :folder_id, :disk_folder_year, :disk_folder_month, :storage_type, :external_path, :bucket_name, :integration_id, :encrypted, :encryption_key_encrypted, :encryption_iv, :encryption_algorithm, :encryption_file_iv, :download_limit_enabled, :download_limit_type, :download_limit_count)");
         $statement->bindParam(':user_id', $this->uploader_id, PDO::PARAM_INT);
         $statement->bindParam(':url', $this->filename_on_disk);
         $statement->bindParam(':original_url', $this->filename_original);
@@ -1134,6 +1152,9 @@ class Files
         $statement->bindParam(':encryption_iv', $this->encryption_iv);
         $statement->bindParam(':encryption_algorithm', $this->encryption_algorithm);
         $statement->bindParam(':encryption_file_iv', $this->encryption_file_iv);
+        $statement->bindParam(':download_limit_enabled', $this->download_limit_enabled, PDO::PARAM_INT);
+        $statement->bindParam(':download_limit_type', $this->download_limit_type);
+        $statement->bindParam(':download_limit_count', $this->download_limit_count, PDO::PARAM_INT);
         $statement->execute();
 
         $this->file_id = $this->dbh->lastInsertId();
@@ -1201,7 +1222,12 @@ class Files
         $this->expiry_date = (isset($expiration_str)) ? $expiration_str : $current["expiry_date"];
         $this->is_public = (isset($data["public"])) ? $data["public"] : 0;
         $this->folder_id = (isset($data["folder_id"]) && !(empty($data["folder_id"]))) ? $data["folder_id"] : null;
-    
+
+        // Download limits
+        $this->download_limit_enabled = (isset($data["download_limit_enabled"])) ? (int)$data["download_limit_enabled"] : 0;
+        $this->download_limit_type = (isset($data["download_limit_type"])) ? $data["download_limit_type"] : 'total';
+        $this->download_limit_count = (isset($data["download_limit_count"])) ? (int)$data["download_limit_count"] : 0;
+
         /**
          * Restrict file properties based on user permissions
          */
@@ -1214,6 +1240,13 @@ class Files
         // Check public download permissions
         if (!current_user_can('upload_public')) {
             $this->is_public = $current["public"];
+        }
+
+        // Check download limit permissions
+        if (!current_user_can('limit_downloads')) {
+            $this->download_limit_enabled = (int)$current["download_limit_enabled"];
+            $this->download_limit_type = $current["download_limit_type"];
+            $this->download_limit_count = (int)$current["download_limit_count"];
         }
 
         if (empty($this->name)) {
@@ -1239,7 +1272,10 @@ class Files
             expires = :expires,
             expiry_date = :expiry_date,
             public_allow = :public,
-            folder_id = :folder_id
+            folder_id = :folder_id,
+            download_limit_enabled = :download_limit_enabled,
+            download_limit_type = :download_limit_type,
+            download_limit_count = :download_limit_count
             WHERE id = :id
         ");
 
@@ -1249,6 +1285,9 @@ class Files
         $statement->bindParam(':expiry_date', $expiry_date);
         $statement->bindParam(':public', $is_public, PDO::PARAM_INT);
         $statement->bindParam(':folder_id', $this->folder_id);
+        $statement->bindParam(':download_limit_enabled', $this->download_limit_enabled, PDO::PARAM_INT);
+        $statement->bindParam(':download_limit_type', $this->download_limit_type);
+        $statement->bindParam(':download_limit_count', $this->download_limit_count, PDO::PARAM_INT);
         $statement->bindParam(':id', $this->id, PDO::PARAM_INT);
         $statement->execute();
         $hidden = (!empty($data['hidden']) && is_numeric($data['hidden'])) ? $data['hidden'] : 0;

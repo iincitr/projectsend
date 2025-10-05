@@ -2305,6 +2305,86 @@ function user_can_edit_file($user_id = null, $file_id = null)
     return false;
 }
 
+/**
+ * Check if a file download limit has been reached
+ *
+ * @param int $file_id The file ID
+ * @param int $user_id The user ID (0 for anonymous)
+ * @return array ['allowed' => bool, 'message' => string]
+ */
+function check_download_limit($file_id, $user_id = null)
+{
+    global $dbh;
+
+    if ($user_id === null && defined('CURRENT_USER_ID')) {
+        $user_id = CURRENT_USER_ID;
+    }
+
+    // Get file download limit settings
+    $file = new \ProjectSend\Classes\Files($file_id);
+
+    // If limits are not enabled, allow download
+    if (!$file->download_limit_enabled || $file->download_limit_count <= 0) {
+        return ['allowed' => true, 'message' => ''];
+    }
+
+    // If the downloader is the file uploader, bypass limit check
+    if ($user_id > 0 && $file->user_id == $user_id) {
+        return ['allowed' => true, 'message' => ''];
+    }
+
+    // Check limit based on type
+    if ($file->download_limit_type == 'per_user') {
+        // Per-user limit
+        if ($user_id == 0) {
+            // Anonymous downloads: check by IP in last 24 hours to prevent abuse
+            $ip = get_client_ip();
+            $query = "SELECT COUNT(*) as count FROM " . TABLE_DOWNLOADS . "
+                      WHERE file_id = :file_id
+                      AND remote_ip = :ip
+                      AND anonymous = 1
+                      AND timestamp >= DATE_SUB(NOW(), INTERVAL 24 HOUR)";
+            $statement = $dbh->prepare($query);
+            $statement->bindParam(':file_id', $file_id, PDO::PARAM_INT);
+            $statement->bindParam(':ip', $ip);
+        } else {
+            // Logged in user
+            $query = "SELECT COUNT(*) as count FROM " . TABLE_DOWNLOADS . "
+                      WHERE file_id = :file_id AND user_id = :user_id";
+            $statement = $dbh->prepare($query);
+            $statement->bindParam(':file_id', $file_id, PDO::PARAM_INT);
+            $statement->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        }
+        $statement->execute();
+        $result = $statement->fetch(PDO::FETCH_ASSOC);
+        $current_downloads = $result['count'];
+
+        if ($current_downloads >= $file->download_limit_count) {
+            return [
+                'allowed' => false,
+                'message' => __('You have reached your download limit for this file.', 'cftp_admin')
+            ];
+        }
+    } else {
+        // Total downloads limit
+        $query = "SELECT COUNT(*) as count FROM " . TABLE_DOWNLOADS . " WHERE file_id = :file_id";
+        $statement = $dbh->prepare($query);
+        $statement->bindParam(':file_id', $file_id, PDO::PARAM_INT);
+        $statement->execute();
+        $result = $statement->fetch(PDO::FETCH_ASSOC);
+        $current_downloads = $result['count'];
+
+        if ($current_downloads >= $file->download_limit_count) {
+            return [
+                'allowed' => false,
+                'message' => __('This file has reached its download limit.', 'cftp_admin')
+            ];
+        }
+    }
+
+    return ['allowed' => true, 'message' => ''];
+}
+
 function record_new_download($user_id = null, $file_id = null)
 {
     global $dbh;
@@ -2320,6 +2400,12 @@ function record_new_download($user_id = null, $file_id = null)
 
     if (!is_numeric($user_id) || !is_numeric($file_id)) {
         return false;
+    }
+
+    // Check download limits before recording
+    $limit_check = check_download_limit($file_id, $user_id);
+    if (!$limit_check['allowed']) {
+        return ['allowed' => false, 'message' => $limit_check['message']];
     }
 
     // Anonymous download
@@ -2353,7 +2439,7 @@ function record_new_download($user_id = null, $file_id = null)
         if (get_option('download_logging_ignore_file_author') == '1') {
             $file = new \ProjectSend\Classes\Files($file_id);
             if ($file->user_id == $user_id) {
-                return;
+                return ['allowed' => true, 'message' => ''];
             }
         }
 
@@ -2367,7 +2453,7 @@ function record_new_download($user_id = null, $file_id = null)
     }
 
     if (!empty($statement)) {
-        return true;
+        return ['allowed' => true, 'message' => ''];
     }
 
     return false;

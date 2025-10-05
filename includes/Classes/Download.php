@@ -29,7 +29,15 @@ class Download
         }
 
         $file = new \ProjectSend\Classes\Files($file_id);
-        record_new_download(CURRENT_USER_ID, $file->id);
+        $download_result = record_new_download(CURRENT_USER_ID, $file->id);
+
+        // Check if download limit was reached
+        if (is_array($download_result) && !$download_result['allowed']) {
+            header("HTTP/1.0 403 Forbidden");
+            $msg = $download_result['message'];
+            echo system_message('danger', $msg);
+            exit;
+        }
 
         // Handle external files differently
         if ($file->storage_type !== 'local' && !empty($file->integration_id)) {
@@ -161,7 +169,11 @@ class Download
                 }
                 if ( $zip->addFile($file->full_path, $file->filename_unfiltered) ) {
                     $added_files++;
-                    record_new_download(CURRENT_USER_ID, $file_id);
+                    $download_result = record_new_download(CURRENT_USER_ID, $file_id);
+                    // Skip file in zip if limit reached, but continue with other files
+                    if (is_array($download_result) && !$download_result['allowed']) {
+                        continue;
+                    }
                     $log_details['files'][] = [
                         'id' => $file_id,
                         'filename' => $file->filename_original

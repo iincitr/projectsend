@@ -80,6 +80,11 @@ class Permissions {
                 'label' => __('Select upload storage', 'cftp_admin'),
                 'description' => __('Allow user to select storage destination during file upload', 'cftp_admin')
             ],
+            'limit_downloads' => [
+                'category' => 'files',
+                'label' => __('Set download limits', 'cftp_admin'),
+                'description' => __('Allow user to set download limits on files', 'cftp_admin')
+            ],
 
             // Category Management
             'create_categories' => [

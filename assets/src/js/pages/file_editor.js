@@ -65,6 +65,48 @@
                 copySettingsToCheckboxes($(this), '.checkbox_setting_hidden', json_strings.translations.upload_form.copy_hidden);
             });
 
+            // Download limit settings toggle
+            $('.checkbox_download_limit_enabled').on('change', function() {
+                var settings = $(this).closest('.file_data').find('.download_limit_settings');
+                if ($(this).is(':checked')) {
+                    settings.slideDown();
+                } else {
+                    settings.slideUp();
+                }
+            });
+
+            // Copy download limit settings
+            $('.copy-download-limit-settings').on('click', function() {
+                if (confirm(json_strings.translations.upload_form.copy_download_limits || 'Apply these download limit settings to all files?')) {
+                    var from_element = document.getElementById($(this).data('copy-from'));
+                    var from_wrapper = $(from_element).closest('.file_data');
+
+                    // Copy enabled checkbox state
+                    $('.checkbox_download_limit_enabled').each(function(i, obj) {
+                        $(this).prop('checked', from_element.checked);
+                        // Show/hide settings based on checkbox
+                        var settings = $(this).closest('.file_data').find('.download_limit_settings');
+                        if (from_element.checked) {
+                            settings.show();
+                        } else {
+                            settings.hide();
+                        }
+                    });
+
+                    // Copy limit type
+                    var from_type = from_wrapper.find('input[type="radio"]:checked').val();
+                    $('input[name$="[download_limit_type]"]').each(function() {
+                        if ($(this).val() === from_type) {
+                            $(this).prop('checked', true);
+                        }
+                    });
+
+                    // Copy limit count
+                    var from_count = from_wrapper.find('input[type="number"]').val();
+                    $('input[name$="[download_limit_count]"]').val(from_count);
+                }
+            });
+
             // Collapse - expand single item
             $('.toggle_file_editor').on('click', function(e) {
                 let wrapper = $(this).parents('.file_editor_wrapper');
