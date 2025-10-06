@@ -75,7 +75,7 @@
                 }
             });
 
-            // Copy download limit settings
+            // Copy download limit settings (legacy - kept for backwards compatibility)
             $('.copy-download-limit-settings').on('click', function() {
                 if (confirm(json_strings.translations.upload_form.copy_download_limits || 'Apply these download limit settings to all files?')) {
                     var from_element = document.getElementById($(this).data('copy-from'));
@@ -104,6 +104,244 @@
                     // Copy limit count
                     var from_count = from_wrapper.find('input[type="number"]').val();
                     $('input[name$="[download_limit_count]"]').val(from_count);
+                }
+            });
+
+            // ===== BULK ACTIONS PANEL =====
+
+            // Toggle bulk actions panel
+            $('#toggleBulkActions, .bulk-actions-header').on('click', function(e) {
+                if ($(e.target).is('select') || $(e.target).is('button:not(#toggleBulkActions)')) {
+                    return; // Don't toggle if clicking on controls
+                }
+                $('#bulkActionsPanel').toggleClass('collapsed');
+            });
+
+            // Helper function to get source file index
+            function getSourceFileIndex(selectId) {
+                var sourceIndex = $('#' + selectId).val();
+                if (!sourceIndex) {
+                    alert('Please select a source file first.');
+                    return null;
+                }
+                return parseInt(sourceIndex);
+            }
+
+            // Helper function to get file editor wrapper by index
+            function getFileWrapperByIndex(index) {
+                return $('.file_editor_wrapper').eq(index - 1);
+            }
+
+            // Copy all settings from selected file
+            $('#bulkCopyAllSettings').on('click', function() {
+                var sourceIndex = getSourceFileIndex('bulkCopySourceFile');
+                if (!sourceIndex) return;
+
+                if (!confirm('Copy all settings from the selected file to all other files?')) {
+                    return;
+                }
+
+                var sourceWrapper = getFileWrapperByIndex(sourceIndex);
+
+                // Copy expiration
+                bulkCopyExpiration(sourceWrapper);
+
+                // Copy download limits
+                bulkCopyDownloadLimits(sourceWrapper);
+
+                // Copy public settings
+                bulkCopyPublic(sourceWrapper);
+
+                // Copy assignments
+                bulkCopyClients(sourceWrapper);
+                bulkCopyGroups(sourceWrapper);
+                bulkCopyHidden(sourceWrapper);
+
+                // Copy organization
+                bulkCopyCategories(sourceWrapper);
+                bulkCopyFolder(sourceWrapper);
+
+                alert('All settings copied successfully!');
+            });
+
+            // Individual bulk copy functions
+            function bulkCopyExpiration(sourceWrapper) {
+                var sourceCheckbox = sourceWrapper.find('.checkbox_setting_expires');
+                var sourceDateField = sourceWrapper.find('.date-field');
+
+                if (sourceCheckbox.length) {
+                    var isChecked = sourceCheckbox.is(':checked');
+                    var dateValue = sourceDateField.val();
+
+                    $('.checkbox_setting_expires').prop('checked', isChecked);
+                    $('.date-field').datepicker('update', dateValue);
+                }
+            }
+
+            function bulkCopyDownloadLimits(sourceWrapper) {
+                var sourceCheckbox = sourceWrapper.find('.checkbox_download_limit_enabled');
+
+                if (sourceCheckbox.length) {
+                    var isEnabled = sourceCheckbox.is(':checked');
+                    var limitType = sourceWrapper.find('input[name$="[download_limit_type]"]:checked').val();
+                    var limitCount = sourceWrapper.find('input[name$="[download_limit_count]"]').val();
+
+                    $('.checkbox_download_limit_enabled').prop('checked', isEnabled).trigger('change');
+
+                    $('input[name$="[download_limit_type]"]').each(function() {
+                        if ($(this).val() === limitType) {
+                            $(this).prop('checked', true);
+                        }
+                    });
+
+                    $('input[name$="[download_limit_count]"]').val(limitCount);
+                }
+            }
+
+            function bulkCopyPublic(sourceWrapper) {
+                var sourceCheckbox = sourceWrapper.find('.checkbox_setting_public');
+
+                if (sourceCheckbox.length) {
+                    var isChecked = sourceCheckbox.is(':checked');
+                    $('.checkbox_setting_public').prop('checked', isChecked);
+                }
+            }
+
+            function bulkCopyClients(sourceWrapper) {
+                var sourceSelect = sourceWrapper.find('.assignments_clients');
+
+                if (sourceSelect.length) {
+                    var selectedValues = sourceSelect.val() || [];
+
+                    $('.assignments_clients').each(function() {
+                        $(this).val(selectedValues).trigger('change');
+                    });
+                }
+            }
+
+            function bulkCopyGroups(sourceWrapper) {
+                var sourceSelect = sourceWrapper.find('.assignments_groups');
+
+                if (sourceSelect.length) {
+                    var selectedValues = sourceSelect.val() || [];
+
+                    $('.assignments_groups').each(function() {
+                        $(this).val(selectedValues).trigger('change');
+                    });
+                }
+            }
+
+            function bulkCopyHidden(sourceWrapper) {
+                var sourceCheckbox = sourceWrapper.find('.checkbox_setting_hidden');
+
+                if (sourceCheckbox.length) {
+                    var isChecked = sourceCheckbox.is(':checked');
+                    $('.checkbox_setting_hidden').prop('checked', isChecked);
+                }
+            }
+
+            function bulkCopyCategories(sourceWrapper) {
+                var sourceSelect = sourceWrapper.find('select[name$="[categories][]"]');
+
+                if (sourceSelect.length) {
+                    var selectedValues = sourceSelect.val() || [];
+
+                    $('select[name$="[categories][]"]').each(function() {
+                        $(this).val(selectedValues).trigger('change');
+                    });
+                }
+            }
+
+            function bulkCopyFolder(sourceWrapper) {
+                var sourceSelect = sourceWrapper.find('select[name$="[folder_id]"]');
+
+                if (sourceSelect.length) {
+                    var selectedValue = sourceSelect.val();
+
+                    $('select[name$="[folder_id]"]').each(function() {
+                        $(this).val(selectedValue).trigger('change');
+                    });
+                }
+            }
+
+            // Individual bulk action buttons
+            $('.bulk-copy-expiration').on('click', function() {
+                var sourceIndex = getSourceFileIndex('bulkExpirationSource');
+                if (!sourceIndex) return;
+
+                if (confirm('Copy expiration settings from the selected file to all other files?')) {
+                    bulkCopyExpiration(getFileWrapperByIndex(sourceIndex));
+                    alert('Expiration settings copied!');
+                }
+            });
+
+            $('.bulk-copy-download-limits').on('click', function() {
+                var sourceIndex = getSourceFileIndex('bulkDownloadLimitSource');
+                if (!sourceIndex) return;
+
+                if (confirm('Copy download limit settings from the selected file to all other files?')) {
+                    bulkCopyDownloadLimits(getFileWrapperByIndex(sourceIndex));
+                    alert('Download limit settings copied!');
+                }
+            });
+
+            $('.bulk-copy-public').on('click', function() {
+                var sourceIndex = getSourceFileIndex('bulkVisibilitySource');
+                if (!sourceIndex) return;
+
+                if (confirm('Copy public visibility settings from the selected file to all other files?')) {
+                    bulkCopyPublic(getFileWrapperByIndex(sourceIndex));
+                    alert('Visibility settings copied!');
+                }
+            });
+
+            $('.bulk-copy-clients').on('click', function() {
+                var sourceIndex = getSourceFileIndex('bulkAssignmentSource');
+                if (!sourceIndex) return;
+
+                if (confirm('Copy client assignments from the selected file to all other files?')) {
+                    bulkCopyClients(getFileWrapperByIndex(sourceIndex));
+                    alert('Client assignments copied!');
+                }
+            });
+
+            $('.bulk-copy-groups').on('click', function() {
+                var sourceIndex = getSourceFileIndex('bulkAssignmentSource');
+                if (!sourceIndex) return;
+
+                if (confirm('Copy group assignments from the selected file to all other files?')) {
+                    bulkCopyGroups(getFileWrapperByIndex(sourceIndex));
+                    alert('Group assignments copied!');
+                }
+            });
+
+            $('.bulk-copy-hidden').on('click', function() {
+                var sourceIndex = getSourceFileIndex('bulkAssignmentSource');
+                if (!sourceIndex) return;
+
+                if (confirm('Copy hidden status from the selected file to all other files?')) {
+                    bulkCopyHidden(getFileWrapperByIndex(sourceIndex));
+                    alert('Hidden status copied!');
+                }
+            });
+
+            $('.bulk-copy-categories').on('click', function() {
+                var sourceIndex = getSourceFileIndex('bulkOrganizationSource');
+                if (!sourceIndex) return;
+
+                if (confirm('Copy category assignments from the selected file to all other files?')) {
+                    bulkCopyCategories(getFileWrapperByIndex(sourceIndex));
+                    alert('Category assignments copied!');
+                }
+            });
+
+            $('.bulk-copy-folder').on('click', function() {
+                var sourceIndex = getSourceFileIndex('bulkOrganizationSource');
+                if (!sourceIndex) return;
+
+                if (confirm('Copy folder assignment from the selected file to all other files?')) {
+                    bulkCopyFolder(getFileWrapperByIndex(sourceIndex));
+                    alert('Folder assignment copied!');
                 }
             });
 

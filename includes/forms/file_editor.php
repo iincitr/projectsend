@@ -423,123 +423,6 @@
                                                 </div>
                                             </div><!-- /.tab-content -->
 
-                                            <?php
-                                                // Copy settings buttons
-                                                $copy_buttons = [];
-                                                if (count($editable) > 1) {
-                                                    // Expiration
-                                                    if (current_user_can('set_file_expiration_date')) {
-                                                        $copy_buttons['expiration'] = [
-                                                            'label' => __('Expiration','cftp_admin'),
-                                                            'class' => 'copy-expiration-settings',
-                                                            'data' => [
-                                                                'copy-from' => 'exp_checkbox_'.$i,
-                                                                'copy-date-from' => 'file_expiry_date_'.$i,
-                                                            ],
-                                                        ];
-                                                    }
-                                                    // Download limit settings
-                                                    if (current_user_can('limit_downloads')) {
-                                                        $copy_buttons['download_limits'] = [
-                                                            'label' => __('Download limits','cftp_admin'),
-                                                            'class' => 'copy-download-limit-settings',
-                                                            'data' => [
-                                                                'copy-from' => 'dl_limit_checkbox_'.$i,
-                                                            ],
-                                                        ];
-                                                    }
-                                                    // Public checkbox
-                                                    if (current_user_can('upload_public')) {
-                                                        $copy_buttons['public'] = [
-                                                            'label' => __('Public settings','cftp_admin'),
-                                                            'class' => 'copy-public-settings',
-                                                            'data' => [
-                                                                'copy-from' => 'pub_checkbox_'.$i,
-                                                            ],
-                                                        ];
-                                                    }
-
-                                                    if (!current_role_in(['Client'])) {
-                                                        // Selected clients
-                                                        $copy_buttons['clients'] = [
-                                                            'label' => __('Selected clients','cftp_admin'),
-                                                            'class' => 'copy-all',
-                                                            'data' => [
-                                                                'type' => 'clients',
-                                                                'target' => 'clients_'.$file->id,
-                                                            ],
-                                                        ];
-
-                                                        // Selected groups
-                                                        if (current_user_can('manage_groups')) {
-                                                            $copy_buttons['groups'] = [
-                                                                'label' => __('Selected groups','cftp_admin'),
-                                                                'class' => 'copy-all',
-                                                                'data' => [
-                                                                    'type' => 'groups',
-                                                                    'target' => 'groups_'.$file->id,
-                                                                ],
-                                                            ];
-                                                        }
-
-                                                        // Hidden status
-                                                        $copy_buttons['hidden'] = [
-                                                            'label' => __('Hidden status','cftp_admin'),
-                                                            'class' => 'copy-hidden-settings',
-                                                            'data' => [
-                                                                'copy-from' => 'hid_checkbox_'.$i,
-                                                            ],
-                                                        ];
-                                                    }
-
-                                                    if (current_user_can('set_file_categories')) {
-                                                        // Categories
-                                                        $copy_buttons['categories'] = [
-                                                            'label' => __('Selected categories','cftp_admin'),
-                                                            'class' => 'copy-all',
-                                                            'data' => [
-                                                                'type' => 'categories',
-                                                                'target' => 'categories_'.$file->id,
-                                                            ],
-                                                        ];
-                                                    }
-
-                                                    if (!current_role_in(['Client'])) {
-                                                        // Folders
-                                                        $copy_buttons['folder'] = [
-                                                            'label' => __('Selected folder','cftp_admin'),
-                                                            'class' => 'copy-all',
-                                                            'data' => [
-                                                                'type' => 'folder',
-                                                                'target' => 'folder_'.$file->id,
-                                                            ],
-                                                        ];
-                                                    }
-
-                                                    if (count($copy_buttons) > 0) {
-                                            ?>
-                                                        <footer>
-                                                            <div class="row">
-                                                                <div class="col">
-                                                                    <h3><?php _e('Apply to all files','cftp_admin'); ?></h3>
-                                                                    <?php foreach ($copy_buttons as $id => $button) { ?>
-                                                                        <button type="button" class="btn btn-sm btn-pslight mb-2 <?php echo $button['class']; ?>"
-                                                                            <?php
-                                                                                foreach ($button['data'] as $key => $value) {
-                                                                                    echo ' data-'.$key.'="'.$value.'"';
-                                                                                }
-                                                                            ?>
-                                                                        >
-                                                                            <?php echo $button['label']; ?>
-                                                                        </button>
-                                                                    <?php } ?>
-                                                                </div>
-                                                            </div>
-                                                        </footer>
-                                            <?php
-                                                    }
-                                                }
-                                            ?>
                                         </div>
                                     </div><!-- /.ps-card -->
                                 </div><!-- /.col-lg-8 -->
@@ -554,6 +437,196 @@
                 }
             }
         ?>
+
+        <?php if (count($editable) > 1) { ?>
+        <!-- Sticky Bulk Actions Panel -->
+        <div class="bulk-actions-panel collapsed" id="bulkActionsPanel">
+            <div class="bulk-actions-header">
+                <h3>
+                    <i class="fa fa-bolt"></i>
+                    <?php echo sprintf(__('Bulk Actions for %d files', 'cftp_admin'), count($editable)); ?>
+                </h3>
+                <button type="button" class="btn btn-sm btn-secondary" id="toggleBulkActions">
+                    <i class="fa fa-chevron-down"></i>
+                </button>
+            </div>
+
+            <div class="bulk-actions-content">
+                <!-- Source File Selector -->
+                <div class="bulk-action-row">
+                    <label class="bulk-action-label">
+                        <i class="fa fa-copy"></i> <?php _e('Copy all settings from:', 'cftp_admin'); ?>
+                    </label>
+                    <div class="bulk-action-controls">
+                        <select class="form-select" id="bulkCopySourceFile">
+                            <option value=""><?php _e('Select a file...', 'cftp_admin'); ?></option>
+                            <?php
+                            $file_index = 1;
+                            foreach ($editable as $file_id) {
+                                $file = new \ProjectSend\Classes\Files($file_id);
+                                if ($file->recordExists()) {
+                                    echo '<option value="' . $file_index . '">' . html_output($file->filename_original) . '</option>';
+                                }
+                                $file_index++;
+                            }
+                            ?>
+                        </select>
+                        <button type="button" class="btn btn-primary" id="bulkCopyAllSettings">
+                            <?php _e('Copy All Settings', 'cftp_admin'); ?>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bulk-actions-divider"><?php _e('OR set individual settings', 'cftp_admin'); ?></div>
+
+                <?php if (current_user_can('set_file_expiration_date')) { ?>
+                <!-- Expiration -->
+                <div class="bulk-action-row">
+                    <label class="bulk-action-label">
+                        <i class="fa fa-clock-o"></i> <?php _e('Expiration', 'cftp_admin'); ?>
+                    </label>
+                    <div class="bulk-action-controls">
+                        <select class="form-select" id="bulkExpirationSource">
+                            <option value=""><?php _e('Copy from file...', 'cftp_admin'); ?></option>
+                            <?php
+                            $file_index = 1;
+                            foreach ($editable as $file_id) {
+                                $file = new \ProjectSend\Classes\Files($file_id);
+                                if ($file->recordExists()) {
+                                    echo '<option value="' . $file_index . '">' . html_output($file->filename_original) . '</option>';
+                                }
+                                $file_index++;
+                            }
+                            ?>
+                        </select>
+                        <button type="button" class="btn btn-primary btn-sm bulk-copy-expiration">
+                            <?php _e('Apply', 'cftp_admin'); ?>
+                        </button>
+                    </div>
+                </div>
+                <?php } ?>
+
+                <?php if (current_user_can('limit_downloads')) { ?>
+                <!-- Download Limits -->
+                <div class="bulk-action-row">
+                    <label class="bulk-action-label">
+                        <i class="fa fa-download"></i> <?php _e('Download Limits', 'cftp_admin'); ?>
+                    </label>
+                    <div class="bulk-action-controls">
+                        <select class="form-select" id="bulkDownloadLimitSource">
+                            <option value=""><?php _e('Copy from file...', 'cftp_admin'); ?></option>
+                            <?php
+                            $file_index = 1;
+                            foreach ($editable as $file_id) {
+                                $file = new \ProjectSend\Classes\Files($file_id);
+                                if ($file->recordExists()) {
+                                    echo '<option value="' . $file_index . '">' . html_output($file->filename_original) . '</option>';
+                                }
+                                $file_index++;
+                            }
+                            ?>
+                        </select>
+                        <button type="button" class="btn btn-primary btn-sm bulk-copy-download-limits">
+                            <?php _e('Apply', 'cftp_admin'); ?>
+                        </button>
+                    </div>
+                </div>
+                <?php } ?>
+
+                <?php if (current_user_can('upload_public')) { ?>
+                <!-- Visibility -->
+                <div class="bulk-action-row">
+                    <label class="bulk-action-label">
+                        <i class="fa fa-eye"></i> <?php _e('Visibility', 'cftp_admin'); ?>
+                    </label>
+                    <div class="bulk-action-controls">
+                        <select class="form-select" id="bulkVisibilitySource">
+                            <option value=""><?php _e('Copy from file...', 'cftp_admin'); ?></option>
+                            <?php
+                            $file_index = 1;
+                            foreach ($editable as $file_id) {
+                                $file = new \ProjectSend\Classes\Files($file_id);
+                                if ($file->recordExists()) {
+                                    echo '<option value="' . $file_index . '">' . html_output($file->filename_original) . '</option>';
+                                }
+                                $file_index++;
+                            }
+                            ?>
+                        </select>
+                        <button type="button" class="btn btn-primary btn-sm bulk-copy-public">
+                            <?php _e('Apply', 'cftp_admin'); ?>
+                        </button>
+                    </div>
+                </div>
+                <?php } ?>
+
+                <?php if (!current_role_in(['Client'])) { ?>
+                <!-- Assignment -->
+                <div class="bulk-action-row">
+                    <label class="bulk-action-label">
+                        <i class="fa fa-users"></i> <?php _e('Assignment', 'cftp_admin'); ?>
+                    </label>
+                    <div class="bulk-action-controls">
+                        <select class="form-select" id="bulkAssignmentSource">
+                            <option value=""><?php _e('Copy from file...', 'cftp_admin'); ?></option>
+                            <?php
+                            $file_index = 1;
+                            foreach ($editable as $file_id) {
+                                $file = new \ProjectSend\Classes\Files($file_id);
+                                if ($file->recordExists()) {
+                                    echo '<option value="' . $file_index . '">' . html_output($file->filename_original) . '</option>';
+                                }
+                                $file_index++;
+                            }
+                            ?>
+                        </select>
+                        <button type="button" class="btn btn-primary btn-sm bulk-copy-clients">
+                            <?php _e('Apply Clients', 'cftp_admin'); ?>
+                        </button>
+                        <?php if (current_user_can('manage_groups')) { ?>
+                        <button type="button" class="btn btn-primary btn-sm bulk-copy-groups">
+                            <?php _e('Apply Groups', 'cftp_admin'); ?>
+                        </button>
+                        <?php } ?>
+                        <button type="button" class="btn btn-primary btn-sm bulk-copy-hidden">
+                            <?php _e('Apply Hidden', 'cftp_admin'); ?>
+                        </button>
+                    </div>
+                </div>
+                <?php } ?>
+
+                <!-- Organization -->
+                <div class="bulk-action-row">
+                    <label class="bulk-action-label">
+                        <i class="fa fa-folder"></i> <?php _e('Organization', 'cftp_admin'); ?>
+                    </label>
+                    <div class="bulk-action-controls">
+                        <select class="form-select" id="bulkOrganizationSource">
+                            <option value=""><?php _e('Copy from file...', 'cftp_admin'); ?></option>
+                            <?php
+                            $file_index = 1;
+                            foreach ($editable as $file_id) {
+                                $file = new \ProjectSend\Classes\Files($file_id);
+                                if ($file->recordExists()) {
+                                    echo '<option value="' . $file_index . '">' . html_output($file->filename_original) . '</option>';
+                                }
+                                $file_index++;
+                            }
+                            ?>
+                        </select>
+                        <?php if (current_user_can('set_file_categories')) { ?>
+                        <button type="button" class="btn btn-primary btn-sm bulk-copy-categories">
+                            <?php _e('Apply Categories', 'cftp_admin'); ?>
+                        </button>
+                        <?php } ?>
+                        <button type="button" class="btn btn-primary btn-sm bulk-copy-folder">
+                            <?php _e('Apply Folder', 'cftp_admin'); ?>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php } ?>
     </div> <!-- container -->
 
     <div class="after_form_buttons">
