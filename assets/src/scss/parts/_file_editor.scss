@@ -62,27 +62,24 @@
     }
 
     .file_editor {
-        background:var(--bg-card);
-        padding:30px 10px 10px;
-        box-shadow: var(--global_box_shadow);
-        border-radius: 8px;
+        // Note: .file_editor is now a Bootstrap row, styles moved to .ps-card
 
         .file_data {
             h3 {
                 padding-top:0;
                 margin-top:0;
             }
-    
+
             @include bk(xs) {
                 background:var(--bg-card);
                 margin-bottom:25px;
             }
         }
-    
+
         .textarea_description {
             min-height: 10rem;
         }
-    
+
         .divider {
             margin:40px auto;
         }

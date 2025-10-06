@@ -208,7 +208,7 @@ if (isset($_POST['save'])) {
 // Message
 if (!empty($editable) && !isset($_GET['saved'])) {
     if (!current_role_in(['Client'])) {
-        $flash->info(__('You can skip assigning if you want. The files are retained and you may add them to clients or groups later.', 'cftp_admin'));
+        //$flash->info(__('You can skip assigning if you want. The files are retained and you may add them to clients or groups later.', 'cftp_admin'));
     }
 }
 
