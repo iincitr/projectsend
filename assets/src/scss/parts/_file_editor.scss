@@ -294,3 +294,12 @@
         }
     }
 }
+
+// Make save button bigger on file editor
+#files + .after_form_buttons {
+    button#upload-continue {
+        font-size: 1.25rem;
+        padding: 1rem 3rem;
+        font-weight: 600;
+    }
+}
