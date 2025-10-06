@@ -90,20 +90,23 @@
 
 // Responsive behavior
 @media (max-width: 768px) {
+    // Hide tabs navigation on mobile
     .file-editor-tabs {
-        .nav-link {
-            font-size: 0.875rem;
-            padding: 0.5rem 0.75rem;
+        display: none !important;
+    }
 
-            i {
-                display: none;
+    // Show all tab panes on mobile
+    .tab-content {
+        .tab-pane {
+            display: block !important;
+            opacity: 1 !important;
+            margin-bottom: 40px;
+
+            &:last-child {
+                margin-bottom: 0;
             }
         }
     }
-
-    // .file-editor-tab-content {
-    //     padding: 1rem;
-    // }
 
     .file-info-sidebar {
         margin-top: 1rem;
