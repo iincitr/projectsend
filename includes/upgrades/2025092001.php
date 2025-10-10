@@ -82,25 +82,8 @@ function upgrade_2025092001()
         $statement->execute($role);
     }
 
-    // Get available permissions from the Permissions class
-    $available_permissions = \ProjectSend\Classes\Permissions::getAvailablePermissions();
-
-    // Insert default permissions for each role
-    foreach ($available_permissions as $permission_key => $permission_data) {
-        $allowed_roles = $permission_data['roles'];
-
-        foreach ($allowed_roles as $role_level) {
-            $insert_permission_sql = "INSERT IGNORE INTO " . TABLE_ROLE_PERMISSIONS . "
-                (role_level, permission, granted)
-                VALUES (:role_level, :permission, 1)";
-
-            $statement = $dbh->prepare($insert_permission_sql);
-            $statement->execute([
-                'role_level' => $role_level,
-                'permission' => $permission_key
-            ]);
-        }
-    }
+    // Note: Permissions will be properly populated by migration 2025092002.php
+    // which creates the permissions table and assigns them correctly
 
     // Add options for role management
     add_option_if_not_exists('enable_custom_roles', '1');

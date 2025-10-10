@@ -7,12 +7,32 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+# Parse command line arguments
+AUTO_YES=false
+while getopts "y" opt; do
+    case $opt in
+        y)
+            AUTO_YES=true
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            echo "Usage: $0 [-y]"
+            echo "  -y: Auto-accept prompts (auto-calculate version)"
+            exit 1
+            ;;
+    esac
+done
+
 echo -e "${GREEN}ProjectSend Release Builder${NC}"
 echo "=============================="
 echo ""
 
-# Prompt for version number
-read -p "Enter version number (or press Enter to auto-calculate): " VERSION_NUMBER
+# Prompt for version number (skip if -y flag is set)
+if [ "$AUTO_YES" = true ]; then
+    VERSION_NUMBER=""
+else
+    read -p "Enter version number (or press Enter to auto-calculate): " VERSION_NUMBER
+fi
 
 # Auto-calculate version if empty
 if [ -z "$VERSION_NUMBER" ]; then
@@ -46,10 +66,12 @@ if [ -z "$VERSION_NUMBER" ]; then
     echo -e "${GREEN}Commits since then: ${COMMITS_SINCE}${NC}"
     echo -e "${GREEN}Calculated version: r${VERSION_NUMBER}${NC}"
     echo ""
-    read -p "Use this version? (Y/n): " CONFIRM
-    if [[ "$CONFIRM" =~ ^[Nn]$ ]]; then
-        echo -e "${YELLOW}Cancelled by user${NC}"
-        exit 0
+    if [ "$AUTO_YES" = false ]; then
+        read -p "Use this version? (Y/n): " CONFIRM
+        if [[ "$CONFIRM" =~ ^[Nn]$ ]]; then
+            echo -e "${YELLOW}Cancelled by user${NC}"
+            exit 0
+        fi
     fi
 else
     # Validate manually entered version number (only digits)

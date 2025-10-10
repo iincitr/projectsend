@@ -51,17 +51,20 @@ class DatabaseUpgrade
         $statement->execute();
         $this->sql_mode_dates_status = false;
 
-		/** Record the action log */
-        $user_id = (defined('IS_INSTALL')) ? 1 : CURRENT_USER_ID;
-        $logger = new \ProjectSend\Classes\ActionsLog;
-        $logger->addEntry([
-            'action' => 49,
-            'owner_id' => $user_id,
-            'details' => [
-                'database_version' => $this->last_upgrade,
-            ],
-        ]);
-        unset($logger);
+		/** Record the action log - only if we have a user context */
+        // During silent upgrades (bootstrap), CURRENT_USER_ID may not be defined
+        if (defined('IS_INSTALL') || defined('CURRENT_USER_ID')) {
+            $user_id = (defined('IS_INSTALL')) ? 1 : CURRENT_USER_ID;
+            $logger = new \ProjectSend\Classes\ActionsLog;
+            $logger->addEntry([
+                'action' => 49,
+                'owner_id' => $user_id,
+                'details' => [
+                    'database_version' => $this->last_upgrade,
+                ],
+            ]);
+            unset($logger);
+        }
 
         save_option('show_upgrade_success_message', 'true');
     }

@@ -12,21 +12,36 @@ function upgrade_2025100501()
     $statement->execute();
 
     // Add limit_downloads permission for Client role
-    // First get the Client role ID
-    $query = "SELECT id FROM " . TABLE_ROLES . " WHERE name = 'Client' LIMIT 1";
-    $statement = $dbh->prepare($query);
-    $statement->execute();
-    $client_role = $statement->fetch(PDO::FETCH_ASSOC);
+    // Check if we're using the new role_id system or old role_level system
+    $check_column_sql = "SHOW COLUMNS FROM " . TABLE_ROLE_PERMISSIONS . " LIKE 'role_level'";
+    $check_stmt = $dbh->prepare($check_column_sql);
+    $check_stmt->execute();
+    $has_role_level = $check_stmt->rowCount() > 0;
 
-    if ($client_role) {
-        $client_role_id = $client_role['id'];
-
-        // Assign permission to Client role (using permission name, not ID)
-        $query = "INSERT IGNORE INTO " . TABLE_ROLE_PERMISSIONS . " (role_id, permission, granted)
-                  VALUES (:role_id, :permission, 1)";
+    if ($has_role_level) {
+        // Old system: use role_level (0 = Client)
+        $query = "INSERT IGNORE INTO " . TABLE_ROLE_PERMISSIONS . " (role_level, permission, granted)
+                  VALUES (0, :permission, 1)";
         $statement = $dbh->prepare($query);
-        $statement->bindParam(':role_id', $client_role_id, PDO::PARAM_INT);
         $statement->bindValue(':permission', 'limit_downloads', PDO::PARAM_STR);
         $statement->execute();
+    } else {
+        // New system: use role_id
+        $query = "SELECT id FROM " . TABLE_ROLES . " WHERE name = 'Client' LIMIT 1";
+        $statement = $dbh->prepare($query);
+        $statement->execute();
+        $client_role = $statement->fetch(PDO::FETCH_ASSOC);
+
+        if ($client_role) {
+            $client_role_id = $client_role['id'];
+
+            // Assign permission to Client role (using permission name, not ID)
+            $query = "INSERT IGNORE INTO " . TABLE_ROLE_PERMISSIONS . " (role_id, permission, granted)
+                      VALUES (:role_id, :permission, 1)";
+            $statement = $dbh->prepare($query);
+            $statement->bindParam(':role_id', $client_role_id, PDO::PARAM_INT);
+            $statement->bindValue(':permission', 'limit_downloads', PDO::PARAM_STR);
+            $statement->execute();
+        }
     }
 }

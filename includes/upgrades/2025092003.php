@@ -24,10 +24,10 @@ function upgrade_2025092003()
 
     // Migrate existing user levels to role_id relationships
     $migration_mappings = [
-        9 => 9, // System Administrator
-        8 => 8, // Account Manager
-        7 => 7, // Uploader
-        0 => 0  // Client
+        9 => 4, // System Administrator (role ID 4)
+        8 => 3, // Account Manager (role ID 3)
+        7 => 2, // Uploader (role ID 2)
+        0 => 1  // Client (role ID 1)
     ];
 
     foreach ($migration_mappings as $old_level => $new_role_id) {
@@ -44,7 +44,7 @@ function upgrade_2025092003()
 
     // Handle any users with unexpected levels (map them to lowest privilege role)
     $cleanup_sql = "UPDATE " . TABLE_USERS . "
-                    SET role_id = 0
+                    SET role_id = 1
                     WHERE role_id IS NULL AND level NOT IN (9, 8, 7, 0)";
 
     $statement = $dbh->prepare($cleanup_sql);
@@ -54,7 +54,7 @@ function upgrade_2025092003()
     try {
         $fk_sql = "ALTER TABLE " . TABLE_USERS . "
                    ADD CONSTRAINT fk_users_role
-                   FOREIGN KEY (role_id) REFERENCES " . TABLE_ROLES . "(role_level)
+                   FOREIGN KEY (role_id) REFERENCES " . TABLE_ROLES . "(id)
                    ON UPDATE CASCADE ON DELETE RESTRICT";
 
         $statement = $dbh->prepare($fk_sql);

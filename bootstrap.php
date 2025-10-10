@@ -45,8 +45,16 @@ require_once ROOT_DIR . '/includes/functions.assets.php';
 // Options functions
 require_once ROOT_DIR . '/includes/functions.options.php';
 
-// Require the updates functions
+// Require the updates functions (needed by migrations)
 require_once ROOT_DIR . '/includes/updates.functions.php';
+
+// CRITICAL: Run database upgrades BEFORE loading sessions/permissions
+// This must happen AFTER options functions are loaded (need option_exists())
+// but BEFORE active.session.php and Permissions class instantiation
+if (!defined('IS_INSTALL') && !defined('IS_ERROR_PAGE')) {
+    $db_upgrade = new \ProjectSend\Classes\DatabaseUpgrade;
+    $db_upgrade->upgradeDatabase(false);
+}
 
 // Contains the session and cookies validation functions
 require_once ROOT_DIR . '/includes/functions.session.permissions.php';
