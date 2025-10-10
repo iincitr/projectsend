@@ -151,6 +151,7 @@ $json_strings = [
         'match_pass' => __('Passwords do not match','cftp_admin'),
         'rules_pass' => __('Password does not meet the required characters rules','cftp_admin'),
         'file_size' => __('File size value must be a whole number','cftp_admin'),
+        'disk_quota' => __('Disk quota value must be a whole number','cftp_admin'),
         'no_role' => __('User role was not specified','cftp_admin'),
         'user_exists' => __('An account with this username already exists.','cftp_admin'),
         'email_exists' => __('An account with this e-mail address already exists.','cftp_admin'),

@@ -33,6 +33,7 @@ if ($_POST) {
         'password' => $_POST['password'],
         'name' => $_POST['name'],
         'email' => $_POST['email'],
+        'role_id' => \ProjectSend\Classes\Roles::getClientRoleId(),
         'address' => (isset($_POST["address"])) ? $_POST['address'] : '',
         'phone' => (isset($_POST["phone"])) ? $_POST['phone'] : '',
         'contact' => (isset($_POST["contact"])) ? $_POST['contact'] : '',
@@ -84,27 +85,25 @@ if ($_POST) {
 
     if ($create['status'] === 'success') {
         $flash->success($create['message']);
-        $redirect_to = BASE_URI . 'clients-edit.php?id=' . $create['id'];
-    } else {
-        $flash->error($create['message']);
-        $redirect_to = BASE_URI . 'clients-add.php';
-    }
 
-    if (isset($create['email'])) {
-        switch ($create['email']) {
-            case 2:
-                $flash->success(__('A welcome message was not sent to the new account owner.', 'cftp_admin'));
-                break;
-            case 1:
-                $flash->success(__('A welcome message with login information was sent to the new account owner.', 'cftp_admin'));
-                break;
-            case 0:
-                $flash->error(__("E-mail notification couldn't be sent.", 'cftp_admin'));
-                break;
+        if (isset($create['email'])) {
+            switch ($create['email']) {
+                case 2:
+                    $flash->success(__('A welcome message was not sent to the new account owner.', 'cftp_admin'));
+                    break;
+                case 1:
+                    $flash->success(__('A welcome message with login information was sent to the new account owner.', 'cftp_admin'));
+                    break;
+                case 0:
+                    $flash->error(__("E-mail notification couldn't be sent.", 'cftp_admin'));
+                    break;
+            }
         }
-    }
 
-    ps_redirect($redirect_to);
+        ps_redirect(BASE_URI . 'clients-edit.php?id=' . $create['id']);
+    } else {
+        // Don't redirect on error - let the page continue to render with form values intact
+    }
 }
 ?>
 
@@ -113,6 +112,11 @@ if ($_POST) {
         <div class="white-box">
             <div class="white-box-interior">
                 <?php
+                // Display validation errors if form submission failed
+                if (!empty($create['errors'])) {
+                    echo $create['errors'];
+                }
+
                 // If the form was submitted with errors, show them here.
                 $clients_form_type = 'new_client';
                 include_once FORMS_DIR . DS . 'clients.php';
