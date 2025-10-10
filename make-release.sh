@@ -168,7 +168,13 @@ rm -rf docs_temp results reports
 # Remove build scripts
 rm -f make-release.sh gulpfile.js package.json package-lock.json
 
-echo -e "${GREEN}Step 9: Cleaning upload directories${NC}"
+echo -e "${GREEN}Step 9: Removing translation source files${NC}"
+# Remove .po and .mo files from root lang folder (keep .pot files)
+find ./lang -type f \( -name "*.po" -o -name "*.mo" \) -delete
+# Remove .po and .mo files from template lang folders (keep .pot files)
+find ./templates/*/lang -type f \( -name "*.po" -o -name "*.mo" \) -delete 2>/dev/null || true
+
+echo -e "${GREEN}Step 10: Cleaning upload directories${NC}"
 
 # Clean upload/temp
 cd ./upload/temp
@@ -201,22 +207,22 @@ rm -rf ../tmp
 # Return to release directory
 cd ../../
 
-echo -e "${GREEN}Step 10: Removing node_modules${NC}"
+echo -e "${GREEN}Step 11: Removing node_modules${NC}"
 rm -rf node_modules
 
-echo -e "${GREEN}Step 11: Creating ZIP archive${NC}"
+echo -e "${GREEN}Step 12: Creating ZIP archive${NC}"
 ZIPFILE="projectsend-${VERSION}.zip"
 zip -r -q "$ZIPFILE" *
 
-echo -e "${GREEN}Step 12: Generating SHA256 hash${NC}"
+echo -e "${GREEN}Step 13: Generating SHA256 hash${NC}"
 SHA256=$(sha256sum "$ZIPFILE" | cut -d' ' -f1)
 
-echo -e "${GREEN}Step 13: Moving release file${NC}"
+echo -e "${GREEN}Step 14: Moving release file${NC}"
 OUTPUT_DIR="$(dirname "$RELEASE_DIR")"
 mv "$ZIPFILE" "$OUTPUT_DIR/"
 OUTPUT_FILE="$OUTPUT_DIR/$ZIPFILE"
 
-echo -e "${GREEN}Step 14: Cleaning up temporary files${NC}"
+echo -e "${GREEN}Step 15: Cleaning up temporary files${NC}"
 rm -rf "$RELEASE_DIR"
 
 echo ""
