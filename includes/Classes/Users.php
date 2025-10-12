@@ -828,7 +828,7 @@ class Users
         }
 
         // Prevent self-deletion
-        if ($this->id == defined('CURRENT_USER_ID') ? \CURRENT_USER_ID : null) {
+        if ($this->id == (defined('CURRENT_USER_ID') ? \CURRENT_USER_ID : null)) {
             return [
                 'status' => 'error',
                 'message' => __('You cannot delete your own account.', 'cftp_admin')
