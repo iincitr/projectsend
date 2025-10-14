@@ -302,7 +302,7 @@ class Roles
 
             // Insert new permissions
             if (!empty($permissions)) {
-                $sql = "INSERT INTO " . TABLE_ROLE_PERMISSIONS . " (role_id, permission, granted)
+                $sql = "INSERT IGNORE INTO " . TABLE_ROLE_PERMISSIONS . " (role_id, permission, granted)
                         VALUES (:role_id, :permission, 1)";
                 $statement = $this->dbh->prepare($sql);
 
