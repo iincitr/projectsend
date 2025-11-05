@@ -55,6 +55,8 @@
                             const fieldNameAttr = `credentials[${fieldName}]`;
                             const isRequired = fieldConfig.required ? 'required' : '';
                             const requiredMark = fieldConfig.required ? ' *' : '';
+                            const placeholder = fieldConfig.placeholder ? `placeholder="${fieldConfig.placeholder}"` : '';
+                            const helpText = fieldConfig.help ? `<div class="form-text">${fieldConfig.help}</div>` : '';
 
                             if (fieldConfig.type === 'select' && fieldConfig.options) {
                                 fieldHtml = `
@@ -65,13 +67,24 @@
                                 Object.keys(fieldConfig.options).forEach(optionValue => {
                                     fieldHtml += `<option value="${optionValue}">${fieldConfig.options[optionValue]}</option>`;
                                 });
-                                fieldHtml += '</select>';
+                                fieldHtml += `</select>${helpText}`;
+                            } else if (fieldConfig.type === 'checkbox') {
+                                const defaultChecked = fieldConfig.default ? 'checked' : '';
+                                fieldHtml = `
+                                    <div class="form-check">
+                                        <input type="checkbox" name="${fieldNameAttr}" id="${fieldId}"
+                                               class="form-check-input" value="1" ${defaultChecked}>
+                                        <label for="${fieldId}" class="form-check-label">${fieldConfig.label}</label>
+                                    </div>
+                                    ${helpText}
+                                `;
                             } else {
                                 const inputType = fieldConfig.type === 'password' ? 'password' : 'text';
                                 fieldHtml = `
                                     <label for="${fieldId}" class="form-label">${fieldConfig.label}${requiredMark}</label>
                                     <input type="${inputType}" name="${fieldNameAttr}" id="${fieldId}"
-                                           class="form-control" ${isRequired}>
+                                           class="form-control" ${isRequired} ${placeholder}>
+                                    ${helpText}
                                 `;
                             }
 

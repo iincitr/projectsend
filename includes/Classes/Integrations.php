@@ -22,13 +22,13 @@ class Integrations
     public static $available_types = [
         self::TYPE_S3 => [
             'name' => 'Amazon S3',
-            'description' => 'Amazon Simple Storage Service',
+            'description' => 'Amazon Simple Storage Service and S3-compatible storage (MinIO, SeaweedFS, etc.)',
             'class' => 'S3Storage',
             'fields' => [
-                'access_key' => ['type' => 'text', 'required' => true, 'label' => 'Access Key ID'],
-                'secret_key' => ['type' => 'password', 'required' => true, 'label' => 'Secret Access Key'],
-                'bucket_name' => ['type' => 'text', 'required' => true, 'label' => 'Bucket Name'],
-                'region' => ['type' => 'select', 'required' => true, 'label' => 'Region', 'options' => [
+                'access_key' => ['type' => 'text', 'required' => true, 'label' => 'Access Key ID', 'help' => 'Your S3 access key or API key'],
+                'secret_key' => ['type' => 'password', 'required' => true, 'label' => 'Secret Access Key', 'help' => 'Your S3 secret key'],
+                'bucket_name' => ['type' => 'text', 'required' => true, 'label' => 'Bucket Name', 'help' => 'The name of the S3 bucket to use'],
+                'region' => ['type' => 'select', 'required' => false, 'label' => 'Region', 'help' => 'AWS region (use "us-east-1" for most S3-compatible services)', 'options' => [
                     'us-east-1' => 'US East (N. Virginia)',
                     'us-east-2' => 'US East (Ohio)',
                     'us-west-1' => 'US West (N. California)',
@@ -40,7 +40,10 @@ class Integrations
                     'ap-southeast-1' => 'Asia Pacific (Singapore)',
                     'ap-southeast-2' => 'Asia Pacific (Sydney)',
                     'ap-northeast-1' => 'Asia Pacific (Tokyo)',
-                ]]
+                    'custom' => 'Custom (specify endpoint below)',
+                ]],
+                'endpoint' => ['type' => 'text', 'required' => false, 'label' => 'Custom Endpoint (Optional)', 'help' => 'For S3-compatible services like MinIO or SeaweedFS (e.g., https://minio.example.com or http://localhost:9000)', 'placeholder' => 'https://your-s3-server.com'],
+                'use_path_style' => ['type' => 'checkbox', 'required' => false, 'label' => 'Use Path-Style Addressing', 'help' => 'Enable for MinIO and some S3-compatible services. Uses bucket/key instead of bucket.endpoint format', 'default' => false]
             ]
         ],
         self::TYPE_GCS => [
