@@ -32,7 +32,7 @@ class S3Storage extends ExternalStorage
             $this->bucket_name = $this->credentials['bucket_name'] ?? '';
             $this->region = $this->credentials['region'] ?? 'us-east-1';
             $this->endpoint = $this->credentials['endpoint'] ?? '';
-            $this->use_path_style = isset($this->credentials['use_path_style']) && $this->credentials['use_path_style'] == '1';
+            $this->use_path_style = isset($this->credentials['use_path_style']) && $this->credentials['use_path_style'] === '1';
 
             $this->initializeS3Client();
         }
