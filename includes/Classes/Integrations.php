@@ -42,7 +42,13 @@ class Integrations
                     'ap-northeast-1' => 'Asia Pacific (Tokyo)',
                     'custom' => 'Custom (specify endpoint below)',
                 ]],
-                'endpoint' => ['type' => 'text', 'required' => false, 'label' => 'Custom Endpoint (Optional)', 'help' => 'For S3-compatible services like MinIO or SeaweedFS (e.g., https://minio.example.com or http://localhost:9000)', 'placeholder' => 'https://your-s3-server.com'],
+                'endpoint' => [
+                    'type' => 'text',
+                    'required' => false,
+                    'label' => 'Custom Endpoint (Optional)',
+                    'help' => 'For S3-compatible services like MinIO or SeaweedFS (e.g., https://minio.example.com or http://localhost:9000)',
+                    'placeholder' => 'https://your-s3-server.com'
+                ],
                 'use_path_style' => ['type' => 'checkbox', 'required' => false, 'label' => 'Use Path-Style Addressing', 'help' => 'Enable for MinIO and some S3-compatible services. Uses bucket/key instead of bucket.endpoint format', 'default' => false]
             ]
         ],
