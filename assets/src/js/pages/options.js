@@ -330,5 +330,24 @@
             // Listen for changes
             encryptionEnabledCheckbox.addEventListener('change', toggleEncryptionRequired);
         }
+
+        // SMTP ports - default values (adapted from PR #1442 by @JazzMalar)
+        const authSelect = document.getElementById("mail_smtp_secure");
+        const portInput = document.getElementById("mail_smtp_port");
+        if (elementExists(portInput)) {
+            console.log(authSelect);
+            const defaults = {
+                "none": "25",   // plain SMTP
+                "ssl": "465",   // implicit TLS
+                "tls": "587"    // STARTTLS
+            };
+
+            authSelect.addEventListener("change", function () {
+                const selected = this.value;
+                if (defaults[selected]) {
+                    portInput.value = defaults[selected];
+                }
+            });
+        }
     };
 })();
