@@ -1,8 +1,8 @@
 (function () {
     'use strict';
-    
+
     admin.parts.widgetStatistics = function () {
-        
+
         $(document).ready(function(){
             var chart;
 
@@ -74,7 +74,7 @@
                 }).done(function(data) {
                     // var obj = JSON.parse(data);
                     var obj = data;
-                    _chart_container.append('<canvas id="chart_statistics"><canvas>');
+                    _chart_container.append('<canvas id="chart_statistics"></canvas>');
 
                     // Get theme colors using centralized function
                     var colors = getThemeColors();
@@ -84,46 +84,43 @@
                         data: obj.chart,
                         options: {
                             responsive: true,
-                            title: {
-                                display: false
-                            },
-                            tooltips: {
-                                mode: 'index',
-                                intersect: false,
-                                backgroundColor: colors.tooltipBg,
-                                titleFontColor: colors.textColor,
-                                bodyFontColor: colors.textColor,
-                                borderColor: colors.gridColor,
-                                borderWidth: 1
-                            },
-                            legend: {
-                                labels: {
-                                    fontColor: colors.textColor
+                            plugins: {
+                                title: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    backgroundColor: colors.tooltipBg,
+                                    titleColor: colors.textColor,
+                                    bodyColor: colors.textColor,
+                                    borderColor: colors.gridColor,
+                                    borderWidth: 1
+                                },
+                                legend: {
+                                    labels: {
+                                        color: colors.textColor
+                                    }
                                 }
                             },
                             scales: {
-                                xAxes: [{
+                                x: {
                                     display: true,
                                     ticks: {
-                                        fontColor: colors.textColor
+                                        color: colors.textColor
                                     },
-                                    gridLines: {
+                                    grid: {
                                         color: colors.gridColor
                                     }
-                                }],
-                                yAxes: [{
+                                },
+                                y: {
                                     display: true,
                                     ticks: {
-                                        fontColor: colors.textColor
+                                        color: colors.textColor
                                     },
-                                    gridLines: {
+                                    grid: {
                                         color: colors.gridColor
                                     }
-                                }]
-                            },
-                            elements: {
-                                line: {
-                                    tension: 0
                                 }
                             }
                         }
@@ -133,7 +130,7 @@
                 }).always(function() {
                     $('#widget_statistics .loading-icon').addClass('none');
                 });
-    
+
                 return;
             }
 

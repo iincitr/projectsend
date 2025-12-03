@@ -14,7 +14,7 @@
         "bootstrap": "5.2.1",
         "bootstrap-datepicker": "1.9.0",
         "bootstrap-toggle": "2.2.2",
-        "chart.js": "^2.9.4",
+        "chart.js": "^4.4.3",
         "codemirror-minified": "^5.65.2",
         "font-awesome": "4.7.0",
         "footable": "2.0.6",
