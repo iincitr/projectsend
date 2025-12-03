@@ -14,6 +14,8 @@ class S3Storage extends ExternalStorage
     private $region;
     private $access_key;
     private $secret_key;
+    private $endpoint;
+    private $use_path_style;
 
     /**
      * Constructor
@@ -29,6 +31,8 @@ class S3Storage extends ExternalStorage
             $this->secret_key = $this->credentials['secret_key'] ?? '';
             $this->bucket_name = $this->credentials['bucket_name'] ?? '';
             $this->region = $this->credentials['region'] ?? 'us-east-1';
+            $this->endpoint = $this->credentials['endpoint'] ?? '';
+            $this->use_path_style = isset($this->credentials['use_path_style']) && $this->credentials['use_path_style'] === '1';
 
             $this->initializeS3Client();
         }
@@ -46,14 +50,28 @@ class S3Storage extends ExternalStorage
                 return;
             }
 
-            $this->s3_client = new \Aws\S3\S3Client([
+            $config = [
                 'version' => 'latest',
-                'region' => $this->region,
+                'region' => $this->region ?: 'us-east-1',
                 'credentials' => [
                     'key' => $this->access_key,
                     'secret' => $this->secret_key,
                 ],
-            ]);
+            ];
+
+            // Add custom endpoint for S3-compatible services (MinIO, SeaweedFS, etc.)
+            if (!empty($this->endpoint)) {
+                $config['endpoint'] = $this->endpoint;
+                $this->logOperation('init', '', 'info', 'Using custom endpoint: ' . $this->endpoint);
+            }
+
+            // Enable path-style addressing for MinIO and other S3-compatible services
+            if ($this->use_path_style) {
+                $config['use_path_style_endpoint'] = true;
+                $this->logOperation('init', '', 'info', 'Using path-style addressing');
+            }
+
+            $this->s3_client = new \Aws\S3\S3Client($config);
 
             $this->is_connected = true;
             $this->logOperation('init', '', 'success', 'S3 client initialized');
@@ -472,6 +490,8 @@ class S3Storage extends ExternalStorage
         $instance->secret_key = $credentials['secret_key'] ?? '';
         $instance->bucket_name = $credentials['bucket_name'] ?? '';
         $instance->region = $credentials['region'] ?? 'us-east-1';
+        $instance->endpoint = $credentials['endpoint'] ?? '';
+        $instance->use_path_style = isset($credentials['use_path_style']) && $credentials['use_path_style'] == '1';
         $instance->initializeS3Client();
         return $instance;
     }
