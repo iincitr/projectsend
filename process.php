@@ -6,8 +6,9 @@ use ProjectSend\Classes\ActionsLog;
 /** Process an action */
 require_once 'bootstrap.php';
 
-// Allow get_public_file_info without login requirement
-if (!isset($_GET['do']) || $_GET['do'] !== 'get_public_file_info') {
+// Actions that don't require login
+$public_actions = ['get_public_file_info', 'social_login'];
+if (!isset($_GET['do']) || !in_array($_GET['do'], $public_actions)) {
     redirect_if_not_logged_in();
 }
 
