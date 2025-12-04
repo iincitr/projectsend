@@ -102,3 +102,18 @@ define('DEBUG', false);
  * Default: 'stable'
  */
 define('UPDATE_CHANNEL', 'stable');
+
+/**
+ * Encryption Master Key
+ * Used to encrypt file-specific encryption keys when file encryption is enabled.
+ *
+ * IMPORTANT:
+ * - This key is automatically generated during installation
+ * - DO NOT change this value after encrypting files, or they will become unreadable
+ * - Keep a secure backup of this key
+ * - The value must be a base64-encoded 32-byte (256-bit) key
+ *
+ * If not defined, the system will attempt to use a key from the database,
+ * or generate a temporary one (not recommended for production).
+ */
+define('ENCRYPTION_MASTER_KEY', '');
