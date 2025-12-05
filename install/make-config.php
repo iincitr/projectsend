@@ -113,6 +113,9 @@ $ready_to_go = $pdo_connected && (!$table_exists || $reuse_tables) && $lang_ok &
 // if the user requested to write the config file AND we can proceed, we try to write the new configuration
 if (isset($_POST['submit-start']) && $ready_to_go) {
     $template = file_get_contents(ROOT_DIR . '/includes/sys.config.sample.php');
+    // Generate a secure encryption master key for this installation
+    $encryption_master_key = base64_encode(random_bytes(32));
+
     $template_search = array(
         "'mysql'",
         "'database'",
@@ -122,7 +125,8 @@ if (isset($_POST['submit-start']) && $ready_to_go) {
         "'password'",
         "'tbl_'",
         "'en'",
-        "2048"
+        "2048",
+        "define('ENCRYPTION_MASTER_KEY', '');",
     );
     $template_replace = array(
         "'" . $post_vars['dbdriver'] . "'",
@@ -134,6 +138,7 @@ if (isset($_POST['submit-start']) && $ready_to_go) {
         "'" . $post_vars['dbprefix'] . "'",
         "'" . $post_vars['lang'] . "'",
         "'" . $post_vars['maxfilesize'] . "'",
+        "define('ENCRYPTION_MASTER_KEY', '" . $encryption_master_key . "');",
     );
     $template = str_replace($template_search, $template_replace, $template);
 

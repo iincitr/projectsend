@@ -3,6 +3,24 @@
  * File Encryption options form configuration
  */
 
+// Check if encryption master key is configured
+$encryption_key_configured = defined('ENCRYPTION_MASTER_KEY') && !empty(ENCRYPTION_MASTER_KEY);
+
+// Show warning if encryption key is not configured
+if (!$encryption_key_configured) {
+?>
+    <div class="alert alert-warning">
+        <h5><i class="fa fa-exclamation-triangle"></i> <?php _e('Encryption Master Key Not Configured', 'cftp_admin'); ?></h5>
+        <p><?php _e('To enable file encryption, you must add an encryption master key to your configuration file.', 'cftp_admin'); ?></p>
+        <p><?php _e('Add the following line to', 'cftp_admin'); ?> <code>includes/sys.config.php</code>:</p>
+        <pre class="bg-light p-2"><code>define('ENCRYPTION_MASTER_KEY', 'YOUR_GENERATED_KEY_HERE');</code></pre>
+        <p><?php _e('To generate a secure key, run this command in your terminal:', 'cftp_admin'); ?></p>
+        <pre class="bg-light p-2"><code>php -r "echo base64_encode(random_bytes(32));"</code></pre>
+        <p class="mb-0"><strong><?php _e('Important:', 'cftp_admin'); ?></strong> <?php _e('Keep a secure backup of this key. If lost, encrypted files cannot be recovered.', 'cftp_admin'); ?></p>
+    </div>
+<?php
+}
+
 // Define the form sections and fields
 $form_sections = [
     [
@@ -13,7 +31,8 @@ $form_sections = [
                 'type' => 'checkbox',
                 'name' => 'files_encryption_enabled',
                 'label' => __('Enable file encryption feature', 'cftp_admin'),
-                'note' => __('When enabled, the encryption feature becomes available. Files can be encrypted based on the setting below.', 'cftp_admin')
+                'note' => __('When enabled, the encryption feature becomes available. Files can be encrypted based on the setting below.', 'cftp_admin'),
+                'disabled' => !$encryption_key_configured,
             ],
             [
                 'type' => 'checkbox',

@@ -246,6 +246,14 @@ if ($_POST) {
         }
     }
 
+    // Validate encryption settings - cannot enable without master key configured
+    if ($section == 'encryption' && !empty($_POST['files_encryption_enabled'])) {
+        if (!defined('ENCRYPTION_MASTER_KEY') || empty(ENCRYPTION_MASTER_KEY)) {
+            $flash->error(__('Cannot enable encryption: ENCRYPTION_MASTER_KEY is not configured in sys.config.php. Please add this constant to your configuration file before enabling encryption.', 'cftp_admin'));
+            ps_redirect(BASE_URI . 'options.php?section=encryption');
+        }
+    }
+
     // If every option is completed, continue
     if ($options_missing > 0) {
         $flash->error(__('Some fields were not completed. Options could not be saved.', 'cftp_admin'));

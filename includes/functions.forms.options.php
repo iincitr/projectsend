@@ -209,7 +209,8 @@ function render_option_field($field) {
             echo '<label for="' . $field_id . '">';
 
             $checked = ($field_value == 1) ? 'checked="checked"' : '';
-            echo '<input type="checkbox" value="1" name="' . $field_name . '" id="' . $field_id . '" class="checkbox_options" ' . $checked . ' /> ';
+            $disabled = (!empty($field['disabled'])) ? 'disabled="disabled"' : '';
+            echo '<input type="checkbox" value="1" name="' . $field_name . '" id="' . $field_id . '" class="checkbox_options" ' . $checked . ' ' . $disabled . ' /> ';
             echo $field_label;
             echo '</label>';
 
