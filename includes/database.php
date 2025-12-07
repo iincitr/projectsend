@@ -7,6 +7,9 @@ use ProjectSend\Classes\Session;
 
 /** Initiate the database connection */
 if ( defined('DB_NAME') ) {
+	if ( !defined('DB_PORT') ) {
+		define('DB_PORT', 3306);
+	}
 	global $dbh;
 	try {
 		switch ( DB_DRIVER ) {
