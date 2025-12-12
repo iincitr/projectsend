@@ -52,7 +52,7 @@ Thanks. Arigatō. Danke. Gracias. Grazie. Mahadsanid. Salamat po. Merci. אַ ד
 
 You can download the compiled, translated files for the available languages from [projectsend.org/translations](https://www.projectsend.org/translations/)
 
-If you want to translate ProjectSend in your language or work on an existing translation, please join the project on [Transifex](https://www.transifex.com/projects/p/projectsend)
+If you want to translate ProjectSend in your language or work on an existing translation, please join the project on [Transifex](https://explore.transifex.com/subwaydesign/projectsend/)
 
 ## License
 
