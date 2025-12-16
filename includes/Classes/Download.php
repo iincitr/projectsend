@@ -293,6 +293,126 @@ class Download
     }
 
     /**
+     * Serve file inline for embedding (PDFs, videos, audio)
+     * Unlike serveFile(), this uses Content-Disposition: inline
+     *
+     * @param object $file File object
+     * @return void
+     */
+    public function serveFileInline($file)
+    {
+        $file_location = $file->full_path;
+
+        if (!file_exists($file_location)) {
+            exit_with_error_code(404);
+        }
+
+        session_write_close();
+        while (ob_get_level()) ob_end_clean();
+
+        // Check if file is encrypted
+        $file_key = false;
+        if ($file->encrypted) {
+            $file_key = $this->getDecryptedFileKey($file);
+            if ($file_key === false) {
+                error_log('Failed to decrypt file key for inline serving');
+                exit_with_error_code(500);
+            }
+        }
+
+        // Determine MIME type
+        $mime_type = $file->mime_type ?: 'application/octet-stream';
+
+        // For encrypted files, we need to handle differently
+        if ($file_key !== false) {
+            try {
+                $encryption = new \ProjectSend\Classes\Encryption();
+
+                header("Pragma: public");
+                header("Expires: -1");
+                header("Cache-Control: public, must-revalidate, post-check=0, pre-check=0");
+                header('Content-Disposition: inline; filename="' . $file->filename_original . '"');
+                header('Content-Type: ' . $mime_type);
+                header('Accept-Ranges: none');
+
+                set_time_limit(0);
+
+                $success = $encryption->decryptFileStream($file_location, $file_key);
+
+                if (!$success) {
+                    error_log('Failed to decrypt and stream file inline');
+                    exit_with_error_code(500);
+                }
+
+                exit;
+
+            } catch (\Exception $e) {
+                error_log('Decryption error during inline serving: ' . $e->getMessage());
+                exit_with_error_code(500);
+            }
+        }
+
+        // Unencrypted file - serve with range support for video/audio seeking
+        $file_size = get_real_size($file_location);
+        $fp = @fopen($file_location, "rb");
+
+        if (!$fp) {
+            exit_with_error_code(500);
+        }
+
+        header("Pragma: public");
+        header("Expires: -1");
+        header("Cache-Control: public, must-revalidate, post-check=0, pre-check=0");
+        header('Content-Disposition: inline; filename="' . $file->filename_original . '"');
+        header('Content-Type: ' . $mime_type);
+
+        // Handle range requests for video/audio seeking
+        if (isset($_SERVER['HTTP_RANGE'])) {
+            list($size_unit, $range_orig) = explode('=', $_SERVER['HTTP_RANGE'], 2);
+            if ($size_unit == 'bytes') {
+                list($range, $extra_ranges) = explode(',', $range_orig, 2);
+            } else {
+                $range = '';
+                header('HTTP/1.1 416 Requested Range Not Satisfiable');
+                fclose($fp);
+                exit;
+            }
+        } else {
+            $range = '';
+        }
+
+        list($seek_start, $seek_end) = explode('-', $range, 2);
+        $seek_end = (empty($seek_end)) ? ($file_size - 1) : min(abs(intval($seek_end)), ($file_size - 1));
+        $seek_start = (empty($seek_start) || $seek_end < abs(intval($seek_start))) ? 0 : max(abs(intval($seek_start)), 0);
+
+        if ($seek_start > 0 || $seek_end < ($file_size - 1)) {
+            header('HTTP/1.1 206 Partial Content');
+            header('Content-Range: bytes ' . $seek_start . '-' . $seek_end . '/' . $file_size);
+            header('Content-Length: ' . ($seek_end - $seek_start + 1));
+        } else {
+            header("Content-Length: $file_size");
+        }
+
+        header('Accept-Ranges: bytes');
+
+        set_time_limit(0);
+        fseek($fp, $seek_start);
+
+        while (!feof($fp)) {
+            print(@fread($fp, 1024 * 8));
+            ob_flush();
+            flush();
+            if (connection_status() != 0) {
+                @fclose($fp);
+                exit;
+            }
+        }
+
+        @fclose($fp);
+        exit;
+    }
+
+    /**
      * Send file to the browser
      *
      * @param string $file_location absolute full path to the file on disk

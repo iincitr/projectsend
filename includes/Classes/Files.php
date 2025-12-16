@@ -465,11 +465,15 @@ class Files
     public function getEmbedData()
     {
         if ($this->embeddable) {
-            $file_url = str_replace(ROOT_DIR, BASE_URI, $this->full_path);
-
+            // Use authenticated endpoint for non-image files to enforce permissions on every request
+            // This prevents direct URL sharing that bypasses permission checks
             if ($this->isImage()) {
-                $file_url = make_thumbnail( $this->full_path, 'proportional', 500 )['thumbnail']['url'];
+                $file_url = make_thumbnail($this->full_path, 'proportional', 500)['thumbnail']['url'];
+            } else {
+                // PDFs, videos, audio - use serve_file endpoint
+                $file_url = BASE_URI . 'process.php?do=serve_file&id=' . $this->id;
             }
+
             $return = [
                 'name' => $this->filename_original,
                 'file_url' => $file_url,
@@ -477,15 +481,18 @@ class Files
                 'mime_type' => $this->mime_type,
             ];
 
-            // Record request
-            $this->logger->addEntry([
-                'action' => 41,
-                'owner_id' => defined('CURRENT_USER_ID') ? CURRENT_USER_ID : 0,
-                'affected_file' => $this->id,
-                'affected_file_name' => $this->filename_on_disk,
-                'affected_account' => defined('CURRENT_USER_ID') ? CURRENT_USER_ID : 0,
-                'file_title_column' => true
-            ]);
+            // Note: Action logging is now done in the serve_file endpoint for non-images
+            // to log each actual access, not just when embed data is requested
+            if ($this->isImage()) {
+                $this->logger->addEntry([
+                    'action' => 41,
+                    'owner_id' => defined('CURRENT_USER_ID') ? CURRENT_USER_ID : 0,
+                    'affected_file' => $this->id,
+                    'affected_file_name' => $this->filename_on_disk,
+                    'affected_account' => defined('CURRENT_USER_ID') ? CURRENT_USER_ID : 0,
+                    'file_title_column' => true
+                ]);
+            }
 
             return json_encode($return);
         }

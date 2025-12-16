@@ -93,6 +93,39 @@ switch ($_GET['do']) {
         echo json_encode($return);
         exit;
         break;
+    case 'serve_file':
+        // Serve file inline for embedding (PDFs, videos, audio)
+        // This validates permissions on every request unlike direct file URLs
+        if (empty($_GET['id'])) {
+            exit_with_error_code(400);
+        }
+
+        $file_id = (int)$_GET['id'];
+        if (!user_can_download_file(CURRENT_USER_ID, $file_id)) {
+            exit_with_error_code(403);
+        }
+
+        $file = new \ProjectSend\Classes\Files($file_id);
+        if (!$file->existsOnDisk()) {
+            exit_with_error_code(404);
+        }
+
+        // Record the preview/embed action
+        $logger = new ActionsLog();
+        $logger->addEntry([
+            'action' => 41,
+            'owner_id' => CURRENT_USER_ID,
+            'affected_file' => $file->id,
+            'affected_file_name' => $file->filename_on_disk,
+            'affected_account' => CURRENT_USER_ID,
+            'file_title_column' => true
+        ]);
+
+        // Serve the file inline
+        $download = new Download();
+        $download->serveFileInline($file);
+        exit;
+        break;
     case 'download':
         $download = new Download;
         $download->download($_GET['id']);
