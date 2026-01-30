@@ -62,7 +62,7 @@ class Auth
         ]);
     }
 
-    public function validate2faRequest($token, $code)
+    public function validate2faRequest($token, $code, $remember_me = false)
     {
         $auth_code = new \ProjectSend\Classes\AuthenticationCode();
         $validate = json_decode($auth_code->validateRequest($token, $code));
@@ -81,6 +81,15 @@ class Auth
         if ($user->isActive()) {
             $this->user = $user;
             $this->login($user);
+
+            // Handle remember me functionality
+            if ($remember_me && get_option('remember_me_enabled', null, '1')) {
+                $rememberMe = new \ProjectSend\Classes\RememberMe();
+                $token = $rememberMe->generateToken();
+                if ($rememberMe->storeToken($user->id, $token)) {
+                    $rememberMe->setCookie($token);
+                }
+            }
 
             $results = [
                 'status' => 'success',
@@ -125,7 +134,7 @@ class Auth
                             $results = [
                                 'status' => 'success',
                                 'user_id' => $user->id,
-                                'location' => BASE_URI."index.php?form=2fa_verify&token=".$request2fa->token,
+                                'location' => BASE_URI."index.php?form=2fa_verify&remember_me=". (int)$remember_me ."&token=".$request2fa->token,
                             ];
                         } else {
                             $this->setError($request2fa->message);
