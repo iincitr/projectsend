@@ -457,6 +457,8 @@ class Download
                         }
 
                         $file_location = $temp_file;
+                        // Update X-Accel path to point to the decrypted temp file
+                        $xaccel = XACCEL_FILES_URL . '/temp/' . basename($temp_file);
                         // Note: temp file will be deleted after download by register_shutdown_function
                         register_shutdown_function(function() use ($temp_file) {
                             if (file_exists($temp_file)) {
