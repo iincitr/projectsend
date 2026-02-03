@@ -13,6 +13,10 @@ if ( !user_is_logged_in() ) {
 	exit;
 }
 
+// Release session lock to prevent blocking keep-alive AJAX requests during upload
+// All session data has been read and CURRENT_USER_* constants are already set
+session_write_close();
+
 function dieWithError($message = null, $code = 400)
 {
     header('Content-Type: application/json');
