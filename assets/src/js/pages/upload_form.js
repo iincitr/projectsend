@@ -51,11 +51,23 @@
                     $(".message_uploading").fadeIn();
 
                     uploader.bind('Error', function(uploader, error) {
-                        var obj = JSON.parse(error.response);
+                        errors++;
+                        var message = '';
+                        try {
+                            var obj = JSON.parse(error.response);
+                            if (obj.error && typeof obj.error === 'object') {
+                                message = obj.error.filename + ': ' + obj.error.message;
+                            } else if (obj.error) {
+                                message = obj.error;
+                            } else {
+                                message = error.message || 'Unknown error';
+                            }
+                        } catch (e) {
+                            message = error.message || 'Upload failed';
+                        }
                         $(
-                            `<div class="alert alert-danger">`+obj.error.filename+`: `+obj.error.message+`</div>`
-                        ).insertBefore( "#upload_form" );
-                        //console.log(obj);
+                            '<div class="alert alert-danger">' + message + '</div>'
+                        ).insertBefore("#upload_form");
                     });
         
                     uploader.bind('FileUploaded', function (uploader, file, info) {
