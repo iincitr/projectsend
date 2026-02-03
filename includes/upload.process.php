@@ -257,15 +257,21 @@ if (!$chunks || $chunk == $chunks - 1) {
             ]
         ];
 
+        header('Content-Type: application/json');
         echo json_encode($response);
         http_response_code(200);
     } else {
-        // Return error response
+        // Return error response in same format as dieWithError()
         $response = [
             'OK' => 0,
-            'error' => $result['message']
+            'error' => [
+                'code' => 400,
+                'message' => $result['message'],
+                'filename' => $fileName
+            ]
         ];
 
+        header('Content-Type: application/json');
         echo json_encode($response);
         http_response_code(400);
     }
