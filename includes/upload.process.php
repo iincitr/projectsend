@@ -223,7 +223,6 @@ if (!$chunks || $chunk == $chunks - 1) {
 
     // Add to database
     $file = new \ProjectSend\Classes\Files;
-    $file->setDefaults();
 
     // Set encryption metadata
     $file->encrypted = $encryption_metadata['encrypted'];
@@ -236,6 +235,9 @@ if (!$chunks || $chunk == $chunks - 1) {
     $route_result = $file->routeToStorage($filePath, $storage_selection, $fileName);
 
     if ($route_result && isset($route_result['filename_original'])) {
+        // setDefaults() must be called after routeToStorage() because it sets
+        // title from filename_original, which is populated by generateSafeFilename()
+        $file->setDefaults();
         $result = $file->addToDatabase();
     } else {
         $result = [
