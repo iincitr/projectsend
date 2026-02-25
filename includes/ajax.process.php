@@ -119,6 +119,11 @@ switch ($_GET['do']) {
     break;
 
     case 'thumbnails_regenerate_get_files':
+        if (!current_user_can('edit_settings')) {
+            echo json_encode(['status' => 'error', 'message' => 'Permission denied']);
+            exit;
+        }
+
         // Validate required parameters
         if (!isset($_POST['formats']) || !is_array($_POST['formats'])) {
             echo json_encode([
@@ -147,6 +152,11 @@ switch ($_GET['do']) {
     break;
 
     case 'thumbnails_regenerate_process':
+        if (!current_user_can('edit_settings')) {
+            echo json_encode(['status' => 'error', 'message' => 'Permission denied']);
+            exit;
+        }
+
         // Validate required parameters
         if (!isset($_POST['file_id']) || !isset($_POST['width']) || !isset($_POST['height'])) {
             echo json_encode([

@@ -139,10 +139,6 @@ if ($_POST) {
         $user_arguments['active'] = (isset($_POST["active"])) ? 1 : 0;
     }
 
-    // Debug: Log the user arguments being processed
-    error_log("Processing user edit for ID: " . $user_id);
-    error_log("User arguments: " . print_r($user_arguments, true));
-    error_log("POST data: " . print_r($_POST, true));
 
     // Process custom fields
     $custom_field_data = [];

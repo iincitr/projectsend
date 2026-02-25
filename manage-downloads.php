@@ -106,6 +106,16 @@ if (isset($_POST['action'])) {
                 );
                 foreach ($selected_files as $index => $file_id) {
                     if (!empty($file_id)) {
+                        if (!current_user_can('edit_others_files')) {
+                            // Verify the user owns the file before deleting
+                            $ownership_check = $dbh->prepare('SELECT cd.id FROM ' . TABLE_CUSTOM_DOWNLOADS . ' cd INNER JOIN ' . TABLE_FILES . ' f ON cd.file_id = f.id WHERE cd.link = :link AND f.user_id = :uploader_id');
+                            $ownership_check->execute(['link' => $file_id, 'uploader_id' => CURRENT_USER_ID]);
+                            if (!$ownership_check->fetch()) {
+                                $delete_results['errors']++;
+                                continue;
+                            }
+                        }
+
                         $deletesql = $dbh->prepare('DELETE FROM ' . TABLE_CUSTOM_DOWNLOADS . ' WHERE link=:link');
                         $deletesql->execute(['link' => $file_id]);
                         $delete_results['success']++;
