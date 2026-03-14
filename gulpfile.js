@@ -1,6 +1,5 @@
 const gulp         = require('gulp');
 const autoprefixer = require('gulp-autoprefixer');
-const babel        = require('gulp-babel');
 const cleanCSS     = require('gulp-clean-css');
 const concat       = require('gulp-concat');
 const rename       = require('gulp-rename');
@@ -94,8 +93,6 @@ gulp.task('javascript', (done) => {
 });
 
 gulp.task('copy', (done) => {
-    gulp.src('node_modules/bootstrap/fonts/*.*')
-        .pipe(gulp.dest(dest + 'fonts/'));
     gulp.src('node_modules/font-awesome/fonts/*.*')
         .pipe(gulp.dest(dest + 'fonts/'));
     gulp.src('node_modules/footable/css/fonts/*.*')
