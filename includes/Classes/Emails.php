@@ -1074,6 +1074,23 @@ class Emails
         );
 
         /**
+         * Replace template variables in custom header/footer
+         */
+        $template_placeholders = [
+            '{{SYSTEM_NAME}}' => get_option('this_install_title'),
+            '{{SYSTEM_URI}}' => BASE_URI,
+            '{{CURRENT_YEAR}}' => date('Y'),
+        ];
+        if (!empty($this->mail_info['subject'])) {
+            $template_placeholders['{{EMAIL_TITLE}}'] = $this->mail_info['subject'];
+        }
+        $this->mail_info['body'] = str_replace(
+            array_keys($template_placeholders),
+            array_values($template_placeholders),
+            $this->mail_info['body']
+        );
+
+        /**
          * If we are generating a preview, just return the html content
          */
         if ($this->preview == true) {
