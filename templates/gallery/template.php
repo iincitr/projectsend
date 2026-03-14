@@ -74,7 +74,7 @@ define('TEMPLATE_THUMBNAILS_HEIGHT', '215');
 					<ul>
                         <li><a href="<?php echo BASE_URI; ?>process.php?do=logout" target="_self" id="logout"><i class="fa fa-sign-out" aria-hidden="true"></i> <?php _e('Logout', 'cftp_admin'); ?></a></li>
                         <li><a href="<?php echo BASE_URI; ?>manage-files.php" target="_self" id="manage"><i class="fa fa-file" aria-hidden="true"></i> <?php _e('Manage files', 'cftp_admin'); ?></a></li>
-						<li><a href="<?php echo BASE_URI; ?>upload.php" target="_self" id="upload"><i class="fa fa-cloud-upload" aria-hidden="true"></i> <?php _e('Upload', 'cftp_admin'); ?></a></li>
+						<?php if (current_user_can_upload()) { ?><li><a href="<?php echo BASE_URI; ?>upload.php" target="_self" id="upload"><i class="fa fa-cloud-upload" aria-hidden="true"></i> <?php _e('Upload', 'cftp_admin'); ?></a></li><?php } ?>
 					</ul>
 				</nav>
 				

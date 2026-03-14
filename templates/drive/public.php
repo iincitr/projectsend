@@ -170,7 +170,7 @@ include_once 'lang/' . LOADED_LANG . '.mo.php';
                         <span class="material-icons text-google-gray-600 dark:text-google-gray-400">dashboard</span>
                     </a>
                     
-                    <?php if (get_option('clients_can_upload') == 1): ?>
+                    <?php if (current_user_can_upload()): ?>
                     <a href="<?php echo BASE_URI; ?>upload.php" 
                        class="p-3 rounded-full hover:bg-google-gray-100 dark:hover:bg-google-gray-700 transition-colors"
                        title="<?php _e('Upload Files', 'drive_template'); ?>">

@@ -122,7 +122,7 @@ if (!empty($current_folder)) {
                     <a href="<?php echo BASE_URI; ?>manage-files.php" class="p-2 text-text-secondary hover:text-text-primary transition-colors duration-200" title="Manage Files">
                         <span class="material-icons">dashboard</span>
                     </a>
-                    <?php if (get_option('clients_can_upload') == 1): ?>
+                    <?php if (current_user_can_upload()): ?>
                     <a href="<?php echo BASE_URI; ?>upload.php" class="p-2 text-text-secondary hover:text-text-primary transition-colors duration-200" title="Upload Files">
                         <span class="material-icons">cloud_upload</span>
                     </a>
