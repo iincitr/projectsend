@@ -1304,11 +1304,13 @@ class Files
             $assignments = (!empty($data['assignments'])) ? $data['assignments'] : null;
             $assignments = $this->saveAssignments($assignments, $hidden);
 
-            // Create notifications if uploaded by client, or if file is not set as hidden
-            if (current_role_in(['Client']) || $hidden == 0) {
-                $notification_type = current_role_in(['Client']) ? 0 : 1;
-                $users = current_role_in(['Client']) ? [CURRENT_USER_ID] : $assignments['added']['clients'];
-                $this->createNotifications($users, $notification_type);
+            // Create notifications only for newly added assignments
+            if (!empty($assignments['added']['clients'])) {
+                if (current_role_in(['Client']) || $hidden == 0) {
+                    $notification_type = current_role_in(['Client']) ? 0 : 1;
+                    $users = current_role_in(['Client']) ? [CURRENT_USER_ID] : $assignments['added']['clients'];
+                    $this->createNotifications($users, $notification_type);
+                }
             }
 
             // Categories
