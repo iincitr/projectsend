@@ -239,8 +239,8 @@ class Users
             $this->role = $this->role_id; // Backward compatibility
             $this->account_type = $this->isClient() ? 'client' : 'user';
             $this->active = html_output($row['active']);
-            $this->max_file_size = html_output($row['max_file_size']);
-            $this->max_disk_quota = html_output($row['max_disk_quota']);
+            $this->max_file_size = ($row['max_file_size'] !== null) ? (int)$row['max_file_size'] : 0;
+            $this->max_disk_quota = ($row['max_disk_quota'] !== null) ? (int)$row['max_disk_quota'] : 0;
             $this->created_date = html_output($row['timestamp']);
             $this->created_by = html_output($row['created_by']);
 
