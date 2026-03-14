@@ -48,13 +48,7 @@ class Options
 
     private function getCurrentUrl()
     {
-        $pageURL = 'http';
-        if (!empty($_SERVER['HTTPS'])) {
-            if ($_SERVER['HTTPS'] == 'on') {
-                $pageURL .= "s";
-            }
-        }
-        $pageURL .= "://";
+        $pageURL = (defined('PROTOCOL')) ? PROTOCOL . '://' : 'http://';
         $pageURL .= $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"];
 
         $extension = substr($pageURL, -4);

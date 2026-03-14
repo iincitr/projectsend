@@ -66,7 +66,11 @@ define('REQUIRED_VERSION_MYSQL', '5.0');
  * Contribution by Scott Wright on
  * http://code.google.com/p/clients-oriented-ftp/issues/detail?id=230
  */
-define('PROTOCOL', empty($_SERVER['HTTPS'])? 'http' : 'https');
+$is_https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+    || (!empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] === 'on')
+    || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+define('PROTOCOL', $is_https ? 'https' : 'http');
 
 /**
  * DEBUG
