@@ -169,10 +169,9 @@ rm -rf docs_temp results reports
 rm -f make-release.sh gulpfile.js package.json package-lock.json
 
 echo -e "${GREEN}Step 9: Removing translation source files${NC}"
-# Remove .po and .mo files from root lang folder (keep .pot files)
-find ./lang -type f \( -name "*.po" -o -name "*.mo" \) -delete
-# Remove .po and .mo files from template lang folders (keep .pot files)
-find ./templates/*/lang -type f \( -name "*.po" -o -name "*.mo" \) -delete 2>/dev/null || true
+# Remove .po source files (keep .mo compiled files needed at runtime, and .pot templates)
+find ./lang -type f -name "*.po" -delete
+find ./templates/*/lang -type f -name "*.po" -delete 2>/dev/null || true
 
 echo -e "${GREEN}Step 10: Cleaning upload directories${NC}"
 
