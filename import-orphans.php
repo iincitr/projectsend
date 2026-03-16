@@ -36,6 +36,7 @@ if (isset($_POST['action'])) {
 
                 if (!empty($_POST['files'])) {
                     foreach ($_POST['files'] as $filename) {
+                        $filename = basename($filename);
                         $filename_path = UPLOADED_FILES_DIR . DS . $filename;
                         if (!file_exists($filename_path) || !file_is_allowed($filename)) {
                             continue;
@@ -63,6 +64,7 @@ if (isset($_POST['action'])) {
                 $selected = count($_POST['files']);
                 $deleted = 0;
                 foreach ($_POST['files'] as $filename) {
+                    $filename = basename($filename);
                     $filename_path = UPLOADED_FILES_DIR . DS . $filename;
                     $delete = delete_file_from_disk($filename_path);
                     if ($delete) { $deleted++; }
