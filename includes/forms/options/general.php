@@ -3,6 +3,7 @@
  * General options form configuration
  * Refactored to use array-based configuration - matches original exactly
  */
+include_once __DIR__ . '/timezones.php';
 
 // Define the form sections and fields
 $form_sections = [
@@ -17,16 +18,11 @@ $form_sections = [
                 'required' => true
             ],
             [
-                'type' => 'custom',
+                'type' => 'select',
                 'name' => 'timezone',
-                'render_callback' => function($field) {
-                    echo '<div class="form-group row">';
-                    echo '<label for="timezone" class="col-sm-4 control-label">' . __('Timezone', 'cftp_admin') . '</label>';
-                    echo '<div class="col-sm-8">';
-                    include_once 'timezones.php';
-                    echo '</div>';
-                    echo '</div>';
-                }
+                'label' => __('Timezone', 'cftp_admin'),
+                'options' => get_timezone_options(),
+                'required' => true
             ],
             [
                 'type' => 'text',

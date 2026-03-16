@@ -191,8 +191,18 @@ function render_option_field($field) {
 
             if (!empty($field['options'])) {
                 foreach ($field['options'] as $option_value => $option_label) {
-                    $selected = ((string)$field_value === (string)$option_value) ? 'selected="selected"' : '';
-                    echo '<option value="' . html_output((string)$option_value) . '" ' . $selected . '>' . html_output($option_label) . '</option>';
+                    if (is_array($option_label)) {
+                        // Optgroup: key is group label, value is array of options
+                        echo '<optgroup label="' . html_output((string)$option_value) . '">';
+                        foreach ($option_label as $group_value => $group_label) {
+                            $selected = ((string)$field_value === (string)$group_value) ? 'selected="selected"' : '';
+                            echo '<option value="' . html_output((string)$group_value) . '" ' . $selected . '>' . html_output($group_label) . '</option>';
+                        }
+                        echo '</optgroup>';
+                    } else {
+                        $selected = ((string)$field_value === (string)$option_value) ? 'selected="selected"' : '';
+                        echo '<option value="' . html_output((string)$option_value) . '" ' . $selected . '>' . html_output($option_label) . '</option>';
+                    }
                 }
             }
 
