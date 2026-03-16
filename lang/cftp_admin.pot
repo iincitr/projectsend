@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: ProjectSend admin\n"
-"POT-Creation-Date: 2025-11-10 13:06-0300\n"
+"POT-Creation-Date: 2026-03-15 00:29-0300\n"
 "PO-Revision-Date: 2016-09-14 15:19-0300\n"
 "Last-Translator: \n"
 "Language-Team: ProjectSend <contact@projectsend.org>\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.8\n"
+"X-Generator: Poedit 3.9\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-SearchPath-0: .\n"
@@ -50,13 +50,13 @@ msgstr ""
 
 #: actions-log.php:104 categories.php:175 clients-membership-requests.php:134
 #: clients-requests.php:194 clients.php:134 custom-assets.php:155 groups.php:158
-#: import-orphans.php:122 manage-downloads.php:226 manage-files.php:418
+#: import-orphans.php:122 manage-downloads.php:236 manage-files.php:418
 #: users.php:154
 msgid "Your search keywords returned no results."
 msgstr ""
 
 #: actions-log.php:107 clients-membership-requests.php:137 clients-requests.php:197
-#: clients.php:137 custom-assets.php:158 groups.php:161 manage-downloads.php:232
+#: clients.php:137 custom-assets.php:158 groups.php:161 manage-downloads.php:242
 #: manage-files.php:424 users.php:157
 msgid "The filters you selected returned no results."
 msgstr ""
@@ -71,7 +71,7 @@ msgstr ""
 
 #: actions-log.php:136 categories.php:190 clients-membership-requests.php:166
 #: clients-requests.php:237 clients.php:178 cron-log.php:103 custom-assets.php:207
-#: groups.php:205 import-orphans.php:147 manage-downloads.php:291
+#: groups.php:205 import-orphans.php:147 manage-downloads.php:301
 #: manage-files.php:495 users.php:209
 msgid "Select action"
 msgstr ""
@@ -144,7 +144,7 @@ msgstr ""
 
 #: categories.php:194 clients.php:185 custom-assets.php:214 custom-fields.php:205
 #: groups.php:208 import-orphans.php:148 integrations.php:203
-#: manage-downloads.php:296 manage-files.php:511 roles.php:158 users.php:216
+#: manage-downloads.php:306 manage-files.php:511 roles.php:158 users.php:216
 msgid "Delete"
 msgstr ""
 
@@ -156,7 +156,7 @@ msgstr ""
 
 #: categories.php:233 clients.php:385 groups.php:261 groups.php:342
 #: includes/forms/options/clients.php:73 includes/layout/main-menu.php:29
-#: includes/widgets/counters.php:54 install/make-config.php:304
+#: includes/widgets/counters.php:54 install/make-config.php:322
 #: integrations-edit.php:281 integrations.php:131
 msgid "Files"
 msgstr ""
@@ -175,7 +175,7 @@ msgstr ""
 
 #: categories.php:244 clients.php:281 custom-assets.php:271 custom-fields.php:138
 #: encrypt-files.php:148 files-edit.php:271 groups.php:280 import-orphans.php:228
-#: integrations.php:134 manage-downloads.php:400 manage-files.php:803 roles.php:86
+#: integrations.php:134 manage-downloads.php:410 manage-files.php:803 roles.php:86
 #: users.php:294
 msgid "Actions"
 msgstr ""
@@ -186,8 +186,8 @@ msgid "Manage files"
 msgstr ""
 
 #: categories.php:321 clients.php:391 custom-assets.php:312 custom-fields.php:195
-#: groups.php:346 integrations.php:192 manage-downloads.php:292
-#: manage-downloads.php:488 manage-files.php:496 manage-files.php:1101 roles.php:151
+#: groups.php:346 integrations.php:192 manage-downloads.php:302
+#: manage-downloads.php:498 manage-files.php:496 manage-files.php:1101 roles.php:151
 #: users.php:351
 msgid "Edit"
 msgstr ""
@@ -216,7 +216,7 @@ msgstr ""
 msgid "Edit client"
 msgstr ""
 
-#: clients-edit.php:153 users-edit.php:179
+#: clients-edit.php:153 users-edit.php:175
 msgid "My account"
 msgstr ""
 
@@ -318,7 +318,7 @@ msgstr ""
 msgid "Account"
 msgstr ""
 
-#: clients-requests.php:313 manage-downloads.php:363 manage-files.php:726
+#: clients-requests.php:313 manage-downloads.php:373 manage-files.php:726
 msgid "Added on"
 msgstr ""
 
@@ -342,7 +342,7 @@ msgstr ""
 msgid "Create new"
 msgstr ""
 
-#: clients.php:165 custom-assets.php:194 manage-downloads.php:279
+#: clients.php:165 custom-assets.php:194 manage-downloads.php:289
 #: manage-files.php:483 users.php:195
 msgid "All statuses"
 msgstr ""
@@ -413,7 +413,7 @@ msgstr ""
 #: includes/forms/options/ldap.php:125 includes/forms/options/ldap.php:151
 #: includes/forms/options/social_login.php:118
 #: includes/forms/options/social_login.php:190
-#: includes/functions.custom-fields.php:87 includes/functions.forms.options.php:297
+#: includes/functions.custom-fields.php:87 includes/functions.forms.options.php:298
 #: manage-files.php:862
 msgid "Yes"
 msgstr ""
@@ -422,7 +422,7 @@ msgstr ""
 #: includes/forms/options/ldap.php:19 includes/forms/options/ldap.php:124
 #: includes/forms/options/ldap.php:150 includes/forms/options/social_login.php:117
 #: includes/forms/options/social_login.php:189
-#: includes/functions.forms.options.php:298 manage-files.php:862
+#: includes/functions.forms.options.php:299 manage-files.php:862
 msgid "No"
 msgstr ""
 
@@ -546,12 +546,12 @@ msgid "Disable"
 msgstr ""
 
 #: custom-assets.php:248 files-edit.php:257 includes/forms/assets.php:33
-#: includes/forms/file_editor.php:193 manage-downloads.php:350 manage-files.php:716
+#: includes/forms/file_editor.php:193 manage-downloads.php:360 manage-files.php:716
 msgid "Title"
 msgstr ""
 
 #: custom-assets.php:258 includes/forms/options/general.php:62
-#: includes/layout/header-top.php:28 install/make-config.php:292
+#: includes/layout/header-top.php:28 install/make-config.php:310
 msgid "Language"
 msgstr ""
 
@@ -808,7 +808,7 @@ msgstr ""
 msgid "Required"
 msgstr ""
 
-#: custom-fields.php:131 manage-downloads.php:280 manage-files.php:484
+#: custom-fields.php:131 manage-downloads.php:290 manage-files.php:484
 #: manage-files.php:896
 msgid "Visible"
 msgstr ""
@@ -825,7 +825,7 @@ msgstr ""
 msgid "Users & Clients"
 msgstr ""
 
-#: custom-fields.php:184 manage-downloads.php:281 manage-files.php:485
+#: custom-fields.php:184 manage-downloads.php:291 manage-files.php:485
 #: manage-files.php:896
 msgid "Hidden"
 msgstr ""
@@ -848,7 +848,7 @@ msgid "There are no recorded downloads for this file"
 msgstr ""
 
 #: download-information.php:87 includes/forms/file_editor.php:250
-#: manage-downloads.php:395 manage-files.php:788
+#: manage-downloads.php:405 manage-files.php:788
 msgid "Total downloads"
 msgstr ""
 
@@ -886,17 +886,17 @@ msgstr ""
 msgid "E-mail templates"
 msgstr ""
 
-#: email-preview.php:8 email-templates.php:106 manage-downloads.php:356
-#: manage-downloads.php:426 manage-files.php:719 manage-files.php:849
+#: email-preview.php:8 email-templates.php:106 manage-downloads.php:366
+#: manage-downloads.php:436 manage-files.php:719 manage-files.php:849
 msgid "Preview"
 msgstr ""
 
-#: email-templates.php:47 options.php:130 options.php:137 options.php:276
+#: email-templates.php:47 options.php:130 options.php:137 options.php:284
 #: themes.php:28
 msgid "Options updated successfully."
 msgstr ""
 
-#: email-templates.php:49 options.php:278 themes.php:30
+#: email-templates.php:49 options.php:286 themes.php:30
 msgid "There was an error. Please try again."
 msgstr ""
 
@@ -984,7 +984,7 @@ msgid ""
 "the preview."
 msgstr ""
 
-#: email-templates.php:239 options.php:376
+#: email-templates.php:239 options.php:384
 msgid "Save options"
 msgstr ""
 
@@ -1582,9 +1582,9 @@ msgstr ""
 msgid "Invalid security token. Please try again."
 msgstr ""
 
-#: import-external.php:33 includes/Classes/Files.php:1805
-#: includes/Classes/Integrations.php:226 includes/Classes/Integrations.php:337
-#: includes/Classes/Integrations.php:388
+#: import-external.php:33 includes/Classes/Files.php:1814
+#: includes/Classes/Integrations.php:235 includes/Classes/Integrations.php:346
+#: includes/Classes/Integrations.php:397
 msgid "Integration not found."
 msgstr ""
 
@@ -1712,7 +1712,7 @@ msgstr ""
 msgid "The selected files were imported successfully."
 msgstr ""
 
-#: import-orphans.php:73 manage-downloads.php:119 manage-files.php:181
+#: import-orphans.php:73 manage-downloads.php:129 manage-files.php:181
 msgid "The selected files were deleted."
 msgstr ""
 
@@ -1720,7 +1720,7 @@ msgstr ""
 msgid "Not all of the selected files where were deleted."
 msgstr ""
 
-#: import-orphans.php:82 manage-downloads.php:134 manage-files.php:192
+#: import-orphans.php:82 manage-downloads.php:144 manage-files.php:192
 msgid "Please select at least one file."
 msgstr ""
 
@@ -1967,97 +1967,97 @@ msgstr ""
 msgid "An email template was updated"
 msgstr ""
 
-#: includes/Classes/Auth.php:332 includes/text.strings.php:118
+#: includes/Classes/Auth.php:341 includes/text.strings.php:118
 msgid "Email and password cannot be empty."
 msgstr ""
 
-#: includes/Classes/Auth.php:358 includes/text.strings.php:110
+#: includes/Classes/Auth.php:367 includes/text.strings.php:110
 #, php-format
 msgid "LDAP connection error: %s"
 msgstr ""
 
-#: includes/Classes/Auth.php:506 includes/text.strings.php:115
+#: includes/Classes/Auth.php:515 includes/text.strings.php:115
 msgid "Error creating user account from LDAP."
 msgstr ""
 
-#: includes/Classes/Auth.php:515 includes/text.strings.php:114
+#: includes/Classes/Auth.php:524 includes/text.strings.php:114
 msgid "Your LDAP account is not authorized. Please contact an administrator."
 msgstr ""
 
-#: includes/Classes/Auth.php:525 includes/Classes/Auth.php:534
-#: includes/Classes/Auth.php:537 includes/text.strings.php:112
+#: includes/Classes/Auth.php:534 includes/Classes/Auth.php:543
+#: includes/Classes/Auth.php:546 includes/text.strings.php:112
 #: includes/text.strings.php:113
 msgid "The supplied email or password does not match an existing record."
 msgstr ""
 
-#: includes/Classes/Auth.php:545 includes/Classes/Auth.php:548
+#: includes/Classes/Auth.php:554 includes/Classes/Auth.php:557
 #: includes/text.strings.php:111
 msgid "Error binding to LDAP server."
 msgstr ""
 
-#: includes/Classes/Auth.php:578
+#: includes/Classes/Auth.php:587
 msgid "LDAP extension is not loaded in PHP."
 msgstr ""
 
-#: includes/Classes/Auth.php:591
+#: includes/Classes/Auth.php:600
 msgid "LDAP server is not configured."
 msgstr ""
 
-#: includes/Classes/Auth.php:594
+#: includes/Classes/Auth.php:603
 msgid "LDAP admin user is not configured."
 msgstr ""
 
-#: includes/Classes/Auth.php:597
+#: includes/Classes/Auth.php:606
 msgid "LDAP admin password is not configured."
 msgstr ""
 
-#: includes/Classes/Auth.php:613
+#: includes/Classes/Auth.php:622
 msgid "Could not connect to LDAP server."
 msgstr ""
 
-#: includes/Classes/Auth.php:616
+#: includes/Classes/Auth.php:625
 msgid "Successfully connected to LDAP server."
 msgstr ""
 
-#: includes/Classes/Auth.php:621
+#: includes/Classes/Auth.php:630
 #, php-format
 msgid "LDAP protocol version set to %s."
 msgstr ""
 
-#: includes/Classes/Auth.php:629
+#: includes/Classes/Auth.php:638
 msgid ""
 "Could not bind to LDAP server with admin credentials. Please check username and "
 "password."
 msgstr ""
 
-#: includes/Classes/Auth.php:632
+#: includes/Classes/Auth.php:641
 msgid "Successfully authenticated with admin credentials."
 msgstr ""
 
-#: includes/Classes/Auth.php:641
+#: includes/Classes/Auth.php:650
 #, php-format
 msgid "Search base \"%s\" is accessible (%d entries found)."
 msgstr ""
 
-#: includes/Classes/Auth.php:644
+#: includes/Classes/Auth.php:653
 #, php-format
 msgid "Could not search in base \"%s\": %s"
 msgstr ""
 
-#: includes/Classes/Auth.php:654
+#: includes/Classes/Auth.php:663
 msgid "However, there were some issues: "
 msgstr ""
 
-#: includes/Classes/Auth.php:660
+#: includes/Classes/Auth.php:669
 msgid "LDAP connection test completed successfully."
 msgstr ""
 
-#: includes/Classes/Auth.php:666
+#: includes/Classes/Auth.php:675
 #, php-format
 msgid "LDAP connection test failed: %s"
 msgstr ""
 
-#: includes/Classes/Auth.php:679
+#: includes/Classes/Auth.php:688
 msgid "Error during log in."
 msgstr ""
 
@@ -2604,7 +2604,7 @@ msgstr ""
 
 #: includes/Classes/Emails.php:195 includes/Classes/Emails.php:337
 #: includes/Classes/Emails.php:370 includes/forms/login.php:11
-#: includes/forms/options/email.php:144 install/make-config.php:228
+#: includes/forms/options/email.php:144 install/make-config.php:246
 msgid "Username"
 msgstr ""
 
@@ -2864,7 +2864,7 @@ msgstr ""
 msgid "Sent from %s"
 msgstr ""
 
-#: includes/Classes/Emails.php:1138
+#: includes/Classes/Emails.php:1155
 msgid ""
 "This email contains HTML formatting and cannot be displayed right now. Please use "
 "an HTML compatible reader."
@@ -2902,71 +2902,71 @@ msgstr ""
 msgid "Unknown external storage error"
 msgstr ""
 
-#: includes/Classes/Files.php:994
+#: includes/Classes/Files.php:1001
 msgid "You do not have permission to delete this file."
 msgstr ""
 
-#: includes/Classes/Files.php:1034
+#: includes/Classes/Files.php:1041
 msgid "File deleted successfully."
 msgstr ""
 
-#: includes/Classes/Files.php:1039
+#: includes/Classes/Files.php:1046
 msgid "Failed to delete file."
 msgstr ""
 
-#: includes/Classes/Files.php:1104
+#: includes/Classes/Files.php:1111
 msgid "You do not have permission to upload files."
 msgstr ""
 
-#: includes/Classes/Files.php:1341
+#: includes/Classes/Files.php:1350
 msgid "File ID is required for editing."
 msgstr ""
 
-#: includes/Classes/Files.php:1354
+#: includes/Classes/Files.php:1363
 msgid "You do not have permission to edit this file."
 msgstr ""
 
-#: includes/Classes/Files.php:1364
+#: includes/Classes/Files.php:1373
 msgid "File updated successfully."
 msgstr ""
 
-#: includes/Classes/Files.php:1370
+#: includes/Classes/Files.php:1379
 msgid "Failed to update file."
 msgstr ""
 
-#: includes/Classes/Files.php:1813
+#: includes/Classes/Files.php:1822
 msgid "Failed to initialize storage."
 msgstr ""
 
-#: includes/Classes/Files.php:1850 includes/Classes/Files.php:1895
+#: includes/Classes/Files.php:1859 includes/Classes/Files.php:1904
 msgid "File is not stored externally."
 msgstr ""
 
-#: includes/Classes/Files.php:1858 includes/Classes/Files.php:1903
+#: includes/Classes/Files.php:1867 includes/Classes/Files.php:1912
 msgid "External storage not available."
 msgstr ""
 
-#: includes/Classes/Files.php:1968
+#: includes/Classes/Files.php:1977
 msgid "File is already stored locally."
 msgstr ""
 
-#: includes/Classes/Files.php:1986
+#: includes/Classes/Files.php:1995
 msgid "File moved to local storage successfully."
 msgstr ""
 
-#: includes/Classes/Files.php:1995
+#: includes/Classes/Files.php:2004
 msgid "Failed to update file record."
 msgstr ""
 
-#: includes/Classes/Files.php:2069
+#: includes/Classes/Files.php:2078
 msgid "Integration not found"
 msgstr ""
 
-#: includes/Classes/Files.php:2078
+#: includes/Classes/Files.php:2087
 msgid "Failed to initialize storage connection"
 msgstr ""
 
-#: includes/Classes/Files.php:2157
+#: includes/Classes/Files.php:2166
 msgid "Invalid storage selection"
 msgstr ""
 
@@ -3015,69 +3015,69 @@ msgstr ""
 msgid "You do not have permission to manage group memberships."
 msgstr ""
 
-#: includes/Classes/Integrations.php:129
+#: includes/Classes/Integrations.php:138
 msgid "Integration type is required."
 msgstr ""
 
-#: includes/Classes/Integrations.php:132 includes/Classes/Integrations.php:235
+#: includes/Classes/Integrations.php:141 includes/Classes/Integrations.php:244
 msgid "Integration name is required."
 msgstr ""
 
-#: includes/Classes/Integrations.php:139 includes/Classes/Integrations.php:242
+#: includes/Classes/Integrations.php:148 includes/Classes/Integrations.php:251
 msgid "Please complete all required fields."
 msgstr ""
 
-#: includes/Classes/Integrations.php:148 includes/Classes/Integrations.php:440
+#: includes/Classes/Integrations.php:157 includes/Classes/Integrations.php:449
 msgid "Invalid integration type."
 msgstr ""
 
-#: includes/Classes/Integrations.php:156 includes/Classes/Integrations.php:252
+#: includes/Classes/Integrations.php:165 includes/Classes/Integrations.php:261
 msgid "Integration name already exists."
 msgstr ""
 
-#: includes/Classes/Integrations.php:197
+#: includes/Classes/Integrations.php:206
 msgid "Integration created successfully."
 msgstr ""
 
-#: includes/Classes/Integrations.php:206
+#: includes/Classes/Integrations.php:215
 msgid "Failed to create integration."
 msgstr ""
 
-#: includes/Classes/Integrations.php:292
+#: includes/Classes/Integrations.php:301
 msgid "No data to update."
 msgstr ""
 
-#: includes/Classes/Integrations.php:310
+#: includes/Classes/Integrations.php:319
 msgid "Integration updated successfully."
 msgstr ""
 
-#: includes/Classes/Integrations.php:318
+#: includes/Classes/Integrations.php:327
 msgid "Failed to update integration."
 msgstr ""
 
-#: includes/Classes/Integrations.php:351
+#: includes/Classes/Integrations.php:360
 #, php-format
 msgid "Cannot delete integration. %d files are using this integration."
 msgstr ""
 
-#: includes/Classes/Integrations.php:363
+#: includes/Classes/Integrations.php:372
 msgid "Integration deleted successfully."
 msgstr ""
 
-#: includes/Classes/Integrations.php:370
+#: includes/Classes/Integrations.php:379
 msgid "Failed to delete integration."
 msgstr ""
 
-#: includes/Classes/Integrations.php:396
+#: includes/Classes/Integrations.php:405
 msgid "Failed to create storage instance."
 msgstr ""
 
-#: includes/Classes/Integrations.php:449
+#: includes/Classes/Integrations.php:458
 #, php-format
 msgid "%s is required."
 msgstr ""
 
-#: includes/Classes/Integrations.php:457
+#: includes/Classes/Integrations.php:466
 msgid "Please complete all required credential fields."
 msgstr ""
 
@@ -3498,49 +3498,49 @@ msgstr ""
 msgid "Asset Management"
 msgstr ""
 
-#: includes/Classes/S3Storage.php:88
+#: includes/Classes/S3Storage.php:106
 #, php-format
 msgid "Connection to S3 successful. Bucket \"%s\" is accessible."
 msgstr ""
 
-#: includes/Classes/S3Storage.php:98
+#: includes/Classes/S3Storage.php:116
 #, php-format
 msgid "Bucket \"%s\" does not exist."
 msgstr ""
 
-#: includes/Classes/S3Storage.php:101
+#: includes/Classes/S3Storage.php:119
 msgid "Access denied. Check your AWS credentials and bucket permissions."
 msgstr ""
 
-#: includes/Classes/S3Storage.php:104
+#: includes/Classes/S3Storage.php:122
 msgid "Invalid AWS Access Key ID."
 msgstr ""
 
-#: includes/Classes/S3Storage.php:107
+#: includes/Classes/S3Storage.php:125
 msgid "Invalid AWS Secret Access Key."
 msgstr ""
 
-#: includes/Classes/S3Storage.php:110
+#: includes/Classes/S3Storage.php:128
 msgid "AWS credentials need to be refreshed."
 msgstr ""
 
-#: includes/Classes/S3Storage.php:153
+#: includes/Classes/S3Storage.php:171
 msgid "Local file not found"
 msgstr ""
 
-#: includes/Classes/S3Storage.php:160
+#: includes/Classes/S3Storage.php:178
 msgid "Invalid remote file path"
 msgstr ""
 
-#: includes/Classes/S3Storage.php:183
+#: includes/Classes/S3Storage.php:201
 msgid "File uploaded successfully"
 msgstr ""
 
-#: includes/Classes/S3Storage.php:225
+#: includes/Classes/S3Storage.php:243
 msgid "File downloaded successfully"
 msgstr ""
 
-#: includes/Classes/S3Storage.php:264
+#: includes/Classes/S3Storage.php:282
 msgid "File deleted successfully"
 msgstr ""
 
@@ -3633,32 +3633,32 @@ msgstr ""
 msgid "Affected Account"
 msgstr ""
 
-#: includes/forms/2fa_verify.php:12
+#: includes/forms/2fa_verify.php:13
 msgid "Verify login code"
 msgstr ""
 
-#: includes/forms/2fa_verify.php:13
+#: includes/forms/2fa_verify.php:14
 #, php-format
 msgid "An email with a 6-digit code was sent to your email address at %s"
 msgstr ""
 
-#: includes/forms/2fa_verify.php:14
+#: includes/forms/2fa_verify.php:15
 msgid "Please enter the code to access your account"
 msgstr ""
 
-#: includes/forms/2fa_verify.php:28
+#: includes/forms/2fa_verify.php:29
 msgid "Verify"
 msgstr ""
 
-#: includes/forms/2fa_verify.php:40
+#: includes/forms/2fa_verify.php:42
 msgid "Didn't receive the email?"
 msgstr ""
 
-#: includes/forms/2fa_verify.php:43
+#: includes/forms/2fa_verify.php:45
 msgid "Request new code"
 msgstr ""
 
-#: includes/forms/2fa_verify.php:44
+#: includes/forms/2fa_verify.php:46
 #, php-format
 msgid "Please wait %s seconds to request a new code"
 msgstr ""
@@ -3733,7 +3733,7 @@ msgstr ""
 
 #: includes/forms/clients.php:86 includes/forms/login-ldap.php:11
 #: includes/forms/login.php:16 includes/forms/options/email.php:155
-#: includes/forms/users.php:56 install/index.php:219 install/make-config.php:238
+#: includes/forms/users.php:56 install/index.php:219 install/make-config.php:256
 msgid "Password"
 msgstr ""
 
@@ -4482,11 +4482,11 @@ msgstr ""
 msgid "SMTP options"
 msgstr ""
 
-#: includes/forms/options/email.php:171 install/make-config.php:208
+#: includes/forms/options/email.php:171 install/make-config.php:216
 msgid "Host"
 msgstr ""
 
-#: includes/forms/options/email.php:178
+#: includes/forms/options/email.php:178 install/make-config.php:226
 msgid "Port"
 msgstr ""
 
@@ -4522,60 +4522,87 @@ msgstr ""
 msgid "After saving your options, you can test your configuration here"
 msgstr ""
 
-#: includes/forms/options/encryption.php:9
+#: includes/forms/options/encryption.php:13
+msgid "Encryption Master Key Not Configured"
+msgstr ""
+
+#: includes/forms/options/encryption.php:14
+msgid ""
+"To enable file encryption, you must add an encryption master key to your "
+"configuration file."
+msgstr ""
+
+#: includes/forms/options/encryption.php:15
+msgid "Add the following line to"
+msgstr ""
+
+#: includes/forms/options/encryption.php:17
+msgid "To generate a secure key, run this command in your terminal:"
+msgstr ""
+
+#: includes/forms/options/encryption.php:19 includes/functions.php:1131
+msgid "Important:"
+msgstr ""
+
+#: includes/forms/options/encryption.php:19
+msgid ""
+"Keep a secure backup of this key. If lost, encrypted files cannot be recovered."
+msgstr ""
+
+#: includes/forms/options/encryption.php:27
 msgid "Encryption Settings"
 msgstr ""
 
-#: includes/forms/options/encryption.php:10
+#: includes/forms/options/encryption.php:28
 msgid ""
 "Enable server-side encryption for uploaded files. Files are encrypted at rest "
 "using AES-256-GCM and automatically decrypted when downloaded."
 msgstr ""
 
-#: includes/forms/options/encryption.php:15
+#: includes/forms/options/encryption.php:33
 msgid "Enable file encryption feature"
 msgstr ""
 
-#: includes/forms/options/encryption.php:16
+#: includes/forms/options/encryption.php:34
 msgid ""
 "When enabled, the encryption feature becomes available. Files can be encrypted "
 "based on the setting below."
 msgstr ""
 
-#: includes/forms/options/encryption.php:21
+#: includes/forms/options/encryption.php:40
 msgid "Make encryption mandatory"
 msgstr ""
 
-#: includes/forms/options/encryption.php:22
+#: includes/forms/options/encryption.php:41
 msgid ""
 "When enabled, ALL uploaded files will be automatically encrypted. When disabled, "
 "users can choose whether to encrypt each file during upload. Note: The encryption "
 "feature must be enabled above for this option to work."
 msgstr ""
 
-#: includes/forms/options/encryption.php:27
+#: includes/forms/options/encryption.php:46
 msgid "Maximum file size for encryption (MB)"
 msgstr ""
 
-#: includes/forms/options/encryption.php:29
+#: includes/forms/options/encryption.php:48
 msgid ""
 "Maximum file size that can be encrypted. Set to 0 for no limit. Note: Very large "
 "files may take longer to encrypt/decrypt."
 msgstr ""
 
-#: includes/forms/options/encryption.php:35
+#: includes/forms/options/encryption.php:54
 msgid "Encryption Tools"
 msgstr ""
 
-#: includes/forms/options/encryption.php:36
+#: includes/forms/options/encryption.php:55
 msgid "Manage and encrypt existing files."
 msgstr ""
 
-#: includes/forms/options/encryption.php:46
+#: includes/forms/options/encryption.php:65
 msgid "Encrypt Unencrypted Files"
 msgstr ""
 
-#: includes/forms/options/encryption.php:49
+#: includes/forms/options/encryption.php:68
 msgid "Batch encrypt files that were uploaded before encryption was enabled."
 msgstr ""
 
@@ -6040,10 +6067,6 @@ msgid "Free software"
 msgstr ""
 
 #: includes/functions.php:1131
-msgid "Important:"
-msgstr ""
-
-#: includes/functions.php:1131
 msgid ""
 "There are no clients or groups at the moment. You can still upload files and "
 "assign them later."
@@ -6554,11 +6577,11 @@ msgstr ""
 msgid "Invalid Date Range"
 msgstr ""
 
-#: includes/text.strings.php:116 process.php:48
+#: includes/text.strings.php:116 process.php:49
 msgid "LDAP authentication is not enabled."
 msgstr ""
 
-#: includes/text.strings.php:117 process.php:39
+#: includes/text.strings.php:117 process.php:40
 msgid "Email and password are required."
 msgstr ""
 
@@ -6855,7 +6878,7 @@ msgstr ""
 msgid "Changelog"
 msgstr ""
 
-#: includes/upload.process.php:239
+#: includes/upload.process.php:245
 msgid "Failed to process file upload to selected storage."
 msgstr ""
 
@@ -6992,7 +7015,7 @@ msgstr ""
 msgid "No files found"
 msgstr ""
 
-#: includes/widgets/system-information.php:11 install/make-config.php:359
+#: includes/widgets/system-information.php:11 install/make-config.php:377
 msgid "System information"
 msgstr ""
 
@@ -7064,11 +7087,11 @@ msgid ""
 "block your access for a few minutes."
 msgstr ""
 
-#: index.php:153
+#: index.php:154
 msgid "Local Account"
 msgstr ""
 
-#: index.php:158
+#: index.php:159
 msgid "LDAP/Active Directory"
 msgstr ""
 
@@ -7162,75 +7185,75 @@ msgstr ""
 msgid "You may proceed to log in with your newely created username and password."
 msgstr ""
 
-#: install/make-config.php:140
+#: install/make-config.php:148
 msgid "Successfully wrote the config file."
 msgstr ""
 
-#: install/make-config.php:175
+#: install/make-config.php:183
 msgid "Database configuration"
 msgstr ""
 
-#: install/make-config.php:176
+#: install/make-config.php:184
 msgid "You need to provide this data for a correct database communication."
 msgstr ""
 
-#: install/make-config.php:179
+#: install/make-config.php:187
 msgid "Select driver"
 msgstr ""
 
-#: install/make-config.php:187 install/make-config.php:197
+#: install/make-config.php:195 install/make-config.php:205
 msgid "(not available)"
 msgstr ""
 
-#: install/make-config.php:218
+#: install/make-config.php:236
 msgid "Database name"
 msgstr ""
 
-#: install/make-config.php:248
+#: install/make-config.php:266
 msgid "Table prefix"
 msgstr ""
 
-#: install/make-config.php:252
+#: install/make-config.php:270
 msgid "The database is already populated"
 msgstr ""
 
-#: install/make-config.php:274
+#: install/make-config.php:292
 msgid "Reuse existing tables"
 msgstr ""
 
-#: install/make-config.php:289
+#: install/make-config.php:307
 msgid "Language selection"
 msgstr ""
 
-#: install/make-config.php:307
+#: install/make-config.php:325
 msgid "Default maximum upload file size"
 msgstr ""
 
-#: install/make-config.php:310
+#: install/make-config.php:328
 msgid "Value expressed in MB, where 1GB = 1024"
 msgstr ""
 
-#: install/make-config.php:316
+#: install/make-config.php:334
 msgid "Folders"
 msgstr ""
 
-#: install/make-config.php:347
+#: install/make-config.php:365
 msgid "Writable"
 msgstr ""
 
-#: install/make-config.php:349
+#: install/make-config.php:367
 msgid "Not writable"
 msgstr ""
 
-#: install/make-config.php:413 install/make-config.php:416
+#: install/make-config.php:431 install/make-config.php:434
 msgid "Check again"
 msgstr ""
 
-#: install/make-config.php:414
+#: install/make-config.php:432
 msgid "Write config file"
 msgstr ""
 
-#: install/make-config.php:416
+#: install/make-config.php:434
 msgid "Check"
 msgstr ""
 
@@ -7461,61 +7484,61 @@ msgstr ""
 msgid "The selected links were enabled."
 msgstr ""
 
-#: manage-downloads.php:122 manage-files.php:184
+#: manage-downloads.php:132 manage-files.php:184
 msgid "Some files could not be deleted."
 msgstr ""
 
-#: manage-downloads.php:229 manage-files.php:421
+#: manage-downloads.php:239 manage-files.php:421
 msgid "There are no files assigned to this category."
 msgstr ""
 
-#: manage-downloads.php:235
+#: manage-downloads.php:245
 msgid ""
 "You can only see downloads for files you uploaded. No downloads found for your "
 "files."
 msgstr ""
 
-#: manage-downloads.php:239 manage-files.php:431
+#: manage-downloads.php:249 manage-files.php:431
 msgid "There are no files."
 msgstr ""
 
-#: manage-downloads.php:245
+#: manage-downloads.php:255
 msgid "Creator"
 msgstr ""
 
-#: manage-downloads.php:353
+#: manage-downloads.php:363
 msgid "File"
 msgstr ""
 
-#: manage-downloads.php:369
+#: manage-downloads.php:379
 msgid "Link creator"
 msgstr ""
 
-#: manage-downloads.php:374
+#: manage-downloads.php:384
 msgid "File uploader"
 msgstr ""
 
-#: manage-downloads.php:381 manage-files.php:763
+#: manage-downloads.php:391 manage-files.php:763
 msgid "Expiry"
 msgstr ""
 
-#: manage-downloads.php:388 manage-files.php:781
+#: manage-downloads.php:398 manage-files.php:781
 msgid "Download count"
 msgstr ""
 
-#: manage-downloads.php:441 manage-files.php:878
+#: manage-downloads.php:451 manage-files.php:878
 msgid "Does not expire"
 msgstr ""
 
-#: manage-downloads.php:445
+#: manage-downloads.php:455
 msgid "File is not public"
 msgstr ""
 
-#: manage-downloads.php:452
+#: manage-downloads.php:462
 msgid "Expired on"
 msgstr ""
 
-#: manage-downloads.php:455
+#: manage-downloads.php:465
 msgid "Expires on"
 msgstr ""
 
@@ -7724,98 +7747,105 @@ msgstr ""
 msgid "External Login"
 msgstr ""
 
-#: options.php:251
+#: options.php:252
+msgid ""
+"Cannot enable encryption: ENCRYPTION_MASTER_KEY is not configured in "
+"sys.config.php. Please add this constant to your configuration file before "
+"enabling encryption."
+msgstr ""
+
+#: options.php:259
 msgid "Some fields were not completed. Options could not be saved."
 msgstr ""
 
-#: options.php:301
+#: options.php:309
 msgid ""
 "Warning: php extension is allowed. This is a serious security problem. If you are "
 "not sure that you need it, please remove it from the list."
 msgstr ""
 
-#: process.php:278 process.php:289 process.php:428 process.php:496
+#: process.php:312 process.php:323 process.php:462 process.php:530
 msgid "Permission denied"
 msgstr ""
 
-#: process.php:300
+#: process.php:334
 msgid "Download URL is required"
 msgstr ""
 
-#: process.php:324
+#: process.php:358
 msgid "Invalid update step"
 msgstr ""
 
-#: process.php:370
+#: process.php:404
 msgid "You do not have permission to delete roles."
 msgstr ""
 
-#: process.php:375 role-permissions.php:13 roles-edit.php:13
+#: process.php:409 role-permissions.php:13 roles-edit.php:13
 msgid "No role specified."
 msgstr ""
 
-#: process.php:383 role-permissions.php:21 roles-edit.php:21
+#: process.php:417 role-permissions.php:21 roles-edit.php:21
 msgid "Role not found."
 msgstr ""
 
-#: process.php:388
+#: process.php:422
 msgid "System roles cannot be deleted."
 msgstr ""
 
-#: process.php:395
+#: process.php:429
 msgid "Cannot delete role with assigned users. Please reassign users first."
 msgstr ""
 
-#: process.php:403
+#: process.php:437
 msgid "Target role for reassignment not found."
 msgstr ""
 
-#: process.php:410
+#: process.php:444
 msgid "Failed to reassign users: "
 msgstr ""
 
-#: process.php:438
+#: process.php:472
 msgid "Invalid CSRF token"
 msgstr ""
 
-#: process.php:443
+#: process.php:477
 msgid "Invalid sort data"
 msgstr ""
 
-#: process.php:482
+#: process.php:516
 msgid "Field order updated successfully"
 msgstr ""
 
-#: process.php:487
+#: process.php:521
 #, php-format
 msgid "Only %d of %d fields were updated"
 msgstr ""
 
-#: process.php:501
+#: process.php:535
 msgid "File ID is required"
 msgstr ""
 
-#: process.php:509
+#: process.php:543
 msgid "File not found"
 msgstr ""
 
-#: process.php:515
+#: process.php:549
 msgid "File is already encrypted"
 msgstr ""
 
-#: process.php:521
+#: process.php:555
 msgid "File encryption is not enabled"
 msgstr ""
 
-#: process.php:529
+#: process.php:563
 msgid "Physical file not found"
 msgstr ""
 
-#: process.php:576
+#: process.php:610
 msgid "File encrypted successfully"
 msgstr ""
 
-#: process.php:582
+#: process.php:616
 msgid "Error encrypting file: "
 msgstr ""
 
@@ -8565,7 +8595,7 @@ msgstr ""
 msgid "Add system user"
 msgstr ""
 
-#: users-edit.php:174
+#: users-edit.php:170
 msgid "Edit system user"
 msgstr ""
 
