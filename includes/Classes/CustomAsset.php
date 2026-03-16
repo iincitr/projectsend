@@ -13,6 +13,10 @@ class CustomAsset
 {
     private $dbh;
     private $logger;
+    private $statement;
+    private $row;
+    private $sql_query;
+    private $sql;
 
     public $id;
     public $title;
