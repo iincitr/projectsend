@@ -62,49 +62,68 @@ let appJs = [
 
 let dest = 'assets/';
 
-gulp.task('sass', (done) => {
-    gulp.src(sassFiles)
+gulp.task('sass-main', () => {
+    return gulp.src(sassFiles)
         .pipe(sourcemaps.init())
         .pipe(sass())
         .pipe(concat('main.css'))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(dest + 'css/'));
-    gulp.src(assetsCss)
+});
+
+gulp.task('sass-assets', () => {
+    return gulp.src(assetsCss)
         .pipe(sourcemaps.init())
         .pipe(sass())
         .pipe(concat('assets.css'))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(dest + 'css/'));
-    done();
 });
 
-gulp.task('javascript', (done) => {
-    gulp.src(appJs)
+gulp.task('sass', gulp.parallel(['sass-main', 'sass-assets']));
+
+gulp.task('js-app', () => {
+    return gulp.src(appJs)
         .pipe(sourcemaps.init())
         .pipe(concat('app.js'))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(dest + 'js/'));
-    gulp.src(assetsJs)
+});
+
+gulp.task('js-assets', () => {
+    return gulp.src(assetsJs)
         .pipe(sourcemaps.init())
         .pipe(concat('assets.js'))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(dest + 'js/'));
-    done();
 });
 
-gulp.task('copy', (done) => {
-    gulp.src('node_modules/font-awesome/fonts/*.*')
+gulp.task('javascript', gulp.parallel(['js-app', 'js-assets']));
+
+gulp.task('copy-fonts', () => {
+    return gulp.src([
+            'node_modules/font-awesome/fonts/*.*',
+            'node_modules/footable/css/fonts/*.*'
+        ], { encoding: false })
         .pipe(gulp.dest(dest + 'fonts/'));
-    gulp.src('node_modules/footable/css/fonts/*.*')
-        .pipe(gulp.dest(dest + 'fonts/'));
-    gulp.src('node_modules/jquery/dist/jquery.min.js')
-        .pipe(gulp.dest(dest + 'lib/jquery/'));
-    gulp.src('node_modules/jquery-migrate/dist/jquery-migrate.min.js')
-        .pipe(gulp.dest(dest + 'lib/jquery-migrate/'));
-    gulp.src('node_modules/codemirror-minified/**/*')
-        .pipe(gulp.dest(dest + 'lib/codemirror/'));
-    done();
 });
+
+gulp.task('copy-lib', () => {
+    return gulp.src('node_modules/jquery/dist/jquery.min.js')
+        .pipe(gulp.dest(dest + 'lib/jquery/'));
+});
+
+gulp.task('copy-lib-migrate', () => {
+    return gulp.src('node_modules/jquery-migrate/dist/jquery-migrate.min.js')
+        .pipe(gulp.dest(dest + 'lib/jquery-migrate/'));
+});
+
+gulp.task('copy-lib-codemirror', () => {
+    return gulp.src('node_modules/codemirror-minified/**/*', { encoding: false })
+        .pipe(gulp.dest(dest + 'lib/codemirror/'));
+});
+
+gulp.task('copy', gulp.parallel(['copy-fonts', 'copy-lib', 'copy-lib-migrate', 'copy-lib-codemirror']));
 
 gulp.task('minify-css', function () {
     return gulp.src(dest + 'css/*.css')
