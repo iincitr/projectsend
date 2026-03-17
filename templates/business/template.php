@@ -423,7 +423,7 @@ include_once 'lang/' . LOADED_LANG . '.mo.php';
                         
                         <?php if (!empty($file->description)): ?>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                            <?php echo nl2br(html_output($file->description)); ?>
+                            <?php echo format_description($file->description); ?>
                         </p>
                         <?php endif; ?>
                     </div>

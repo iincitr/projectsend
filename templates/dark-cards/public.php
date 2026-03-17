@@ -293,7 +293,7 @@ $logo_file_info = generate_logo_url();
                         
                         <?php if (!empty($file->description)): ?>
                             <p class="text-text-muted text-xs mb-3 line-clamp-2" title="<?php echo html_output($file->description); ?>">
-                                <?php echo html_output($file->description); ?>
+                                <?php echo format_description($file->description); ?>
                             </p>
                         <?php endif; ?>
                         

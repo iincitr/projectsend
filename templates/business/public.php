@@ -384,7 +384,7 @@ $pagination_page = (isset($_GET["page"])) ? $_GET["page"] : 1;
                         
                         <?php if (!empty($file->description)): ?>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                            <?php echo nl2br(html_output($file->description)); ?>
+                            <?php echo format_description($file->description); ?>
                         </p>
                         <?php endif; ?>
                     </div>

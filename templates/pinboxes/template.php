@@ -174,7 +174,7 @@ define('TEMPLATE_THUMBNAILS_HEIGHT', '400');
 							<div class="img_data">
 								<h2><?php echo $file->title; ?></h2>
 								<div class="photo_info">
-									<?php echo $file->description; ?>
+									<?php echo format_description($file->description); ?>
 									<p class="file_size">
 										<?php _e('File size:','pinboxes_template'); ?> <strong><?php echo $file->size_formatted; ?></strong>
 									</p>

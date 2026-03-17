@@ -196,7 +196,7 @@ $random_videogames = getRandomVideoGames(3);
                                         </td>
                                         <td bgcolor="#f0f0f0">
                                             <font face="Arial, sans-serif" color="#000000" size="2">
-                                                <?php echo nl2br(html_output($file->description)); ?>
+                                                <?php echo format_description($file->description); ?>
                                             </font>
                                         </td>
                                     </tr>

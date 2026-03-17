@@ -280,7 +280,7 @@ $random_videogames = getRandomVideoGames(3);
                                                             <font size="1"><i><?php echo html_output($file->filename_original); ?></i></font><br>
                                                         <?php endif; ?>
                                                         <?php if (!empty($file->description)): ?>
-                                                            <font size="1"><?php echo html_output($file->description); ?></font><br>
+                                                            <font size="1"><?php echo format_description($file->description); ?></font><br>
                                                         <?php endif; ?>
                                                     </font>
                                                 </td>

@@ -310,7 +310,7 @@ $body_class = array('template', 'business-template', 'business-download', 'hide_
                             </h4>
                             <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                                 <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
-                                    <?php echo nl2br(html_output($file->description)); ?>
+                                    <?php echo format_description($file->description); ?>
                                 </p>
                             </div>
                         </div>

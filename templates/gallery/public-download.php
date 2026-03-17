@@ -450,7 +450,7 @@ define('TEMPLATE_THUMBNAILS_HEIGHT', '300');
                         <?php if (!empty($file->description)) { ?>
                             <div class="file-description">
                                 <strong><?php _e('Description', 'cftp_template_gallery'); ?>:</strong><br>
-                                <?php echo !empty($file->description) ? nl2br(html_output($file->description)) : ''; ?>
+                                <?php echo !empty($file->description) ? format_description($file->description) : ''; ?>
                             </div>
                         <?php } ?>
 

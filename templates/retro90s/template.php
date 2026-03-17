@@ -312,7 +312,7 @@ $bulk_actions_items = [
                                                         <br><font size="1" color="#666666">(<?php echo htmlspecialchars($file->filename_original); ?>)</font>
                                                     <?php } ?>
                                                     <?php if (!empty($file->description)) { ?>
-                                                        <br><font size="1"><?php echo htmlspecialchars($file->description); ?></font>
+                                                        <br><font size="1"><?php echo format_description($file->description); ?></font>
                                                     <?php } ?>
                                                     <?php if ($file->expires == '1') { ?>
                                                         <br>

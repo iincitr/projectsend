@@ -454,7 +454,7 @@ define('TEMPLATE_THUMBNAILS_HEIGHT', '300');
                             <?php if (!empty($file->description)) { ?>
                                 <div class="file-description">
                                     <strong><?php _e('Description', 'pinboxes_template'); ?>:</strong><br>
-                                    <?php echo nl2br(html_output($file->description)); ?>
+                                    <?php echo format_description($file->description); ?>
                                 </div>
                             <?php } ?>
 

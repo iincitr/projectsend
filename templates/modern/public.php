@@ -408,7 +408,7 @@ $bulk_actions_items = [
                                 
                                 <?php if (!empty($file->description)) { ?>
                                     <p class="file-description" title="<?php echo htmlspecialchars($file->description); ?>">
-                                        <?php echo htmlspecialchars($file->description); ?>
+                                        <?php echo format_description($file->description); ?>
                                     </p>
                                 <?php } ?>
 

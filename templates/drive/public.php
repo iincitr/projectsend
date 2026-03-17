@@ -349,7 +349,7 @@ include_once 'lang/' . LOADED_LANG . '.mo.php';
                             
                             <?php if (!empty($file->description)): ?>
                             <p class="text-xs text-google-gray-600 dark:text-google-gray-300 truncate mt-1">
-                                <?php echo html_output($file->description); ?>
+                                <?php echo format_description($file->description); ?>
                             </p>
                             <?php endif; ?>
                         </div>

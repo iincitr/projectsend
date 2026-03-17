@@ -488,7 +488,7 @@ if ($is_logged_in && current_user_can_upload()) {
                 <?php if (!empty($file->description)): ?>
                     <div class="file-description">
                         <h3><?php echo __('Description', 'modern_template'); ?></h3>
-                        <p><?php echo nl2br(html_output($file->description)); ?></p>
+                        <div><?php echo format_description($file->description); ?></div>
                     </div>
                 <?php endif; ?>
 

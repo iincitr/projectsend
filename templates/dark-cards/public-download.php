@@ -236,7 +236,7 @@ $window_title = __('File Download', 'dark_cards_template') . ' - ' . $file->titl
                                 <?php echo __('Description', 'dark_cards_template'); ?>
                             </h3>
                             <div class="bg-dark-surface rounded-xl p-4 border border-dark-surface-light">
-                                <p class="text-text-secondary leading-relaxed"><?php echo nl2br(html_output($file->description)); ?></p>
+                                <div class="text-text-secondary leading-relaxed"><?php echo format_description($file->description); ?></div>
                             </div>
                         </div>
                     <?php endif; ?>

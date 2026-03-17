@@ -196,7 +196,7 @@
 
                                                         <div class="form-group">
                                                             <label><?php _e('Description', 'cftp_admin');?></label>
-                                                            <textarea id="description_<?php echo $file->id; ?>" name="file[<?php echo $i; ?>][description]" class="<?php if ( get_option('files_descriptions_use_ckeditor') == 1 ) { echo 'ckeditor'; } ?> form-control textarea_description" placeholder="<?php _e('Optionally, enter here a description for the file.', 'cftp_admin');?>"><?php if (!empty($file->description)) { echo html_output($file->description); } ?></textarea>
+                                                            <textarea id="description_<?php echo $file->id; ?>" name="file[<?php echo $i; ?>][description]" class="<?php if ( get_option('files_descriptions_use_ckeditor') == 1 ) { echo 'ckeditor'; } ?> form-control textarea_description" placeholder="<?php _e('Optionally, enter here a description for the file.', 'cftp_admin');?>"><?php if (!empty($file->description)) { echo (get_option('files_descriptions_use_ckeditor') == 1) ? htmlentities_allowed($file->description) : html_output($file->description); } ?></textarea>
                                                         </div>
                                                     </div>
                                                 </div>

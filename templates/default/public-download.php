@@ -48,7 +48,7 @@ include_once ADMIN_VIEWS_DIR . DS . 'header-unlogged.php';
                         <?php } ?>
 
                         <div class="description">
-                            <?php echo html_output($file->description); ?>
+                            <?php echo format_description($file->description); ?>
                         </div>
 
                         <div class="size">

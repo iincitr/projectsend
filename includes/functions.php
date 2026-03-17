@@ -1343,6 +1343,44 @@ function encode_html($str)
     return $str;
 }
 
+/**
+ * Sanitize HTML description content.
+ * When CKEditor is enabled, the input is already HTML with tags like <p>, <ul>, etc.
+ * We strip dangerous tags but preserve safe formatting tags.
+ * When CKEditor is disabled, we treat the input as plain text and encode it.
+ */
+function sanitize_description($str)
+{
+    if (empty($str)) {
+        return '';
+    }
+
+    if (get_option('files_descriptions_use_ckeditor') == '1') {
+        return strip_tags($str, '<i><b><strong><em><p><br><ul><ol><li><u><sup><sub><s><a><h1><h2><h3><h4><h5><h6><blockquote><pre><code>');
+    }
+
+    return encode_html($str);
+}
+
+/**
+ * Format a description for display.
+ * If the description already contains block-level HTML (from CKEditor),
+ * return it as-is. Otherwise apply nl2br() for plain text descriptions.
+ */
+function format_description($str)
+{
+    if (preg_match('/<(p|ul|ol|blockquote|h[1-6])\b/i', $str)) {
+        $html = htmlentities_allowed($str);
+        // Clean up stray <br> tags between block elements left by the old
+        // encode_html() bug that applied nl2br() to CKEditor HTML content
+        $html = preg_replace('#(</(p|ul|ol|li|blockquote|h[1-6])>)\s*<br\s*/?\s*>#i', '$1', $html);
+        return $html;
+    }
+    // Plain text descriptions already have <br> tags from nl2br() during save.
+    // Use htmlentities_allowed() to preserve them while escaping dangerous content.
+    return htmlentities_allowed($str);
+}
+
 
 /**
  * Based on a script found on webcheatsheet. Fixed an issue from the original code.

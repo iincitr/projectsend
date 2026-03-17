@@ -195,7 +195,7 @@ class Files
     public function set($arguments = [])
     {
 		$this->title = (!empty($arguments['title'])) ? encode_html($arguments['title']) : null;
-        $this->description = (!empty($arguments['description'])) ? encode_html($arguments['description']) : null;
+        $this->description = (!empty($arguments['description'])) ? sanitize_description($arguments['description']) : null;
         $this->uploaded_by = (!empty($arguments['uploaded_by'])) ? encode_html($arguments['uploaded_by']) : null;
         $this->filename_on_disk = (!empty($arguments['filename'])) ? $arguments['filename'] : null;
         $this->filename_original = (!empty($arguments['filename_original'])) ? (int)$arguments['filename_original'] : 0;
@@ -1224,7 +1224,7 @@ class Files
 
         // Set data
         $this->name = encode_html($data["name"]);
-        $this->description = encode_html($data["description"]);
+        $this->description = sanitize_description($data["description"]);
         $this->expires = (isset($data["expires"])) ? $data["expires"] : 0;
         $this->expiry_date = (isset($expiration_str)) ? $expiration_str : $current["expiry_date"];
         $this->is_public = (isset($data["public"])) ? $data["public"] : 0;
