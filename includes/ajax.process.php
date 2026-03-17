@@ -224,6 +224,85 @@ switch ($_GET['do']) {
         exit;
     break;
 
+    case 'recalculate_storage':
+        header('Content-Type: application/json');
+
+        if (!current_user_can('edit_settings')) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => __('You do not have permission to perform this action.', 'cftp_admin')
+            ]);
+            exit;
+        }
+
+        set_time_limit(0);
+
+        // Get ALL files for full recalculation
+        $files_sql = "SELECT id, url, disk_folder_year, disk_folder_month
+                      FROM " . TABLE_FILES;
+        $files_statement = $dbh->prepare($files_sql);
+        $files_statement->execute();
+        $files = $files_statement->fetchAll(PDO::FETCH_ASSOC);
+
+        $total_files = count($files);
+        $updated_count = 0;
+        $total_storage = 0;
+
+        $update_sql = "UPDATE " . TABLE_FILES . " SET size = :size WHERE id = :id";
+        $update_statement = $dbh->prepare($update_sql);
+
+        foreach ($files as $file) {
+            $filename = $file['url'];
+            if (empty($filename)) {
+                continue;
+            }
+
+            // Construct file path directly (same logic as Files::getFilePath())
+            $path = UPLOADED_FILES_DIR . DS;
+            if (!empty($file['disk_folder_year'])) {
+                $path .= $file['disk_folder_year'] . DS;
+            }
+            if (!empty($file['disk_folder_month'])) {
+                $path .= $file['disk_folder_month'] . DS;
+            }
+            $path .= $filename;
+
+            // Fallback to flat path if date-folder path doesn't exist
+            if (!file_exists($path) && (!empty($file['disk_folder_year']) || !empty($file['disk_folder_month']))) {
+                $path = UPLOADED_FILES_DIR . DS . $filename;
+            }
+
+            if (file_exists($path)) {
+                try {
+                    $file_size = get_real_size($path);
+                    if (is_numeric($file_size) && $file_size > 0) {
+                        $update_statement->execute([
+                            'size' => $file_size,
+                            'id' => $file['id']
+                        ]);
+                        $total_storage += $file_size;
+                        $updated_count++;
+                    }
+                } catch (Exception $e) {
+                    error_log("ProjectSend: Recalculate storage - error for file ID {$file['id']}: " . $e->getMessage());
+                }
+            }
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'message' => sprintf(
+                __('Storage recalculated. Updated %d of %d files.', 'cftp_admin'),
+                $updated_count,
+                $total_files
+            ),
+            'updated_count' => $updated_count,
+            'total_files' => $total_files,
+            'total_storage_formatted' => format_file_size($total_storage)
+        ]);
+        exit;
+    break;
+
     default:
         die_with_error_code(500);
     break;

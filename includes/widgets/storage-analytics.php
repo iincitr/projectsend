@@ -104,6 +104,15 @@ if (defined('UPLOADED_FILES_DIR') && is_dir(UPLOADED_FILES_DIR)) {
                     </li>
                 </ul>
 
+                <?php if (current_user_can('edit_settings')) { ?>
+                    <div class="mt-3">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-recalculate-storage">
+                            <i class="fa fa-refresh"></i> <?php _e('Recalculate Storage', 'cftp_admin'); ?>
+                        </button>
+                        <div id="recalculate-storage-status" class="mt-2 small"></div>
+                    </div>
+                <?php } ?>
+
                 <?php if ($disk_total) { ?>
                     <div class="mt-3">
                         <h6><?php _e('Disk Usage', 'cftp_admin'); ?></h6>

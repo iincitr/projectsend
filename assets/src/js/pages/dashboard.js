@@ -6,6 +6,7 @@
         $(document).ready(function(){
             initCollapsibleWidgets();
             initDraggableWidgets();
+            initRecalculateStorage();
         });
 
         function initCollapsibleWidgets() {
@@ -173,6 +174,41 @@
             if (screenWidth < 1200) return 2; // Tablet
             if (screenWidth < 1600) return 3; // Desktop
             return 4; // Large desktop
+        }
+
+        function initRecalculateStorage() {
+            var $btn = $('#btn-recalculate-storage');
+            if (!$btn.length) return;
+
+            $btn.on('click', function() {
+                var $status = $('#recalculate-storage-status');
+                $btn.prop('disabled', true);
+                $btn.find('i').addClass('fa-spin');
+                $status.html('<span class="text-muted">' + json_strings.translations.processing + '</span>');
+
+                $.ajax({
+                    url: json_strings.uri.base + 'includes/ajax.process.php?do=recalculate_storage',
+                    type: 'POST',
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            $status.html('<span class="text-success">' + response.message + '</span>');
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            $status.html('<span class="text-danger">' + response.message + '</span>');
+                            $btn.prop('disabled', false);
+                            $btn.find('i').removeClass('fa-spin');
+                        }
+                    },
+                    error: function() {
+                        $status.html('<span class="text-danger">' + json_strings.translations.error + '</span>');
+                        $btn.prop('disabled', false);
+                        $btn.find('i').removeClass('fa-spin');
+                    }
+                });
+            });
         }
 
         function initDraggableWidgets() {
